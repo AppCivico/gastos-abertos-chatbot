@@ -22,7 +22,6 @@
   },
   "homepage": "https://github.com/lucasansei/gastos-abertos-chatbot#readme",
   "dependencies": {
-    "apiai": "^4.0.3",
     "botbuilder": "^3.9.0",
     "pg": "^6.4.1",
     "pg-hstore": "^2.3.2",
