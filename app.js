@@ -1,34 +1,31 @@
-require('./db/connection')
-var restify = require('restify');
-var builder = require('botbuilder');
+require('./db/connection');
+require('./connectorSetup.js')();
+bot.library(require('./dialogs/game-sign-up'));
 
-// Configurando servidor Restify
-var server = restify.createServer();
-server.listen(process.env.port || 3978, function () {
-    console.log('%s listening to %s', server.name, server.url); 
-});
+const GameSignUpOption = "Inscreva-me no processo de missões";
 
-// Create bot and add dialogs
+bot.dialog('/', [
+    function (session) {
+        session.replaceDialog('/promptButtons');
+    }
+]);
 
-var connector = new builder.ChatConnector({
-    appID: "",
-    appPassword: "",
-});
-
-server.post('/api/messages', connector.listen());
-
-var bot = new builder.UniversalBot(connector);
-bot.dialog('/', function (session) {
-
-    var msg = new builder.Message(session)
-    .text("Olá! Aqui é o Guaxi, o chatbot do Gastos Abertos! Escolha uma opção abaixo:")
-    .suggestedActions(
-        builder.SuggestedActions.create(
-                session, [
-                    builder.CardAction.imBack(session, "productId=1&color=green", "Quero me inscrever no processo de missões."),
-                ]
-            ));
-    session.send(msg);
-
-});
-
+bot.dialog('/promptButtons', [
+    (session) => {
+        builder.Prompts.choice(session,
+            "Olá! Aqui é o Guaxi, o chatbot do Gastos Abertos! Escolha uma opção abaixo:",
+            [GameSignUpOption],
+            { listStyle: builder.ListStyle.button });
+    },
+    (session, result) => {
+        if (result.response) {
+            switch (result.response.entity) {
+                case GameSignUpOption:
+                    session.beginDialog('gameSignUp:/');
+                    break;
+            }
+        } else {
+            session.send(`I am sorry but I didn't understand that. I need you to select one of the options below`);
+        }
+    }
+]);
