@@ -9,7 +9,7 @@
   "test": {
     "username": "postgres",
     "password": null,
-    "database": "gastos_abertos_homol",
+    "database": "gastos_abertos_test",
     "host": "127.0.0.1",
     "dialect": "postgres"
   },

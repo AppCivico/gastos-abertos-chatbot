@@ -3,6 +3,7 @@ module.exports = function () {
     var restify    = require('restify');
     global.builder = require('botbuilder');
 
+
     //If testing via the emulator, no need for appId and appPassword. If publishing, enter appId and appPassword here 
     var connector = new builder.ChatConnector({
     appId: process.env.MICROSOFT_APP_ID ? process.env.MICROSOFT_APP_ID : '',
