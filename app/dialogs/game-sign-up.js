@@ -1,5 +1,5 @@
 var builder = require('botbuilder');
-// User = require('../server/controllers/users');
+
 User = require('../server/models').user;
 
 const library = new builder.Library('gameSignUp');
@@ -12,8 +12,6 @@ var emoji_sunglass = "\uD83D\uDE0E";
 library.dialog('/', [
     (session) => {
         builder.Prompts.text(session, "Qual é o seu nome completo?");
-        var teste = User.findAll();
-        console.log(teste);
     },
     (session, args) => {
         session.dialogData.fullName = args.response;
@@ -52,9 +50,17 @@ library.dialog('/', [
     },
     (session, args) => {
         session.dialogData.occupation = args.response;
-        // console.log(session.dialogData);
-        var req = User.create(session.dialogData);
-        console.log(req);
+        var tx = User.create({
+            name: session.dialogData.fullName,
+            email: session.dialogData.email,
+            birth_date: session.dialogData.birthDate,
+            state: session.dialogData.state,
+            city: session.dialogData.city,
+            cellphone_number: session.dialogData.cellphoneNumber,
+            occupation: session.dialogData.occupation
+        });
+
+        console.log(tx);
 
         session.send('Terminamos nossa primeira missão!' + emoji_clap.repeat(3) +
             '\n\nAcho que formamos uma bom time' + emoji_smile + 
