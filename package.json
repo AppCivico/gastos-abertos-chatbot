@@ -25,8 +25,10 @@
   "dependencies": {
     "botbuilder": "^3.9.0",
     "dotenv": "^4.0.0",
+    "email-validator": "^1.1.1",
     "pg": "6.4.1",
     "pg-hstore": "^2.3.2",
+    "phone": "^1.0.10",
     "restify": "^5.0.0",
     "sequelize": "4.4.0",
     "sequelize-cli": "^2.7.0"

@@ -8,12 +8,14 @@ module.exports = function(sequelize, DataTypes) {
     state: DataTypes.STRING,
     city: DataTypes.STRING,
     cellphone_number: DataTypes.STRING
-  }, {
+  },
+  {
     classMethods: {
       associate: function(models) {
         // associations can be defined here
       }
-    }
+    },
+    freezeTableName: true,
   });
   return user;
 };

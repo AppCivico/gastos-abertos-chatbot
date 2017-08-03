@@ -1,15 +1,26 @@
 var builder = require('botbuilder');
+// User = require('../server/controllers/users');
+User = require('../server/models').user;
 
 const library = new builder.Library('gameSignUp');
+
+var emoji_thinking = "\uD83E\uDD14";
+var emoji_clap     = "\uD83D\uDC4F";
+var emoji_smile    = "\uD83E\uDD17";
+var emoji_sunglass = "\uD83D\uDE0E";
 
 library.dialog('/', [
     (session) => {
         builder.Prompts.text(session, "Qual é o seu nome completo?");
+        var teste = User.findAll();
+        console.log(teste);
     },
     (session, args) => {
         session.dialogData.fullName = args.response;
-        // TODO implementar fluxo de validação de e-mail
-        builder.Prompts.text(session, "Qual é o seu e-mail?");
+        session.beginDialog('validators:email', {
+            prompt: "Qual é o seu e-mail?",
+            retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+        });
     },
     (session, args) => {
         session.dialogData.email = args.response;
@@ -19,9 +30,9 @@ library.dialog('/', [
     },
     (session, args) => {
         session.dialogData.birthDate = args.response.entity;
-        // TODO implementar fluxo de validação de sigla de estado
-        builder.Prompts.text(session, "Qual é o estado(sigla) que você mora?", {
-            retryPrompt: 'Hummm. Não entendi a data que você digitou. Vamos tentar novamente?',
+        session.beginDialog('validators:state', {
+            prompt: "Qual é o estado(sigla) que você mora?",
+            retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Vamos tentar novamente?",
         });
     },
     (session, args) => {
@@ -30,8 +41,10 @@ library.dialog('/', [
     },
     (session, args) => {
         session.dialogData.city = args.response;
-        // Todo implementar fluxo de validação de celular
-        builder.Prompts.number(session, "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD.");
+        session.beginDialog('validators:cellphone', {
+            prompt: "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD.",
+            retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Vamos tentar novamente?",
+        });
     },
     (session, args) => {
         session.dialogData.cellphoneNumber = args.response;
@@ -39,12 +52,15 @@ library.dialog('/', [
     },
     (session, args) => {
         session.dialogData.occupation = args.response;
-        console.log(session.dialogData);
+        // console.log(session.dialogData);
+        var req = User.create(session.dialogData);
+        console.log(req);
 
-        session.send('Terminamos nossa primeira missão!' + +
-            '\n\nAcho que formamos uma bom time' + + 
-            '\n\nAgora vamos esperar a equipe do Gastos Abertos confirmar sua inscrição. Eles levam até 24h para enviar em seu email todas as informações.'+
-            '\n\nNos encontramos na próxima missão!');
+        session.send('Terminamos nossa primeira missão!' + emoji_clap.repeat(3) +
+            '\n\nAcho que formamos uma bom time' + emoji_smile + 
+            '\n\nAgora vamos esperar a equipe do Gastos Abertos confirmar sua inscrição. Eles levam até 24h para enviar em seu email todas as informações.\n\nNos encontramos na próxima missão!'+
+            emoji_sunglass
+        );
         session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
     },
 ]).cancelAction('cancel', null, { matches: /^cancel/i });

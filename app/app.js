@@ -1,6 +1,7 @@
 require('dotenv').config();
 require('./connectorSetup.js')();
 
+bot.library(require('./validators'));
 bot.library(require('./dialogs/game-sign-up'));
 bot.library(require('./dialogs/other-options'));
 
