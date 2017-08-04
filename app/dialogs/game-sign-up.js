@@ -1,6 +1,6 @@
 var builder = require('botbuilder');
 
-User = require('../server/models').user;
+User = require('../server/schema/models').user;
 
 const library = new builder.Library('gameSignUp');
 
