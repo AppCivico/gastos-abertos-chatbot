@@ -2,31 +2,40 @@ var builder = require('botbuilder');
 
 const library = new builder.Library('otherOptions');
 
+const SignUpProblems = "Problemas na inscrição";
+const Informations   = "Informações";
+
+var emoji_thinking = "\uD83E\uDD14";
+
 library.dialog('/', [
     (session) => {
-        builder.Prompts.text("Qual é o seu nome completo?");
+        builder.Prompts.choice(session,
+            "Obrigado por seu interesse. Mas, diga como posso te ajudar?",
+            [SignUpProblems, Informations],
+            { listStyle: builder.ListStyle.button }
+        );
     },
-    (session, args) => {
-        session.dialogData.fullName = args.response;
-        session.send('The phone you provided is: ' + args.response);
-
-        builder.Prompts.time(session, 'Please enter your date of birth (MM/dd/yyyy):', {
-            retryPrompt: 'The value you entered is not a valid date. Please try again:',
-            maxRetries: 2
-        });
-    },
-    (session, args) => {
-        if (args.resumed) {
-            session.send('You have tried to enter your date of birth many times. Please try again later.');
-            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-            return;
+    (session, result) => {
+        if (result.response) {
+            switch (result.response.entity) {
+                case SignUpProblems:
+                    session.beginDialog('validators:email', {
+                        prompt: "Deixe seu email, a equipe Gastos Abertos entrará em contato.",
+                        retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+                    });
+                    break;
+                case Informations:
+                    session.beginDialog('validators:email', {
+                        prompt: "Deixe seu email, a equipe Gastos Abertos entrará em contato.",
+                        retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+                    });
+                    break;
+            }
+        } else {
+            session.send('Desculpa, não entendi a opção que você selecionou.');
         }
-
-        session.send('The date of birth you provided is: ' + args.response.entity);
-
-        var newPassword = uuid.v1();
-        session.send('Thanks! Your new password is _' + newPassword + '_');
-
+    },
+    (session, args) => {
         session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
     }
 ]).cancelAction('cancel', null, { matches: /^cancel/i });
