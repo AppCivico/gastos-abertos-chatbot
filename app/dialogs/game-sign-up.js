@@ -1,4 +1,5 @@
 var builder = require('botbuilder');
+var dateFns = require('date-fns');
 
 User = require('../server/schema/models').user;
 
@@ -18,22 +19,43 @@ library.dialog('/', [
         session.beginDialog('validators:email', {
             prompt: "Qual é o seu e-mail?",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+            maxRetries: 3
         });
     },
     (session, args) => {
+        if (args.resumed) {
+            session.send('Você tentou inserir um e-mail inválido muitas vezes. Tente novamente mais tarde.');
+            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+            return;
+        }
+
         session.dialogData.email = args.response;
         builder.Prompts.time(session, "Qual é a sua data de nascimento? (dd/mm/aaaa)", {
             retryPrompt: 'Hummm. Não entendi a data que você digitou. Vamos tentar novamente?',
+            maxRetries: 3
         });
     },
     (session, args) => {
+        if (args.resumed) {
+            session.send('Você tentou inserir uma data inválida muitas vezes. Tente novamente mais tarde.');
+            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+            return;
+        }
+
         session.dialogData.birthDate = args.response.entity;
         session.beginDialog('validators:state', {
             prompt: "Qual é o estado(sigla) que você mora?",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Vamos tentar novamente?",
+            maxRetries: 3
         });
     },
     (session, args) => {
+        if (args.resumed) {
+            session.send('Você tentou inserir um estado inválido muitas vezes. Tente novamente mais tarde.');
+            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+            return;
+        }
+
         session.dialogData.state = args.response;
         builder.Prompts.text(session, "Qual é o município que você representará?");
     },
@@ -42,9 +64,16 @@ library.dialog('/', [
         session.beginDialog('validators:cellphone', {
             prompt: "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD.",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Vamos tentar novamente?",
+            maxRetries: 3
         });
     },
     (session, args) => {
+        if (args.resumed) {
+            session.send('Você tentou inserir um número de telefone celular inválido muitas vezes. Tente novamente mais tarde.');
+            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+            return;
+        }
+
         session.dialogData.cellphoneNumber = args.response;
         builder.Prompts.text(session, "Qual a sua ocupação?");
     },
@@ -69,6 +98,6 @@ library.dialog('/', [
         );
         session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
     },
-]).cancelAction('cancel', null, { matches: /^cancel/i });
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 module.exports = library;

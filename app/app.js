@@ -10,7 +10,7 @@ const Yes = "Sim";
 const No  = "Não";
 
 bot.dialog('/', [
-    function (session) {
+    (session) => {
         session.replaceDialog('/promptButtons');
     }
 ]);
