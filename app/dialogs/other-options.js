@@ -22,17 +22,26 @@ library.dialog('/', [
                     session.beginDialog('validators:email', {
                         prompt: "Deixe seu email, a equipe Gastos Abertos entrará em contato.",
                         retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+                        maxRetries: 3
                     });
                     break;
                 case Informations:
                     session.beginDialog('validators:email', {
                         prompt: "Deixe seu email, a equipe Gastos Abertos entrará em contato.",
                         retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+                        maxRetries: 3
                     });
                     break;
             }
         } else {
             session.send('Desculpa, não entendi a opção que você selecionou.');
+        }
+    },
+    (session, args) => {
+        if (args.resumed) {
+            session.send('Você tentou inserir um e-mail inválido muitas vezes. Tente novamente mais tarde.');
+            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+            return;
         }
     },
     (session, args) => {
