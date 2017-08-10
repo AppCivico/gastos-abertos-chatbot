@@ -5,10 +5,10 @@ User = require('../server/schema/models').user;
 
 const library = new builder.Library('gameSignUp');
 
-var emoji_thinking = "\uD83E\uDD14";
-var emoji_clap     = "\uD83D\uDC4F";
-var emoji_smile    = "\uD83E\uDD17";
-var emoji_sunglass = "\uD83D\uDE0E";
+const emoji_thinking = "\uD83E\uDD14";
+const emoji_clap     = "\uD83D\uDC4F";
+const emoji_smile    = "\uD83E\uDD17";
+const emoji_sunglass = "\uD83D\uDE0E";
 
 library.dialog('/', [
     (session) => {
@@ -19,7 +19,7 @@ library.dialog('/', [
         session.beginDialog('validators:email', {
             prompt: "Qual é o seu e-mail?",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
-            maxRetries: 3
+            maxRetries: 10
         });
     },
     (session, args) => {
@@ -32,7 +32,7 @@ library.dialog('/', [
         session.dialogData.email = args.response;
         builder.Prompts.time(session, "Qual é a sua data de nascimento? (dd/mm/aaaa)", {
             retryPrompt: 'Hummm. Não entendi a data que você digitou. Vamos tentar novamente?',
-            maxRetries: 3
+            maxRetries: 10
         });
     },
     (session, args) => {
@@ -46,7 +46,7 @@ library.dialog('/', [
         session.beginDialog('validators:state', {
             prompt: "Qual é o estado(sigla) que você mora?",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Vamos tentar novamente?",
-            maxRetries: 3
+            maxRetries: 10
         });
     },
     (session, args) => {
@@ -61,10 +61,11 @@ library.dialog('/', [
     },
     (session, args) => {
         session.dialogData.city = args.response;
+        session.send("Ufa! Não desanime, parceiro. Faltam apenas 2 perguntas para finalizar sua inscrição. Vamos lá!");
         session.beginDialog('validators:cellphone', {
             prompt: "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD. Ex: (##)#####-####",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Vamos tentar novamente?",
-            maxRetries: 3
+            maxRetries: 10
         });
     },
     (session, args) => {
@@ -90,11 +91,9 @@ library.dialog('/', [
         })
         .then(function(User) {
             console.log('User created sucessfully');
-            session.send('Terminamos nossa primeira missão!' + emoji_clap.repeat(3) +
-                '\n\nAcho que formamos uma bom time' + emoji_smile + 
-                '\n\nAgora vamos esperar a equipe do Gastos Abertos confirmar sua inscrição. Eles levam até 24h para enviar em seu email todas as informações.\n\nNos encontramos na próxima missão!'+
-                emoji_sunglass
-            );
+            session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
+            session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
+            session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos. Segue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos. Até a próxima missão!");
             session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
             return User;
         })
