@@ -93,7 +93,9 @@ library.dialog('/', [
             console.log('User created sucessfully');
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
             session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
-            session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos. Segue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos. Até a próxima missão!");
+            session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos. \
+            Segue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos. \
+            Até a próxima missão!");
             session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
             return User;
         })
