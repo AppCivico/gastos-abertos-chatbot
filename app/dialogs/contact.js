@@ -1,7 +1,7 @@
 var builder = require('botbuilder');
 var Trello  = require('trello');
 
-var trello    = new Trello("85f21b05e0d18f125903ae69f5d0b0b0", "2d69092b57dc9e0c00a5ff920b9ff6eb03c0b05e22fa1c27c27d3d2f6870c8d4");
+var trello    = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_USER_TOKEN);
 const library = new builder.Library('contact');
 
 const SignUpProblems = "Problemas na inscrição";
@@ -57,7 +57,7 @@ library.dialog('/', [
         session.dialogData.message = args.response;
 
         if (Subject == SignUpProblems) {
-                trello.addCard('e-mail: ' + session.dialogData.email, session.dialogData.message, '598b168fc055dba624be6db1',
+                trello.addCard('e-mail: ' + session.dialogData.email, session.dialogData.message, process.env.TRELLO_LIST_ID_1,
                     function (error, trelloCard) {
                         if (error) {
                             console.log('Could not add card:', error);
@@ -73,7 +73,7 @@ library.dialog('/', [
                 );
             }
             if (Subject == Informations) {
-                trello.addCard('e-mail: ' + session.dialogData.email, session.dialogData.message, '598b1964dccc66efd2ab9d8e',
+                trello.addCard('e-mail: ' + session.dialogData.email, session.dialogData.message, process.env.TRELLO_LIST_ID_2,
                     function (error, trelloCard) {
                         if (error) {
                             console.log('Could not add card:', error);
