@@ -49,35 +49,46 @@ library.dialog('/', [
             return;
         } else {
             session.dialogData.email = args.response;
-            if (Subject == SignUpProblems) {
-                trello.addCard('e-mail: ' + session.dialogData.email, '', '598b168fc055dba624be6db1',
-                            function (error, trelloCard) {
-                                if (error) {
-                                    console.log('Could not add card:', error);
-                                }
-                                else {
-                                    console.log('Added card:', trelloCard);
-                                }
-                            }
-                );
-            }
-            if (Subject == Informations) {
-                trello.addCard('e-mail: ' + session.dialogData.email, '', '598b1964dccc66efd2ab9d8e',
-                            function (error, trelloCard) {
-                                if (error) {
-                                    console.log('Could not add card:', error);
-                                }
-                                else {
-                                    console.log('Added card:', trelloCard);
-                                }
-                            }
-                );
-            }
-            session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+
+            builder.Prompts.text(session, "Qual é a sua mensagem para nós?");
         }
     },
     (session, args) => {
-        
+        session.dialogData.message = args.response;
+
+        if (Subject == SignUpProblems) {
+                trello.addCard('e-mail: ' + session.dialogData.email, session.dialogData.message, '598b168fc055dba624be6db1',
+                    function (error, trelloCard) {
+                        if (error) {
+                            console.log('Could not add card:', error);
+                            session.send("Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente.");
+                            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+                        }
+                        else {
+                            console.log('Added card:');
+                            session.send("Recebemos seu contato com sucesso! Em breve você receberá em seu e-mail uma resposta!");
+                            session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+                        }
+                    }
+                );
+            }
+            if (Subject == Informations) {
+                trello.addCard('e-mail: ' + session.dialogData.email, session.dialogData.message, '598b1964dccc66efd2ab9d8e',
+                    function (error, trelloCard) {
+                        if (error) {
+                            console.log('Could not add card:', error);
+                            session.send("Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente.");
+                            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+                        }
+                        else {
+                            console.log('Added card:');
+                            session.send("Recebemos seu contato com sucesso! Em breve você receberá em seu e-mail uma resposta!");
+                            session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+                        }
+                    }
+                );
+            }
+            
     }
 ]).cancelAction('cancel', null, { matches: /^cancel/i });
 
