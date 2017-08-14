@@ -63,7 +63,7 @@ library.dialog('/', [
         session.dialogData.city = args.response;
         session.send("Ufa! Não desanime, parceiro. Faltam apenas 2 perguntas para finalizar sua inscrição. Vamos lá!");
         session.beginDialog('validators:cellphone', {
-            prompt: "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD. Ex: (##)#####-####",
+            prompt: "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD.",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Vamos tentar novamente?",
             maxRetries: 10
         });
