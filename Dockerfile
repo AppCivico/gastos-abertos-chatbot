@@ -1,14 +1,17 @@
-# specify the node base image with your desired version node:<version>
-FROM node:boron
+FROM node:8.1.4
 ENV NPM_CONFIG_LOGLEVEL warn
 
-# replace this with your application's default port
 EXPOSE 8080
 
-COPY . .
+WORKDIR /usr/src/app
 
+COPY package.json .
+COPY . .
+COPY .env .
+COPY .sequelizerc .
+
+RUN npm install -g restify
+RUN npm install -g dotenv
+RUN npm install -g botbuilder
 RUN npm install -g sequelize-cli
-RUN npm install -g nodemon
 RUN npm install
-#RUN npm run start:dev
-#CMD ["npm", "run", "start:dev"]

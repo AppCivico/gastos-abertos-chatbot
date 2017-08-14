@@ -5,6 +5,7 @@ var builder = require('botbuilder');
 
 const library = new builder.Library('gastosAbertosInformation');
 
+const gastosAbertosCicles            = "O que é um ciclo do Gastos Abertos";
 const secondGastosAbertosCicle       = "O 2º ciclo do Gastos Abertos";
 const gameSignUp                     = "Fazer sua inscrição para o 2º Ciclo";
 const firstGastosAbertosCicleResults = "Os resultados de nosso 1º Ciclo";
@@ -18,7 +19,7 @@ library.dialog('/', [
             "Que bom, a equipe do Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.\
             Acreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.\
             Quer conhecer mais sobre:",
-            [ secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults ],
+            [ gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults ],
             { listStyle: builder.ListStyle.button }
         );
     },
@@ -34,6 +35,9 @@ library.dialog('/', [
                 case firstGastosAbertosCicleResults:
                     session.replaceDialog('/firstGastosAbertosCicleResults');
                     break;
+                case gastosAbertosCicles:
+                    session.replaceDialog('/gastosAbertosCicles');
+                    break;
                 default :
                     session.send('Desculpa, não entendi a opção que você selecionou.');
                     break;
@@ -41,6 +45,41 @@ library.dialog('/', [
         }
     }
 ]);
+
+library.dialog('/gastosAbertosCicles', [
+    (session) => {
+        builder.Prompts.choice(session,
+            "Um ciclo do Gastos Abertos é um período onde recrutamos várias pessoas para tornarem-se\
+            lideranças regionais do Gastos Abertos e como líderes damos missões para essas pessoas.\
+            \n\nEssas missões impactarão a transparência no município que o líder representa.\
+            \n\nSerá bem legal se você participar disto conosco!",
+            [ gameSignUp, secondGastosAbertosCicle, firstGastosAbertosCicleResults, otherInformations ],
+            { listStyle: builder.ListStyle.button }
+        );
+    },
+    (session, result) => {
+        if (result.response) {
+            switch (result.response.entity) {
+                case secondGastosAbertosCicle:
+                    session.replaceDialog('/secondGastosAbertosCicle');
+                    break;
+                case firstGastosAbertosCicleResults:
+                    session.replaceDialog('/firstGastosAbertosCicleResults');
+                    break;
+                case gameSignUp:
+                    session.replaceDialog('/gameSignUpConfirmation');
+                    break;
+                case otherInformations:
+                    session.beginDialog('contact:/');
+                    break;
+                default :
+                    session.send('Desculpa, não entendi a opção que você selecionou.');
+                    break;
+            }
+        }
+    }
+]);
+
 
 library.dialog('/secondGastosAbertosCicle', [
     (session) => {
