@@ -1,5 +1,5 @@
 bot.library(require('./game-sign-up'));
-bot.library(require('./other-options'));
+bot.library(require('./contact'));
 
 var builder = require('botbuilder');
 
@@ -62,6 +62,7 @@ library.dialog('/secondGastosAbertosCicle', [
                     session.replaceDialog('/gameSignUpConfirmation');
                     break;
                 case otherInformations:
+                    session.beginDialog('contact:/');
                     break;
                 default :
                     session.send('Desculpa, não entendi a opção que você selecionou.');
@@ -88,7 +89,7 @@ library.dialog('/firstGastosAbertosCicleResults', [
                     session.replaceDialog('/gameSignUpConfirmation');
                     break;
                 case otherInformations:
-                    session.beginDialog('otherOptions:/');
+                    session.beginDialog('contact:/');
                     break;
                 default :
                     session.send('Desculpa, não entendi a opção que você selecionou.');
@@ -144,7 +145,7 @@ library.dialog('/gameSignUpDeclined', [
                     session.replaceDialog('/firstGastosAbertosCicleResults');
                     break;
                 case otherInformations:
-                    session.beginDialog('otherOptions:/');
+                    session.beginDialog('contact:/');
                     break;
                 default :
                     session.send('Desculpa, não entendi a opção que você selecionou.');

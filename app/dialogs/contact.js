@@ -2,7 +2,7 @@ var builder = require('botbuilder');
 var Trello  = require('trello');
 
 var trello    = new Trello("85f21b05e0d18f125903ae69f5d0b0b0", "2d69092b57dc9e0c00a5ff920b9ff6eb03c0b05e22fa1c27c27d3d2f6870c8d4");
-const library = new builder.Library('otherOptions');
+const library = new builder.Library('contact');
 
 const SignUpProblems = "Problemas na inscrição";
 const Informations   = "Informações";
