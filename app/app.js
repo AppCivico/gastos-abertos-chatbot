@@ -12,15 +12,21 @@ const Contact                  = "Entre em contato com o Gastos Abertos";
 
 bot.dialog('/', [
     (session) => {
-        session.send({
-            attachments: [
-                {
-                    contentType: 'image/jpeg',
-                    contentUrl: "https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png"
-                }
-            ]
-        });
-        session.replaceDialog('/promptButtons');
+        if (session.message.address.channelId == "facebook" && session.message.text == "GET_STARTED") {
+            session.send({
+                attachments: [
+                    {
+                        contentType: 'image/jpeg',
+                        contentUrl: "https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png"
+                    }
+                ]
+            });
+            session.replaceDialog('/promptButtons');
+        }
+
+        if (session.message.address.channelId == "emulator") {
+            session.replaceDialog('/promptButtons');
+        }
     }
 ]);
 
