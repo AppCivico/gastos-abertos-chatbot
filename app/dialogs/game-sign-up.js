@@ -17,6 +17,7 @@ library.dialog('/', [
     },
     (session, args) => {
         session.dialogData.fullName = args.response;
+        session.sendTyping();
         session.beginDialog('validators:email', {
             prompt: "Qual é o seu e-mail?",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",

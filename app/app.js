@@ -47,6 +47,7 @@ bot.dialog('/promptButtons', [
         );
     },
     (session, result) => {
+        session.sendTyping();
         if (result.response) {
             switch (result.response.entity) {
                 case GastosAbertosInformation:

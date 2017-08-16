@@ -12,6 +12,7 @@ var emoji_thinking = "\uD83E\uDD14";
 
 library.dialog('/', [
     (session) => {
+        session.sendTyping();
         builder.Prompts.choice(session,
             "Obrigado por seu interesse. Mas, diga como posso te ajudar?",
             [SignUpProblems, Informations],
@@ -19,6 +20,7 @@ library.dialog('/', [
         );
     },
     (session, result) => {
+        session.sendTyping();
         if (result.response) {
             switch (result.response.entity) {
                 case SignUpProblems:
@@ -39,10 +41,12 @@ library.dialog('/', [
                     break;
             }
         } else {
+            session.sendTyping();
             session.send('Desculpa, não entendi a opção que você selecionou.');
         }
     },
     (session, args) => {
+        session.sendTyping();
         if (args.resumed) {
             session.send('Você tentou inserir um e-mail inválido muitas vezes. Tente novamente mais tarde.');
             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
