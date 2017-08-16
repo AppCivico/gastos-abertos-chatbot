@@ -10,8 +10,28 @@ const GameSignUpOption         = "Quero fazer minha inscrição para o 2º Ciclo
 const GastosAbertosInformation = "Quero saber mais sobre o  Gastos Abertos";
 const Contact                  = "Entre em contato com o Gastos Abertos";
 
-bot.dialog('/', [
+bot.beginDialogAction('getstarted', '/getstarted');
+
+bot.dialog('/getstarted', [
     (session) => {
+        console.log(session.userData);
+        session.sendTyping();
+        if( !session.userData.firstRun ) {
+            // Store the returned user page-scoped id (USER_ID) and page id
+            session.userData.userid = session.message.sourceEvent.sender.id;
+            session.userData.pageid = session.message.sourceEvent.recipient.id;
+
+            // DELAY ISN'T THE REQUEST - I THINK IT'S THE INITIAL REQUEST TO BOTFRAMEWORK
+
+            // Move to the /getprofile dialog
+            session.beginDialog('/promptButtons');
+        } else {
+            // The firstname has been stored so the user has completed the /getstarted dialog
+            // Stop this dialog and Welcome them back
+            session.replaceDialog('/promptButtons');
+        }
+    }
+    /*(session) => {
         if (session.message.address.channelId == "facebook" && session.message.text == "GET_STARTED") {
             session.send({
                 attachments: [
@@ -27,7 +47,7 @@ bot.dialog('/', [
         if (session.message.address.channelId == "emulator") {
             session.replaceDialog('/promptButtons');
         }
-    }
+    }*/
 ]);
 
 bot.dialog('/promptButtons', [
