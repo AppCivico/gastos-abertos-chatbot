@@ -16,8 +16,8 @@ const no                             = "Não";
 library.dialog('/', [
     (session) => {
         builder.Prompts.choice(session,
-            "Que bom, a equipe do Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.<br><br />\
-            Acreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.<br><br />\
+            "Que bom, a equipe do Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.\n\n \
+            Acreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.\n\n \
             Quer conhecer mais sobre:",
             [ gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults ],
             { listStyle: builder.ListStyle.button }
