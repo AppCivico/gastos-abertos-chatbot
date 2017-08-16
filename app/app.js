@@ -30,6 +30,14 @@ bot.dialog('/getstarted', [
 
 bot.dialog('/promptButtons', [
     (session) => {
+        session.send({
+                attachments: [
+                    {
+                        contentType: 'image/jpeg',
+                        contentUrl: "https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png"
+                    }
+                ]
+        });
         builder.Prompts.choice(session,
             'Olá, eu sou o Guaxi.  Sou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas. Quer saber mais sobre?',
             [GastosAbertosInformation, GameSignUpOption, Contact],
