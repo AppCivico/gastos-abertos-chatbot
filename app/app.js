@@ -11,6 +11,7 @@ const GastosAbertosInformation = "Gastos Abertos";
 const Contact                  = "Entrar em contato";
 
 bot.beginDialogAction('getstarted', '/getstarted');
+bot.beginDialogAction('reset', '/reset');
 
 bot.dialog('/getstarted', [
     (session) => {
@@ -30,6 +31,7 @@ bot.dialog('/getstarted', [
 
 bot.dialog('/promptButtons', [
     (session) => {
+        session.sendTyping();
         session.send({
                 attachments: [
                     {
@@ -61,5 +63,11 @@ bot.dialog('/promptButtons', [
                     break;
             }
         }
+    }
+]);
+
+bot.dialog('/reset', [
+    (session, activity) => {
+        activity.GetStateClient().BotState.DeleteStateForUser(activity.ChannelId, activity.From.Id);
     }
 ]);

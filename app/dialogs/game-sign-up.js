@@ -12,6 +12,7 @@ const emoji_sunglass = "\uD83D\uDE0E";
 
 library.dialog('/', [
     (session) => {
+        session.sendTyping();
         builder.Prompts.text(session, "Qual é o seu nome completo?");
     },
     (session, args) => {
@@ -24,12 +25,14 @@ library.dialog('/', [
     },
     (session, args) => {
         if (args.resumed) {
+            session.sendTyping();
             session.send('Você tentou inserir um e-mail inválido muitas vezes. Tente novamente mais tarde.');
             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
             return;
         }
 
         session.dialogData.email = args.response;
+        session.sendTyping();
         builder.Prompts.time(session, "Qual é a sua data de nascimento? (dd/mm/aaaa)", {
             retryPrompt: 'Hummm. Não entendi a data que você digitou. Vamos tentar novamente?',
             maxRetries: 10
@@ -37,12 +40,14 @@ library.dialog('/', [
     },
     (session, args) => {
         if (args.resumed) {
+            session.sendTyping();
             session.send('Você tentou inserir uma data inválida muitas vezes. Tente novamente mais tarde.');
             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
             return;
         }
 
         session.dialogData.birthDate = args.response.entity;
+        session.sendTyping();
         session.beginDialog('validators:state', {
             prompt: "Qual é o estado(sigla) que você mora?",
             retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Vamos tentar novamente?",
@@ -51,16 +56,19 @@ library.dialog('/', [
     },
     (session, args) => {
         if (args.resumed) {
+            session.sendTyping();
             session.send('Você tentou inserir um estado inválido muitas vezes. Tente novamente mais tarde.');
             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
             return;
         }
 
         session.dialogData.state = args.response;
+        session.sendTyping();
         builder.Prompts.text(session, "Qual é o município que você representará?");
     },
     (session, args) => {
         session.dialogData.city = args.response;
+        session.sendTyping();
         session.send("Ufa! Não desanime, parceiro. Faltam apenas 2 perguntas para finalizar sua inscrição. Vamos lá!");
         session.beginDialog('validators:cellphone', {
             prompt: "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD.",
@@ -70,12 +78,14 @@ library.dialog('/', [
     },
     (session, args) => {
         if (args.resumed) {
+            session.sendTyping();
             session.send('Você tentou inserir um número de telefone celular inválido muitas vezes. Tente novamente mais tarde.');
             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
             return;
         }
 
         session.dialogData.cellphoneNumber = args.response;
+        session.sendTyping();
         builder.Prompts.text(session, "Qual a sua ocupação?");
     },
     (session, args) => {
