@@ -5,10 +5,10 @@ var builder = require('botbuilder');
 
 const library = new builder.Library('gastosAbertosInformation');
 
-const gastosAbertosCicles            = "O que é um ciclo do Gastos Abertos";
-const secondGastosAbertosCicle       = "O 2º ciclo do Gastos Abertos";
-const gameSignUp                     = "Fazer sua inscrição para o 2º Ciclo";
-const firstGastosAbertosCicleResults = "Os resultados de nosso 1º Ciclo";
+const gastosAbertosCicles            = "O que é um ciclo";
+const secondGastosAbertosCicle       = "2º Ciclo ";
+const gameSignUp                     = "Inscrição 2º Ciclo";
+const firstGastosAbertosCicleResults = "Resultados 1º Ciclo";
 const otherInformations              = "Outras informações";
 const yes                            = "Sim, vamos lá!";
 const no                             = "Não";

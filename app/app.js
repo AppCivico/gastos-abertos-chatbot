@@ -6,9 +6,9 @@ bot.library(require('./dialogs/game-sign-up'));
 bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 
-const GameSignUpOption         = "Quero fazer minha inscrição para o 2º Ciclo";
-const GastosAbertosInformation = "Quero saber mais sobre o  Gastos Abertos";
-const Contact                  = "Entre em contato com o Gastos Abertos";
+const GameSignUpOption         = "Inscrição 2º Ciclo";
+const GastosAbertosInformation = "Gastos Abertos";
+const Contact                  = "Entrar em contato";
 
 bot.beginDialogAction('getstarted', '/getstarted');
 
@@ -31,7 +31,7 @@ bot.dialog('/getstarted', [
 bot.dialog('/promptButtons', [
     (session) => {
         builder.Prompts.choice(session,
-            'Olá, eu sou o Guaxi.  Sou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas. Como posso te ajudar?',
+            'Olá, eu sou o Guaxi.  Sou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas. Quer saber mais sobre?',
             [GastosAbertosInformation, GameSignUpOption, Contact],
             { listStyle: builder.ListStyle.button }
         );
