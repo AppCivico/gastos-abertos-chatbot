@@ -4,7 +4,7 @@ var Trello  = require('trello');
 var trello    = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_USER_TOKEN);
 const library = new builder.Library('contact');
 
-const SignUpProblems = "Problemas na inscrição";
+const SignUpProblems = "Inscrição";
 const Informations   = "Informações";
 let   Subject        = "";
 
