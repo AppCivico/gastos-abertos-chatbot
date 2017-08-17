@@ -40,8 +40,9 @@ bot.dialog('/promptButtons', [
                     }
                 ]
         });
+        session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
         builder.Prompts.choice(session,
-            'Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.\n\nQuer saber mais sobre?',
+            'Quer saber mais sobre?',
             [GastosAbertosInformation, GameSignUpOption, Contact],
             { listStyle: builder.ListStyle.button }
         );
