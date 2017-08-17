@@ -34,8 +34,9 @@ library.dialog('/', [
 
         session.dialogData.email = args.response;
         session.sendTyping();
-        builder.Prompts.time(session, "Qual é a sua data de nascimento? (dd/mm/aaaa)", {
-            retryPrompt: 'Hummm. Não entendi a data que você digitou. Vamos tentar novamente?',
+        session.beginDialog('validators:date', {
+            prompt: "Qual é a sua data de nascimento? (dd/mm/aaaa)",
+            retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Vamos tentar novamente?",
             maxRetries: 10
         });
     },
