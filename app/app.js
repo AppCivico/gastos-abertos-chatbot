@@ -70,5 +70,6 @@ bot.dialog('/promptButtons', [
 bot.dialog('/reset', [
     (session, activity) => {
         activity.GetStateClient().BotState.DeleteStateForUser(activity.ChannelId, activity.From.Id);
+        session.beginDialog('/promptButtons');
     }
 ]);
