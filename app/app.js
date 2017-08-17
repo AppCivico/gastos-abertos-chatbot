@@ -14,7 +14,9 @@ bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
 
 bot.dialog('/', [
-    session.replaceDialog('/promptButtons');
+    (session) => {
+        session.replaceDialog('/promptButtons');
+    }
 ]);
 
 bot.dialog('/getstarted', [
