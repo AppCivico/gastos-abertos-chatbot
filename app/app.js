@@ -13,6 +13,10 @@ const Contact                  = "Entrar em contato";
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
 
+bot.dialog('/', [
+    session.replaceDialog('/promptButtons');
+]);
+
 bot.dialog('/getstarted', [
     (session) => {
         console.log(session.userData);
