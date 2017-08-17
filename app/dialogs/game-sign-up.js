@@ -20,7 +20,10 @@ library.dialog('/', [
         session.sendTyping();
         session.beginDialog('validators:email', {
             prompt: "Qual é o seu e-mail?",
-            retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+            retryPrompt: [
+                emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+                emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. O e-mail deve ter o seguinte formato: exemplo@exemplo.com"
+            ],
             maxRetries: 10
         });
     },
@@ -35,8 +38,11 @@ library.dialog('/', [
         session.dialogData.email = args.response;
         session.sendTyping();
         session.beginDialog('validators:date', {
-            prompt: "Qual é a sua data de nascimento? (dd/mm/aaaa)",
-            retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Vamos tentar novamente?",
+            prompt: "Qual é a sua data de nascimento?",
+            retryPrompt: [
+                emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Vamos tentar novamente?",
+                emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Não se esqueça que ela deve ter o seguinte formato: 01/01/2000"
+            ],
             maxRetries: 10
         });
     },
@@ -48,11 +54,14 @@ library.dialog('/', [
             return;
         }
 
-        session.dialogData.birthDate = args.response.entity;
+        session.dialogData.birthDate = args.response;
         session.sendTyping();
         session.beginDialog('validators:state', {
             prompt: "Qual é o estado(sigla) que você mora?",
-            retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Vamos tentar novamente?",
+            retryPrompt: [
+                emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Vamos tentar novamente?",
+                emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Ele dever apenas a sigla como por exemplo a sigla do estado onde eu fui criado: SP",
+            ],
             maxRetries: 10
         });
     },
@@ -74,7 +83,10 @@ library.dialog('/', [
         session.send("Ufa! Não desanime, parceiro. Faltam apenas 2 perguntas para finalizar sua inscrição. Vamos lá!");
         session.beginDialog('validators:cellphone', {
             prompt: "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD.",
-            retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Vamos tentar novamente?",
+            retryPrompt: [
+                emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Vamos tentar novamente?",
+                emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Siga o seguinte exemplo: 11988888888 ou 1188888888",
+            ],
             maxRetries: 10
         });
     },
