@@ -46,7 +46,7 @@ bot.dialog('/promptButtons', [
             [GastosAbertosInformation, GameSignUpOption, Contact],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
             }
         );
     },

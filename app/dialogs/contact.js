@@ -16,7 +16,10 @@ library.dialog('/', [
         builder.Prompts.choice(session,
             "Obrigado por seu interesse. Mas, diga como posso te ajudar?",
             [SignUpProblems, Informations],
-            { listStyle: builder.ListStyle.button }
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+            }
         );
     },
     (session, result) => {

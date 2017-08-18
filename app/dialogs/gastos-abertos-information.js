@@ -21,7 +21,7 @@ library.dialog('/', [
             [ gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
             }
         );
     },
@@ -57,7 +57,7 @@ library.dialog('/gastosAbertosCicles', [
             [ gameSignUp, secondGastosAbertosCicle, firstGastosAbertosCicleResults, otherInformations ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
             }
         );
     },
@@ -94,7 +94,7 @@ library.dialog('/secondGastosAbertosCicle', [
             [ gameSignUp, firstGastosAbertosCicleResults, otherInformations ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
             }
         );
     },
@@ -127,7 +127,7 @@ library.dialog('/firstGastosAbertosCicleResults', [
             [ gameSignUp, otherInformations ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
             }
         );
     },
@@ -157,7 +157,7 @@ library.dialog('/gameSignUpConfirmation', [
             [ yes, no ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
             }
         );
     },
@@ -187,7 +187,7 @@ library.dialog('/gameSignUpDeclined', [
             [secondGastosAbertosCicle, firstGastosAbertosCicleResults, otherInformations ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
             }
         );
     },
