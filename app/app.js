@@ -13,6 +13,12 @@ const Contact                  = "Entrar em contato";
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
 
+bot.dialog('/', [
+    (session) => {
+        session.replaceDialog('/promptButtons');
+    }
+]).triggerAction({ matches: ['Inscrição 2º Ciclo', 'Informações', 'Entrar em contato'] });
+
 bot.dialog('/getstarted', [
     (session) => {
         console.log(session.userData);
