@@ -118,7 +118,7 @@ library.dialog('/', [
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
             session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
             session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos.\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!");
-            session.endDialog();
+            session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
             return User;
         })
         .catch(e => {
