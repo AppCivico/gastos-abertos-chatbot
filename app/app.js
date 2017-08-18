@@ -3,27 +3,27 @@ require('./connectorSetup.js')();
 
 bot.library(require('./validators'));
 bot.library(require('./dialogs/game-sign-up'));
-bot.library(require('./dialogs/other-options'));
+bot.library(require('./dialogs/contact'));
+bot.library(require('./dialogs/gastos-abertos-information'));
 
-const GameSignUpOption = "Inscreva-me no processo de missões";
-const Yes = "Sim";
-const No  = "Não";
+const GameSignUpOption         = "Inscrição 2º Ciclo";
+const GastosAbertosInformation = "Gastos Abertos";
+const Contact                  = "Entrar em contato";
 
-bot.dialog('/', [
-    function (session) {
-        if (session.message.address.channelId == "facebook" && session.message.text == "GET_STARTED") {
-            session.send({
-                attachments: [
-                    {
-                        contentType: 'image/jpeg',
-                        contentUrl: "https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png"
-                    }
-                ]
-            });
-            session.replaceDialog('/promptButtons');
-        }
+bot.beginDialogAction('getstarted', '/getstarted');
+bot.beginDialogAction('reset', '/reset');
 
-        if (session.message.address.channelId == "emulator") {
+bot.dialog('/getstarted', [
+    (session) => {
+        console.log(session.userData);
+        session.sendTyping();
+        if( !session.userData.firstRun ) {
+
+            session.userData.userid = session.message.sourceEvent.sender.id;
+            session.userData.pageid = session.message.sourceEvent.recipient.id;
+
+            session.beginDialog('/promptButtons');
+        } else {
             session.replaceDialog('/promptButtons');
         }
     }
@@ -31,28 +31,49 @@ bot.dialog('/', [
 
 bot.dialog('/promptButtons', [
     (session) => {
+        session.sendTyping();
+        session.send({
+                attachments: [
+                    {
+                        contentType: 'image/jpeg',
+                        contentUrl: "https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png"
+                    }
+                ]
+        });
+        session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
         builder.Prompts.choice(session,
-            "Olá, Eu sou o Guaxi. Serei seu assistente do Gastos Abertos. Vamos iniciar seu cadastro?",
-            [Yes, No],
-            { listStyle: builder.ListStyle.button });
+            'Quer saber mais sobre?',
+            [GastosAbertosInformation, GameSignUpOption, Contact],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+            }
+        );
     },
     (session, result) => {
+        session.sendTyping();
         if (result.response) {
             switch (result.response.entity) {
-                /*
-                Estes fluxos iniciais serão substituidos por outras opções,
-                por enquanto eles serão apenas "Sim" ou "Não" por tratar apenas
-                da inscrição de líderes no processo de missões
-                */
-                case Yes:
+                case GastosAbertosInformation:
+                    session.beginDialog('gastosAbertosInformation:/');
+                    break;
+                case GameSignUpOption:
                     session.beginDialog('gameSignUp:/');
                     break;
-                case No:
-                    session.beginDialog('otherOptions:/');
+                case Contact:
+                    session.beginDialog('contact:/');
+                    break;
+                default :
+                    session.send('Desculpa, não entendi a opção que você selecionou.');
                     break;
             }
-        } else {
-            session.send('Desculpa, não entendi a opção que você selecionou.');
         }
+    }
+]);
+
+bot.dialog('/reset', [
+    (session, activity) => {
+        activity.GetStateClient().BotState.DeleteStateForUser(activity.ChannelId, activity.From.Id);
+        session.beginDialog('/promptButtons');
     }
 ]);

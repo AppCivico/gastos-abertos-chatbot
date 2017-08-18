@@ -15,7 +15,7 @@ module.exports = function () {
 
     // Setup Restify Server
     var server = restify.createServer();
-    server.listen(process.env.port || 8080, function () {
+    server.listen(process.env.port || 1998, function () {
         console.log('%s listening to %s', server.name, server.url);
     });
     server.post('/api/messages', connector.listen());

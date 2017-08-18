@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start:dev": "nodemon app/app.js",
+    "start:prod": "sequelize db:migrate && node app/app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,15 +26,16 @@
   "dependencies": {
     "amqplib": "^0.5.1",
     "botbuilder": "^3.9.0",
+    "date-fns": "^1.28.5",
     "dotenv": "^4.0.0",
     "email-validator": "^1.1.1",
     "nodemailer": "^4.0.1",
     "pg": "6.4.1",
     "pg-hstore": "^2.3.2",
-    "phone": "^1.0.10",
     "restify": "^5.0.0",
     "sequelize": "4.4.0",
     "sequelize-cli": "^2.7.0",
-    "smtp-server": "^3.0.1"
+    "smtp-server": "^3.0.1",
+    "trello": "^0.8.0"
   }
 }

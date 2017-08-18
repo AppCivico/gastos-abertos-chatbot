@@ -4,7 +4,7 @@ module.exports = function(sequelize, DataTypes) {
     name: DataTypes.STRING,
     occupation: DataTypes.STRING,
     email: DataTypes.STRING,
-    birth_date: DataTypes.DATE,
+    birth_date: DataTypes.STRING,
     state: DataTypes.STRING,
     city: DataTypes.STRING,
     cellphone_number: DataTypes.STRING
