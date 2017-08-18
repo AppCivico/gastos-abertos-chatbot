@@ -22,7 +22,7 @@ library.dialog('/', [
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
-            },
+            }
         );
     },
     (session, result) => {
@@ -58,7 +58,7 @@ library.dialog('/gastosAbertosCicles', [
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
-            },
+            }
         );
     },
     (session, result) => {
@@ -95,7 +95,7 @@ library.dialog('/secondGastosAbertosCicle', [
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
-            },
+            }
         );
     },
     (session, result) => {
@@ -128,7 +128,7 @@ library.dialog('/firstGastosAbertosCicleResults', [
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
-            },
+            }
         );
     },
     (session, result) => {
@@ -158,7 +158,7 @@ library.dialog('/gameSignUpConfirmation', [
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
-            },
+            }
         );
     },
     (session, result) => {
@@ -188,7 +188,7 @@ library.dialog('/gameSignUpDeclined', [
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
-            },
+            }
         );
     },
     (session, result) => {

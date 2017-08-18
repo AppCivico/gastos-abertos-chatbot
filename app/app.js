@@ -47,7 +47,7 @@ bot.dialog('/promptButtons', [
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
-            },
+            }
         );
     },
     (session, result) => {
