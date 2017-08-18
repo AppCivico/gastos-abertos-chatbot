@@ -75,7 +75,7 @@ bot.dialog('/promptButtons', [
             }
         }
     }
-]);
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 bot.dialog('/reset', [
     (session, activity) => {
