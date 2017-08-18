@@ -13,12 +13,6 @@ const Contact                  = "Entrar em contato";
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
 
-bot.dialog('/', [
-    (session) => {
-        session.replaceDialog('/promptButtons');
-    }
-]);
-
 bot.dialog('/getstarted', [
     (session) => {
         console.log(session.userData);
@@ -50,7 +44,10 @@ bot.dialog('/promptButtons', [
         builder.Prompts.choice(session,
             'Quer saber mais sobre?',
             [GastosAbertosInformation, GameSignUpOption, Contact],
-            { listStyle: builder.ListStyle.button }
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+            },
         );
     },
     (session, result) => {

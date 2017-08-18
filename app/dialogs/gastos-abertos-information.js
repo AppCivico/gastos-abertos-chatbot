@@ -17,9 +17,12 @@ library.dialog('/', [
     (session) => {
         session.sendTyping();
         builder.Prompts.choice(session,
-            "Que bom, a equipe do Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.\n\nQuer conhecer mais sobre:",
+            "Que bom, a equipe do Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.\n\n\nQuer conhecer mais sobre:",
             [ gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults ],
-            { listStyle: builder.ListStyle.button }
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+            },
         );
     },
     (session, result) => {
@@ -50,9 +53,12 @@ library.dialog('/gastosAbertosCicles', [
     (session) => {
         session.sendTyping();
         builder.Prompts.choice(session,
-            "Um ciclo do Gastos Abertos é um período onde recrutamos várias pessoas para tornarem-se lideranças regionais do Gastos Abertos e como líderes damos missões para essas pessoas.\n\nEssas missões impactarão a transparência no município que o líder representa.\n\nSerá bem legal se você participar disto conosco!",
+            "Um ciclo do Gastos Abertos é um período onde recrutamos várias pessoas para tornarem-se lideranças regionais do Gastos Abertos e como líderes damos missões para essas pessoas.\n\n\nEssas missões impactarão a transparência no município que o líder representa.\n\n\nSerá bem legal se você participar disto conosco!",
             [ gameSignUp, secondGastosAbertosCicle, firstGastosAbertosCicleResults, otherInformations ],
-            { listStyle: builder.ListStyle.button }
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+            },
         );
     },
     (session, result) => {
@@ -84,9 +90,12 @@ library.dialog('/secondGastosAbertosCicle', [
     (session) => {
         session.sendTyping();
         builder.Prompts.choice(session,
-            "Neste 2º ciclo, queremos replicar a execução do Gastos Abertos em diferentes municípios, aprimorar a metodologia, ampliar o número de lideranças formadas e portais de transparência avaliados.\nEspero por você em nessa nova jornada",
+            "Neste 2º ciclo, queremos replicar a execução do Gastos Abertos em diferentes municípios, aprimorar a metodologia, ampliar o número de lideranças formadas e portais de transparência avaliados.\n\n\nEspero por você em nessa nova jornada",
             [ gameSignUp, firstGastosAbertosCicleResults, otherInformations ],
-            { listStyle: builder.ListStyle.button }
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+            },
         );
     },
     (session, result) => {
@@ -114,9 +123,12 @@ library.dialog('/firstGastosAbertosCicleResults', [
     (session) => {
         session.sendTyping();
         builder.Prompts.choice(session,
-            "No primeiro ciclo do gastos Abertos (2016-2017), tivemos 181 lideranças inscritas, 150 municípios atendidos, 75 portais de transparência avaliados, 25 pedidos realizados, 3 dados públicos de orçamento abertos e 1 carta compromisso assinada. Para o segundo ciclo, queremos atender mais municípios e formar novas lideranças.",
+            "No primeiro ciclo do gastos Abertos (2016-2017), tivemos 181 lideranças inscritas, 150 municípios atendidos, 75 portais de transparência avaliados, 25 pedidos realizados, 3 dados públicos de orçamento abertos e 1 carta compromisso assinada. \n\n\nPara o segundo ciclo, queremos atender mais municípios e formar novas lideranças.",
             [ gameSignUp, otherInformations ],
-            { listStyle: builder.ListStyle.button }
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+            },
         );
     },
     (session, result) => {
@@ -141,9 +153,12 @@ library.dialog('/gameSignUpConfirmation', [
     (session) => {
         session.sendTyping();
         builder.Prompts.choice(session,
-            "Uhu! Seja bem vindo ao time.\nSerei seu agente virtual em todas as missões.\nCom Guaxi, missão dada é missão cumprida.\nVamos começar?",
+            "Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.\n\n\nCom Guaxi, missão dada é missão cumprida.\nVamos começar?",
             [ yes, no ],
-            { listStyle: builder.ListStyle.button }
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+            },
         );
     },
     (session, result) => {
@@ -170,7 +185,10 @@ library.dialog('/gameSignUpDeclined', [
         builder.Prompts.choice(session,
             "Ok! Posso te ajudar com alguma informação sobre",
             [secondGastosAbertosCicle, firstGastosAbertosCicleResults, otherInformations ],
-            { listStyle: builder.ListStyle.button }
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\n Selecione uma das opções abaixo"
+            },
         );
     },
     (session, result) => {
