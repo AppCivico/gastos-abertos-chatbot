@@ -43,7 +43,7 @@ Construa o container
 
 Inicie o container
 > cp sample-run-container.sh run-container.sh
->
+
 > chmod +x run-container.sh
->
+
 > ./run-container.sh
