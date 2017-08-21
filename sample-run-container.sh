@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # confira o seu ip usando ifconfig docker0|grep 'inet addr:'
-export DOCKER_LAN_IP=172.17.0.1
+export DOCKER_LAN_IP=$(ifconfig docker0 | grep 'inet addr:' | awk '{ split($2,a,":"); print a[2] }')
 
 # porta que será feito o bind
 export LISTEN_PORT=8181
