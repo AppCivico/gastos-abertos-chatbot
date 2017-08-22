@@ -1,5 +1,4 @@
 var builder = require('botbuilder');
-var dateFns = require('date-fns');
 
 User = require('../server/schema/models').user;
 
