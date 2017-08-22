@@ -1,4 +1,5 @@
-var builder = require('botbuilder');
+var builder  = require('botbuilder');
+const mailer = require('../server/mailer/mailer.js');
 
 User = require('../server/schema/models').user;
 
@@ -36,13 +37,28 @@ library.dialog('/', [
 
         session.dialogData.email = args.response;
         session.sendTyping();
-        session.beginDialog('validators:date', {
-            prompt: "Qual é a sua data de nascimento?",
-            retryPrompt: [
-                emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Vamos tentar novamente?",
-                emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Não se esqueça que ela deve ter o seguinte formato: 01/01/2000"
-            ],
-            maxRetries: 10
+
+        User.count({
+            where: {
+                email: session.dialogData.email
+            }
+        })
+        .then(count => {
+            if (count != 0) {
+                session.send("Você já está cadastrado companheiro!\n" + emoji_sunglass + "Verifique se você recebeu minha mensagem em seu e-mail.\n\n\nEu a enviei para o seguinte e-mail: " + session.dialogData.email + ".");
+                session.endDialog();
+                return;
+            } else {
+                session.sendTyping();
+                session.beginDialog('validators:date', {
+                prompt: "Qual é a sua data de nascimento?",
+                retryPrompt: [
+                    emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Vamos tentar novamente?",
+                    emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Não se esqueça que ela deve ter o seguinte formato: 01/01/2000"
+                ],
+                maxRetries: 10
+            });
+            }
         });
     },
     (session, args) => {
@@ -114,6 +130,9 @@ library.dialog('/', [
         })
         .then(function(User) {
             console.log('User created sucessfully');
+            mailer.listofemails.push(session.dialogData.email);
+            mailer.massMailer();
+
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
             session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
             session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos.\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!");
