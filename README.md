@@ -21,29 +21,24 @@ Efetue as migrations do Sequelize
 Inicie a aplicação
 > npm run start:dev
 
-### Subindo em ambiente de produção
-
-Instale os helpers
-> npm install -g sequelize-cli dotenv
-
-Instale as dependências
-> npm install
-
-Copie o arquivo de envs
-> cp example.env .env 
+### Subindo em ambiente de produção (com docker)
 
 Crie o banco de dados
-> createdb -h localhost -U postgres gastos_abertos_prod
 
-Efetue as migrations do Sequelize
-> sequelize db:migrate --env production
+  $ createdb -h localhost -U postgres gastos_abertos_prod
 
+Configure os arquivos:
+
+   $ cp example.env .env 
+   $ $EDITOR .env
+   $ $EDITOR app/server/schema/config/config.json
+  
 Construa o container
-> chmod +x build-container.sh
+
+   $ ./build-container.sh
 
 Inicie o container
-> cp sample-run-container.sh run-container.sh
 
-> chmod +x run-container.sh
-
-> ./run-container.sh
+   $ cp sample-run-container.sh run-container.sh
+   $ $EDITOR run-container.sh
+   $ ./run-container.sh
