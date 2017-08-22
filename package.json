@@ -25,10 +25,11 @@
   "homepage": "https://github.com/lucasansei/gastos-abertos-chatbot#readme",
   "dependencies": {
     "amqplib": "^0.5.1",
+    "async": "^2.5.0",
     "botbuilder": "^3.9.0",
-    "date-fns": "^1.28.5",
     "dotenv": "^4.0.0",
     "email-validator": "^1.1.1",
+    "http": "0.0.0",
     "nodemailer": "^4.0.1",
     "pg": "6.4.1",
     "pg-hstore": "^2.3.2",
