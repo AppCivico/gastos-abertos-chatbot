@@ -6,9 +6,6 @@ EXPOSE 8080
 USER root
 RUN useradd -ms /bin/bash app
 
-RUN npm install -g dotenv
-RUN npm install -g sequelize-cli
-
 RUN apt-get update
 RUN apt-get install -y runit
 
@@ -19,10 +16,13 @@ WORKDIR /src
 
 USER app
 RUN npm install
+RUN npm install dotenv sequelize-cli
 
 USER root
 COPY services/ /etc/service/
 RUN chmod +x /etc/service/*/run
+
+
 
 ENTRYPOINT ["runsvdir"]
 CMD ["/etc/service/"]

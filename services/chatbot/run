@@ -1,4 +1,4 @@
 #!/bin/bash
 export USER=app
 
-su - app -c 'cd /src ; npm start'
+su - app -c 'cd /src; /src/node_modules/.bin/sequelize db:migrate --env production; npm start'
