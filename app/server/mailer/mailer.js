@@ -16,11 +16,11 @@ var mailer = (function() {
     self.massMailer = function() {
         transporter = nodemailer.createTransport({
             service: "SMTP",
-            host: process.env.SMTP_SERVER,
-            port: process.env.SMTP_PORT,
+            host: 'smtp.sendgrid.net',
+            port: 587,
             auth: {
-                user: process.env.SMTP_USERNAME,
-                pass: process.env.SMTP_PASSWORD
+                user: "neweokoe",
+                pass: "CsqdZftMIh8Q"
             },
                 tls: {rejectUnauthorized: false},
                 debug:true
@@ -47,6 +47,7 @@ var mailer = (function() {
                     subject: 'Guaxi - Recebi sua inscrição com sucesso!', 
                     html: "Olá!<br><br>Eu, Guaxi, vi que você se inscreveu para o segundo ciclo do processo de missões do Gastos Abertos.<br><br>Em breve um membro da equipe do Gastos Abertos irá entrar em contato através do e-mail que você cadastrou.<br><br>Muito obrigado parceiro!"
                 };
+                listofemails.pop(Email);
                 transporter.sendMail(mailOptions, function(error, info) {               
                     if(error) {
                         console.log(error)
@@ -61,7 +62,7 @@ var mailer = (function() {
             function(statusCode,Email,callback) {
                 console.log("Will update DB here for " + Email + "With " + statusCode);
                 Email_queue.create({
-                        email: listofemails[0],
+                        email: listofemails,
                         sucess: sucess_email ? sucess_email[0] : failure_email[0]
                     })
                 .then(function(Email_queue) {
