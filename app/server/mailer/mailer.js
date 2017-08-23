@@ -16,11 +16,11 @@ var mailer = (function() {
     self.massMailer = function() {
         transporter = nodemailer.createTransport({
             service: "SMTP",
-            host: 'smtp.sendgrid.net',
-            port: 587,
+            host: process.env.SMTP_SERVER,
+            port: process.env.SMTP_PORT,
             auth: {
-                user: "neweokoe",
-                pass: "CsqdZftMIh8Q"
+                user: process.env.SMTP_USERNAME,
+                pass: process.env.SMTP_PASSWORD
             },
                 tls: {rejectUnauthorized: false},
                 debug:true
