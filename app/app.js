@@ -47,7 +47,6 @@ bot.dialog('/promptButtons', [
                 ]
         });
         session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
-        session.send("Tenho o maior respeito pela sua privacidade e tomarei todo cuidado com seus dados. Se tiver dúvidas, confira os termos de uso do Gastos Abertos: https://gastosabertos.org/termos .");
         builder.Prompts.choice(session,
             'Quer saber mais sobre?',
             [GastosAbertosInformation, GameSignUpOption, Contact],
