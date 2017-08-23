@@ -9,7 +9,7 @@ const gastosAbertosCicles            = "O que é um ciclo";
 const secondGastosAbertosCicle       = "2º Ciclo ";
 const gameSignUp                     = "Inscrição 2º Ciclo";
 const firstGastosAbertosCicleResults = "Resultados 1º Ciclo";
-const otherInformations              = "Outras informações";
+const contact                        = "Entrar em contato";
 const yes                            = "Sim, vamos lá!";
 const no                             = "Não";
 
@@ -18,7 +18,7 @@ library.dialog('/', [
         session.sendTyping();
         builder.Prompts.choice(session,
             "Que bom, a equipe do Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.\n\n\nQuer conhecer mais sobre:",
-            [ gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults ],
+            [ gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults, contact ],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
@@ -41,8 +41,8 @@ library.dialog('/', [
                 case gastosAbertosCicles:
                     session.replaceDialog('/gastosAbertosCicles');
                     break;
-                default :
-                    session.send('Desculpa, não entendi a opção que você selecionou.');
+                case contact:
+                    session.beginDialog('contact:/');
                     break;
             }
         }
@@ -54,7 +54,7 @@ library.dialog('/gastosAbertosCicles', [
         session.sendTyping();
         builder.Prompts.choice(session,
             "Um ciclo do Gastos Abertos é um período onde recrutamos várias pessoas para tornarem-se lideranças regionais do Gastos Abertos e como líderes damos missões para essas pessoas.\n\n\nEssas missões impactarão a transparência no município que o líder representa.\n\n\nSerá bem legal se você participar disto conosco!",
-            [ gameSignUp, secondGastosAbertosCicle, firstGastosAbertosCicleResults, otherInformations ],
+            [ gameSignUp, secondGastosAbertosCicle, firstGastosAbertosCicleResults, contact ],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
@@ -74,11 +74,8 @@ library.dialog('/gastosAbertosCicles', [
                 case gameSignUp:
                     session.replaceDialog('/gameSignUpConfirmation');
                     break;
-                case otherInformations:
+                case contact:
                     session.beginDialog('contact:/');
-                    break;
-                default :
-                    session.send('Desculpa, não entendi a opção que você selecionou.');
                     break;
             }
         }
@@ -91,7 +88,7 @@ library.dialog('/secondGastosAbertosCicle', [
         session.sendTyping();
         builder.Prompts.choice(session,
             "Neste 2º ciclo, queremos replicar a execução do Gastos Abertos em diferentes municípios, aprimorar a metodologia, ampliar o número de lideranças formadas e portais de transparência avaliados.\n\n\nEspero por você em nessa nova jornada",
-            [ gameSignUp, firstGastosAbertosCicleResults, otherInformations ],
+            [ gameSignUp, firstGastosAbertosCicleResults, gastosAbertosCicles, contact],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
@@ -108,11 +105,14 @@ library.dialog('/secondGastosAbertosCicle', [
                 case gameSignUp:
                     session.replaceDialog('/gameSignUpConfirmation');
                     break;
-                case otherInformations:
+                case contact:
                     session.beginDialog('contact:/');
                     break;
-                default :
-                    session.send('Desculpa, não entendi a opção que você selecionou.');
+                case secondGastosAbertosCicle:
+                    session.replaceDialog('/secondGastosAbertosCicle');
+                    break;
+                case gastosAbertosCicles:
+                    session.replaceDialog('/gastosAbertosCicles');
                     break;
             }
         }
@@ -124,7 +124,7 @@ library.dialog('/firstGastosAbertosCicleResults', [
         session.sendTyping();
         builder.Prompts.choice(session,
             "No primeiro ciclo do gastos Abertos (2016-2017), tivemos 181 lideranças inscritas, 150 municípios atendidos, 75 portais de transparência avaliados, 25 pedidos realizados, 3 dados públicos de orçamento abertos e 1 carta compromisso assinada. \n\n\nPara o segundo ciclo, queremos atender mais municípios e formar novas lideranças.",
-            [ gameSignUp, otherInformations ],
+            [ gameSignUp, contact, secondGastosAbertosCicle, gastosAbertosCicles],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
@@ -138,11 +138,14 @@ library.dialog('/firstGastosAbertosCicleResults', [
                 case gameSignUp:
                     session.replaceDialog('/gameSignUpConfirmation');
                     break;
-                case otherInformations:
+                case contact:
                     session.beginDialog('contact:/');
                     break;
-                default :
-                    session.send('Desculpa, não entendi a opção que você selecionou.');
+                case gastosAbertosCicles:
+                    session.replaceDialog('/gastosAbertosCicles');
+                    break;
+                case secondGastosAbertosCicle:
+                    session.replaceDialog('/secondGastosAbertosCicle');
                     break;
             }
         }
@@ -171,9 +174,6 @@ library.dialog('/gameSignUpConfirmation', [
                 case no:
                     session.replaceDialog('/gameSignUpDeclined');
                     break;
-                default :
-                    session.send('Desculpa, não entendi a opção que você selecionou.');
-                    break;
             }
         }
     }
@@ -184,7 +184,7 @@ library.dialog('/gameSignUpDeclined', [
         session.sendTyping();
         builder.Prompts.choice(session,
             "Ok! Posso te ajudar com alguma informação sobre",
-            [secondGastosAbertosCicle, firstGastosAbertosCicleResults, otherInformations ],
+            [secondGastosAbertosCicle, firstGastosAbertosCicleResults, gastosAbertosCicles, contact ],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
@@ -201,11 +201,8 @@ library.dialog('/gameSignUpDeclined', [
                 case firstGastosAbertosCicleResults:
                     session.replaceDialog('/firstGastosAbertosCicleResults');
                     break;
-                case otherInformations:
+                case contact:
                     session.beginDialog('contact:/');
-                    break;
-                default :
-                    session.send('Desculpa, não entendi a opção que você selecionou.');
                     break;
             }
         }

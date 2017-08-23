@@ -13,6 +13,7 @@ const emoji_sunglass = "\uD83D\uDE0E";
 library.dialog('/', [
     (session) => {
         session.sendTyping();
+        session.send("Tenho o maior respeito pela sua privacidade e tomarei todo cuidado com seus dados. Se tiver dúvidas, confira os termos de uso do Gastos Abertos: https://gastosabertos.org/termos .");
         builder.Prompts.text(session, "Qual é o seu nome completo?");
     },
     (session, args) => {
@@ -45,7 +46,7 @@ library.dialog('/', [
         })
         .then(count => {
             if (count != 0) {
-                session.send("Você já está cadastrado companheiro!\n" + emoji_sunglass + "Verifique se você recebeu minha mensagem em seu e-mail.\n\n\nEu a enviei para o seguinte e-mail: " + session.dialogData.email + ".");
+                session.send("Você já está cadastrado companheiro! " + emoji_sunglass + "Verifique se você recebeu minha mensagem em seu e-mail.\n\n\nEu a enviei para o seguinte e-mail: " + session.dialogData.email + ".");
                 session.endDialog();
                 return;
             } else {
