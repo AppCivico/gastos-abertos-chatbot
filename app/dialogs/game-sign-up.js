@@ -1,4 +1,6 @@
-var builder  = require('botbuilder');
+var builder           = require('botbuilder');
+var GoogleSpreadsheet = require('google-spreadsheet');
+var async             = require('async');
 const mailer = require('../server/mailer/mailer.js');
 
 User = require('../server/schema/models').user;
@@ -9,6 +11,9 @@ const emoji_thinking = "\uD83E\uDD14";
 const emoji_clap     = "\uD83D\uDC4F";
 const emoji_smile    = "\uD83E\uDD17";
 const emoji_sunglass = "\uD83D\uDE0E";
+
+var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
+var sheet;
 
 library.dialog('/', [
     (session) => {
@@ -120,7 +125,8 @@ library.dialog('/', [
     },
     (session, args) => {
         session.dialogData.occupation = args.response;
-        User.create({
+
+        var user = {
             name: session.dialogData.fullName,
             email: session.dialogData.email,
             birth_date: session.dialogData.birthDate,
@@ -128,11 +134,37 @@ library.dialog('/', [
             city: session.dialogData.city,
             cellphone_number: session.dialogData.cellphoneNumber,
             occupation: session.dialogData.occupation
+        };
+
+        User.create({ 
+            name: user.name,
+            email: user.email,
+            birth_date: user.birth_date,
+            state: user.state,
+            city: user.city,
+            cellphone_number: user.cellphone_number,
+            occupation: user.occupation 
         })
         .then(function(User) {
             console.log('User created sucessfully');
+
             mailer.listofemails.push(session.dialogData.email);
             mailer.massMailer();
+
+            async.series([
+                //Comment this whole block if you're not feeding a Google Spreadsheet
+                function setAuth(step)  {
+                    // This is where you insert your JSON credentials file
+                    var creds = require('./Gastos-abertos-spreadsheet-b1c4c355e003.json');
+                    doc.useServiceAccountAuth(creds, step);
+                },
+
+                function addEntry(step) {
+                    doc.addRow(process.env.GOOGLE_WORKSHEET_ID, user, function(err, row) {
+                        step();
+                    });
+                }
+            ]);
 
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
             session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
