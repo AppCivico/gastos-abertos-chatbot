@@ -2,3 +2,4 @@
 node_modules/
 **/node_modules
 /.env
+/app/dialogs/Gastos-abertos-spreadsheet-b1c4c355e003.json
