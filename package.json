@@ -27,6 +27,7 @@
     "amqplib": "^0.5.1",
     "async": "^2.5.0",
     "botbuilder": "^3.9.0",
+    "date-fns": "^1.28.5",
     "dotenv": "^4.0.0",
     "email-validator": "^1.1.1",
     "google-spreadsheet": "^2.0.4",
