@@ -2,8 +2,9 @@ var builder           = require('botbuilder');
 var GoogleSpreadsheet = require('google-spreadsheet');
 var async             = require('async');
 
+var emoji        = require('../misc/speeches_utils/emojis');
 var retryPrompts = require('../misc/speeches_utils/retry-prompts');
-const mailer = require('../server/mailer/mailer.js');
+const mailer     = require('../server/mailer/mailer.js');
 
 User = require('../server/schema/models').user;
 
