@@ -1,14 +1,14 @@
 var builder = require('botbuilder');
 var Trello  = require('trello');
 
-var trello    = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_USER_TOKEN);
+var trello       = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_USER_TOKEN);
+var retryPrompts = require('../misc/speeches_utils/retry-prompts');
+
 const library = new builder.Library('contact');
 
 const SignUpProblems = "Inscrição";
 const Informations   = "Informações";
 let   Subject        = "";
-
-var emoji_thinking = "\uD83E\uDD14";
 
 library.dialog('/', [
     (session) => {
@@ -18,7 +18,7 @@ library.dialog('/', [
             [SignUpProblems, Informations],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },
@@ -29,7 +29,7 @@ library.dialog('/', [
                 case SignUpProblems:
                     session.beginDialog('validators:email', {
                         prompt: "Deixe seu email, a equipe Gastos Abertos entrará em contato.",
-                        retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+                        retryPrompt: retryPrompts.email,
                         maxRetries: 10
                     });
                     Subject = SignUpProblems;
@@ -37,7 +37,7 @@ library.dialog('/', [
                 case Informations:
                     session.beginDialog('validators:email', {
                         prompt: "Deixe seu email, a equipe Gastos Abertos entrará em contato.",
-                        retryPrompt: emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
+                        retryPrompt: retryPrompts.email,
                         maxRetries: 10
                     });
                     Subject = Informations;

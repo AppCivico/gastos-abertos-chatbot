@@ -1,7 +1,8 @@
 bot.library(require('./game-sign-up'));
 bot.library(require('./contact'));
 
-var builder = require('botbuilder');
+var retryPrompts = require('../misc/speeches_utils/retry-prompts');
+var builder      = require('botbuilder');
 
 const library = new builder.Library('gastosAbertosInformation');
 
@@ -21,7 +22,7 @@ library.dialog('/', [
             [ gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults, contact ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },
@@ -57,7 +58,7 @@ library.dialog('/gastosAbertosCicles', [
             [ gameSignUp, secondGastosAbertosCicle, firstGastosAbertosCicleResults, contact ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },
@@ -91,7 +92,7 @@ library.dialog('/secondGastosAbertosCicle', [
             [ gameSignUp, firstGastosAbertosCicleResults, gastosAbertosCicles, contact],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },
@@ -127,7 +128,7 @@ library.dialog('/firstGastosAbertosCicleResults', [
             [ gameSignUp, contact, secondGastosAbertosCicle, gastosAbertosCicles],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },
@@ -160,7 +161,7 @@ library.dialog('/gameSignUpConfirmation', [
             [ yes, no ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },
@@ -187,7 +188,7 @@ library.dialog('/gameSignUpDeclined', [
             [secondGastosAbertosCicle, firstGastosAbertosCicleResults, gastosAbertosCicles, contact ],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },

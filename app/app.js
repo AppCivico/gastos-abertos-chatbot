@@ -1,7 +1,8 @@
 require('dotenv').config();
 require('./connectorSetup.js')();
 
-var dateFns = require('date-fns');
+var dateFns      = require('date-fns');
+var retryPrompts = require('./misc/speeches_utils/retry-prompts');
 
 bot.library(require('./validators'));
 bot.library(require('./dialogs/game-sign-up'));
@@ -59,7 +60,7 @@ bot.dialog('/promptButtons', [
             [GastosAbertosInformation, Game, GameSignUpOption, Contact],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },
