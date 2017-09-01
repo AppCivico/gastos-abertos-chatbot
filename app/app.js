@@ -1,14 +1,21 @@
 require('dotenv').config();
 require('./connectorSetup.js')();
 
+var dateFns = require('date-fns');
+
 bot.library(require('./validators'));
 bot.library(require('./dialogs/game-sign-up'));
 bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
+bot.library(require('./dialogs/game'));
 
 const GameSignUpOption         = "Inscrição 2º Ciclo";
 const GastosAbertosInformation = "Gastos Abertos";
 const Contact                  = "Entrar em contato";
+const Game                     = "Processo de missões";
+
+var maxSignUpDate = dateFns.format(new Date(2017, 08, 12), 'MM/DD/YYYY');
+var today         = dateFns.format(new Date(), 'MM/DD/YYYY');
 
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
@@ -49,7 +56,7 @@ bot.dialog('/promptButtons', [
         session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
         builder.Prompts.choice(session,
             'Em que assunto eu posso te ajudar?',
-            [GastosAbertosInformation, GameSignUpOption, Contact],
+            [GastosAbertosInformation, Game, GameSignUpOption, Contact],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
@@ -64,13 +71,21 @@ bot.dialog('/promptButtons', [
                     session.beginDialog('gastosAbertosInformation:/');
                     break;
                 case GameSignUpOption:
-                    session.beginDialog('gameSignUp:/');
+                    if (today > maxSignUpDate) {
+                        session.send("Oooops...As inscrições para o segundo ciclo de missões do Gastos Abertos já se incerraram.");
+                    } else {
+                        session.beginDialog('gameSignUp:/');
+                    };
                     break;
                 case Contact:
                     session.beginDialog('contact:/');
                     break;
-                default :
-                    session.send('Desculpa, não entendi a opção que você selecionou.');
+                case Game:
+                    if (today <= maxSignUpDate) {
+                        session.beginDialog('game:/');
+                    } else {
+                        session.send("Calma lá! O processo de missões começa só no dia 12/09/2017");
+                    }
                     break;
             }
         }
