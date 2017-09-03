@@ -6,7 +6,7 @@ module.exports = {
       '"user"',
       'active',
       {
-        allowNull: true,
+        allowNull: false,
         defaultValue: false,
         type: Sequelize.BOOLEAN
       }
