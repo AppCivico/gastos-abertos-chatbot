@@ -27,6 +27,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('email_queues');
+    return queryInterface.dropTable('email_queue');
   }
 };
