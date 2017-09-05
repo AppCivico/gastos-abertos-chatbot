@@ -3,6 +3,7 @@ module.exports = function(sequelize, DataTypes) {
   var user_mission = sequelize.define('user_mission', {
     user_id: DataTypes.INTEGER,
     mission_id: DataTypes.INTEGER,
+    completed: DataTypes.BOOLEAN,
     metadata: DataTypes.JSON
   }, {
     classMethods: {

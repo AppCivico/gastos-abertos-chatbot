@@ -2,7 +2,8 @@ var builder = require('botbuilder');
 
 var retryPrompts = require('../misc/speeches_utils/retry-prompts');
 
-User = require('../server/schema/models').user;
+User        = require('../server/schema/models').user;
+UserMission = require('../server/schema/models').user_mission;
 
 const library = new builder.Library('game');
 
@@ -23,19 +24,20 @@ library.dialog('/', [
             return;
         }
 
-        session.dialogData.email = args.response;
+        var email = args.response;
         session.sendTyping();
 
         User.count({
             where: {
-                email: session.dialogData.email
+                email: email
             }
         })
         .then(count => {
             if (count != 0) {
                 session.sendTyping();
                 session.send("Vamos à primeira missão!");
-                session.replaceDialog('/firstMissionAssign');
+                session.replaceDialog('/missionStatus');
+                return email;
             } else {
                 session.sendTyping();
                 session.send("Hmmm...Não consegui encontrar seu cadastro. Tente novamente.");
@@ -44,6 +46,12 @@ library.dialog('/', [
             }
         });
     },
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+
+library.dialog('/missionStatus', [
+    (session) => {
+        console.log(email);
+    }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 library.dialog('/firstMissionAssign', [
