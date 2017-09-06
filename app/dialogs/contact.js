@@ -43,9 +43,6 @@ library.dialog('/', [
                     Subject = Informations;
                     break;
             }
-        } else {
-            session.sendTyping();
-            session.send('Desculpa, não entendi a opção que você selecionou.');
         }
     },
     (session, args) => {
