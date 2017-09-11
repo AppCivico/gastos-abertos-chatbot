@@ -309,16 +309,17 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
             returning: true,
         })
         .then(result => {
-            console.log(result);
+            console.log(result + "Mission updated sucessfuly");
+            session.send("Uhuuu! Concluímos nossa primeira missão!\n\nEu disse que formariamos uma boa equipe!");
+            session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+        })
+        .catch(e => {
+            console.log("Error updating mission" + e);
+            session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
+            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+            throw e;
         });
 
-        // UserMission.update({
-        //     where: {
-        //         user_id: user.id,
-        //         mission_id: 1,
-        //         completed: false
-        //     }
-        // });
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
