@@ -154,7 +154,8 @@ library.dialog('/firstMissionAssign', [
                 session.beginDialog('contact:/');
                 break;
             case Restart:
-                session.beginDialog(':/');
+                session.endDialog();
+                session.beginDialog('/');
                 break;
         }
     }
