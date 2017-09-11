@@ -1,14 +1,22 @@
+bot.library(require('./contact'));
+bot.library(require('./first_mission/conclusion'));
+
 var builder = require('botbuilder');
 var dateFns = require('date-fns');
 
 var retryPrompts = require('../misc/speeches_utils/retry-prompts');
+var texts        = require("../misc/speeches_utils/big-texts");
 
 User        = require('../server/schema/models').user;
 UserMission = require('../server/schema/models').user_mission;
 
 const library = new builder.Library('game');
-const Yes     = "Sim";
-const No      = "Não";
+
+const MoreInformations = "Mais informações";
+const Contact          = "Entrar em contato";
+const Restart          = "Ir para o início";
+const Yes              = "Sim";
+const No               = "Não";
 
 let email = "";
 let user;
@@ -97,17 +105,22 @@ library.dialog('/currentMission', [
         })
         .then(UserMission => {
             user_mission = UserMission[UserMission.length-1].dataValues;
-            console.log(user_mission);
 
             switch(user_mission.mission_id) {
                 case 1:
 
-                    if (today < firstMissionCompleteMinDate) {
-                        session.send("Vi aqui que você está na primeira missão.\n\nVocê poderá conclui-la a partir do dia 19/09/2017");
-                        session.endDialog();
-                    } else {
-                        session.replaceDialog('/firstMissionCompletePrompt');
-                    }
+                    // if (today < firstMissionCompleteMinDate) {
+                        // session.send("Vi aqui que você está na primeira missão.\n\nVocê poderá conclui-la a partir do dia 19/09/2017");
+                        // session.endDialog();
+                    // } else {
+                        session.beginDialog(
+                            'firstMissionConclusion:/',
+                            {
+                                user:         user,
+                                user_mission: user_mission
+                            }
+                        );
+                    // }
                     break;
             }
         });
@@ -122,104 +135,28 @@ library.dialog('/firstMissionAssign', [
         })
         .then(UserMission => {
             session.send("Vamos lá! Que comece o processo de missões!");
-            session.send("Nessa missão, a sua tarefa será realizar um mapeamento da existência e qualidade do portal de transparência do seu município. \nVocê poderá utilizar esse dois portais de transparência como referência no Brasil:");
-            session.send("Curitiba - http://www.transparencia.curitiba.pr.gov.br/ .\n Recife - http://transparencia.recife.pe.gov.br/codigos/web/geral/home.php\nEles não são perfeitos, mas servem como referência para o trabalho de outros municípios.");
-            session.send("Para concluir a primeira missão, você deverá me chamar e selecionar a opção “Processo de missões” novamente e eu irei te fazer algumas perguntas sobre a missão.\n\nIMPORTANTE: a conclusão da primeira missão será liberada apenas no dia 19/09/2017 e apenas após você responder as perguntas sua conclusão será confirmada.");
-            session.endDialog();
+            session.send(texts.first_mission.assign);
+            builder.Prompts.choice(session,
+            'Posso te ajudar com mais alguma coisa?',
+                [MoreInformations, Contact, Restart],
+                {
+                    listStyle: builder.ListStyle.button,
+                    retryPrompt: retryPrompts.choice
+                }
+            );
         });
-    }
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
-
-library.dialog('/firstMissionCompletePrompt', [
-    (session) => {
-        session.sendTyping();
-        builder.Prompts.choice(session,
-            "Pelo o que vi aqui você está na primeira missão, vamos conclui-la?",
-            [Yes, No],
-            {
-                listStyle: builder.ListStyle.button,
-                retryPrompt: retryPrompts.choice
-            }
-        );
     },
-    (session, result) => {
-        session.sendTyping();
-        if (result.response) {
-            switch (result.response.entity) {
-                case Yes:
-                    session.replaceDialog('/firstMissionComplete');
-                    break;
-                case No:
-                    break;
-            }
+    (session, args) => {
+        switch(args.response.entity) {
+            case MoreInformations:
+                break;
+            case Contact:
+                session.beginDialog('contact:/');
+                break;
+            case Restart:
+                session.beginDialog(':/');
+                break;
         }
-    }
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
-
-library.dialog('/firstMissionComplete', [
-    (session) => {
-        builder.Prompts.choice(session,
-            'Há um portal para transparência orçamentária na cidade, mantido oficialmente pela prefeitura? (Responda com Sim ou Não)',
-            [Yes, No],
-            {
-                listStyle: builder.ListStyle.button,
-                retryPrompt: retryPrompts.choice
-            }
-        );
-    },
-
-    (session, result) => {
-        session.sendTyping();
-        if (result.response) {
-            switch (result.response.entity) {
-                case Yes:
-                    session.dialogData.transparencyPortalExists = 1;
-                    builder.Prompts.text(session, "Qual é a URL(link) do portal?");
-                    break;
-                case No:
-                    session.dialogData.transparencyPortalExists = 0;
-                    break;
-            }
-        }
-    },
-
-    (session, result) => {
-        session.dialogData.transparencyPortalURL = result.response;
-
-        session.sendTyping();
-        builder.Prompts.choice(session,
-            'Há dados sobre a execução orçamentária disponível no portal de transparência? (Responda com Sim ou Não)',
-            [Yes, No],
-            {
-                listStyle: builder.ListStyle.button,
-                retryPrompt: retryPrompts.choice
-            }
-        );
-    },
-
-    (session, result) => {
-        session.sendTyping();
-        if (result.response) {
-            switch (result.response.entity) {
-                case Yes:
-                    session.dialogData.transparencyPortalHasFinancialData = 1;
-                    break;
-                case No:
-                    session.dialogData.transparencyPortalHasFinancialData = 0;
-                    break;
-            }
-        }
-    },
-    (session, result) => {
-        console.log(session.dialogData.transparencyPortalURL);
-        // builder.Prompts.choice(session,
-        //                 'É possível realizar download dos dados orçamentários? (Responda com Sim ou Não)',
-        //                 [Yes, No],
-        //                 {
-        //                     listStyle: builder.ListStyle.button,
-        //                     retryPrompt: retryPrompts.choice
-        //                 }
-        //             );
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
