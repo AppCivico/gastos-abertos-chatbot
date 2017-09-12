@@ -9,7 +9,8 @@ module.exports = function(sequelize, DataTypes) {
     city: DataTypes.STRING,
     cellphone_number: DataTypes.STRING,
     approved: DataTypes.BOOLEAN,
-    active: DataTypes.BOOLEAN
+    active: DataTypes.BOOLEAN,
+    fb_id: DataTypes.STRING
   },
   {
     classMethods: {
