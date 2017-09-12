@@ -39,6 +39,12 @@ library.dialog('/', [
                     retryPrompt: retryPrompts.choice
                 }
             );
+        })
+        .catch(e => {
+            console.log("Error creating user mission" + e);
+            session.send("Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde e entre em contato conosco.");
+            session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+            throw e;
         });
 
         // User.update({
