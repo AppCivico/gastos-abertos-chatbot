@@ -35,6 +35,8 @@ bot.dialog('/getstarted', [
 
             session.userData.userid = session.message.sourceEvent.sender.id;
             session.userData.pageid = session.message.sourceEvent.recipient.id;
+            console.log(session.userData.userid);
+            console.log(session.message.sourceEvent);
 
             session.beginDialog('/promptButtons');
         } else {
