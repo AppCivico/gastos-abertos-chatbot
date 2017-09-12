@@ -1,5 +1,7 @@
 const library = new builder.Library('firstMissionConclusion');
 
+bot.library(require('../second_mission/assign'));
+
 let answers = {};
 answers[
     'transparencyPortalExists',
@@ -318,8 +320,14 @@ library.dialog('/userUpdate', [
         .then(result => {
             console.log(result + "Mission updated sucessfuly");
             session.send("Uhuuu! Concluímos nossa primeira missão!\n\nEu disse que formariamos uma boa equipe!");
-            // session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-            session.replaceDialog('/');
+
+            session.beginDialog(
+            'secondMissionAssign:/',
+            {
+                user:         user,
+                user_mission: user_mission
+            }
+        );
         })
         .catch(e => {
             console.log("Error updating mission" + e);
@@ -327,7 +335,7 @@ library.dialog('/userUpdate', [
             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
             throw e;
         });
-    }
+    },
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 module.exports = library;

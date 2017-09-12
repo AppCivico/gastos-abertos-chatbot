@@ -1,7 +1,6 @@
-const library = new builder.Library('firstMissionAssign');
+const library = new builder.Library('secondMissionAssign');
 
 bot.library(require('../contact'));
-bot.library(require('./conclusion'));
 
 User        = require('../../server/schema/models').user;
 UserMission = require('../../server/schema/models').user_mission;
@@ -26,10 +25,10 @@ library.dialog('/', [
 
         UserMission.create({
             user_id: user.id,
-            mission_id: 1,
+            mission_id: 2,
         })
         .then(UserMission => {
-            session.send("Vamos lá! Que comece o processo de missões!");
+            session.send("Vamos agora para a sua segunda missão!");
             session.send(texts.first_mission.assign);
             builder.Prompts.choice(session,
             'Posso te ajudar com mais alguma coisa?',
@@ -40,23 +39,8 @@ library.dialog('/', [
                 }
             );
         });
-
-        // User.update({
-        //     fb_id: session.message.sourceEvent.sender.id
-        // }, {
-        //     where: {
-        //         id: user.id
-        //     },
-        //     returning: true,
-        // })
-        // .then(result => {
-        //     console.log(result);
-        // })
-        // .catch(e => {
-        //     console.log(e);
-        //     throw e;
-        // });
     },
+
     (session, args) => {
         switch(args.response.entity) {
             case MoreInformations:

@@ -133,25 +133,4 @@ library.dialog('/currentMission', [
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
-// library.dialog('/secondMissionAssign', [
-//     (session) => {
-//         UserMission.create({
-//             user_id: user.id,
-//             mission_id: 2,
-//         })
-//         .then(UserMission => {
-//             session.send("Vamos agora para a sua segunda missão!");
-//             session.send(texts.first_mission.assign);
-//             builder.Prompts.choice(session,
-//             'Posso te ajudar com mais alguma coisa?',
-//                 [MoreInformations, Contact, Restart],
-//                 {
-//                     listStyle: builder.ListStyle.button,
-//                     retryPrompt: retryPrompts.choice
-//                 }
-//             );
-//         });
-//     }
-// ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
-
 module.exports = library;
