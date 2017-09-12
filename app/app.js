@@ -15,7 +15,7 @@ const GastosAbertosInformation = "Gastos Abertos";
 const Contact                  = "Entrar em contato";
 const Game                     = "Processo de missões";
 
-var maxSignUpDate = dateFns.format(new Date(2017, 08, 11), 'MM/DD/YYYY');
+var maxSignUpDate = dateFns.format(new Date(2017, 08, 28), 'MM/DD/YYYY');
 var today         = dateFns.format(new Date(), 'MM/DD/YYYY');
 
 bot.beginDialogAction('getstarted', '/getstarted');
@@ -83,9 +83,9 @@ bot.dialog('/promptButtons', [
                     break;
                 case Game:
                     if (today <= maxSignUpDate) {
-                        session.send("Calma lá! O processo de missões começa só no dia 12/09/2017.\n\nNo dia 12/09 basta só me chamar de novo e selecionar esta opção novamente e iremos começar!");
-                    } else {
                         session.beginDialog('game:/');
+                    } else {
+                        session.send("Calma lá! O processo de missões começa só no dia 12/09/2017.\n\nNo dia 12/09 basta só me chamar de novo e selecionar esta opção novamente e iremos começar!");
                     }
                     break;
             }

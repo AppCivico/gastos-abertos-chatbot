@@ -1,5 +1,6 @@
 bot.library(require('./contact'));
 bot.library(require('./first_mission/conclusion'));
+bot.library(require('./first_mission/assign'));
 
 var builder = require('botbuilder');
 var dateFns = require('date-fns');
@@ -86,7 +87,12 @@ library.dialog('/missionStatus', [
             })
             .then(count => {
                 if (count === 0 && !user.active && user.approved) {
-                    session.replaceDialog('/firstMissionAssign');
+                    session.beginDialog(
+                        'firstMissionAssign:/',
+                        {   
+                           user:         user,
+                           user_mission: user_mission
+                        }); 
                     return user;
                 } else {
                     session.replaceDialog('/currentMission');
@@ -127,38 +133,25 @@ library.dialog('/currentMission', [
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
-library.dialog('/firstMissionAssign', [
-    (session) => {
-        UserMission.create({
-            user_id: user.id,
-            mission_id: 1,
-        })
-        .then(UserMission => {
-            session.send("Vamos lá! Que comece o processo de missões!");
-            session.send(texts.first_mission.assign);
-            builder.Prompts.choice(session,
-            'Posso te ajudar com mais alguma coisa?',
-                [MoreInformations, Contact, Restart],
-                {
-                    listStyle: builder.ListStyle.button,
-                    retryPrompt: retryPrompts.choice
-                }
-            );
-        });
-    },
-    (session, args) => {
-        switch(args.response.entity) {
-            case MoreInformations:
-                break;
-            case Contact:
-                session.beginDialog('contact:/');
-                break;
-            case Restart:
-                session.endDialog();
-                session.beginDialog('/');
-                break;
-        }
-    }
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+// library.dialog('/secondMissionAssign', [
+//     (session) => {
+//         UserMission.create({
+//             user_id: user.id,
+//             mission_id: 2,
+//         })
+//         .then(UserMission => {
+//             session.send("Vamos agora para a sua segunda missão!");
+//             session.send(texts.first_mission.assign);
+//             builder.Prompts.choice(session,
+//             'Posso te ajudar com mais alguma coisa?',
+//                 [MoreInformations, Contact, Restart],
+//                 {
+//                     listStyle: builder.ListStyle.button,
+//                     retryPrompt: retryPrompts.choice
+//                 }
+//             );
+//         });
+//     }
+// ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 module.exports = library;

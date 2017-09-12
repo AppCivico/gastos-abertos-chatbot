@@ -77,7 +77,9 @@ library.dialog('/transparencyPortalExists', [
                     break;
                 case No:
                     answers.transparencyPortalExists = 0;
+
                     //Neste caso o fluxo de conclusão se finaliza pois as próximas perguntas não farão sentido
+                    session.replaceDialog('/userUpdate');
                     break;
             }
         }
@@ -296,7 +298,12 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
                 answers.transparencyPortalHasBiddingProcessData = 0;
                 break;
         }
+        session.replaceDialog('/userUpdate');
+    }
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
+library.dialog('/userUpdate', [
+    (session) => {
         UserMission.update({
             completed: true,
             metadata: answers
@@ -311,7 +318,8 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
         .then(result => {
             console.log(result + "Mission updated sucessfuly");
             session.send("Uhuuu! Concluímos nossa primeira missão!\n\nEu disse que formariamos uma boa equipe!");
-            session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+            // session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+            session.replaceDialog('/');
         })
         .catch(e => {
             console.log("Error updating mission" + e);
@@ -319,7 +327,6 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
             throw e;
         });
-
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
