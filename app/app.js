@@ -41,6 +41,11 @@ bot.dialog('/getstarted', [
             session.beginDialog('/promptButtons');
         } else {
             session.replaceDialog('/promptButtons');
+
+            session.userData.userid = session.message.sourceEvent.sender.id;
+            session.userData.pageid = session.message.sourceEvent.recipient.id;
+            console.log(session.userData.userid);
+            console.log(session.message.sourceEvent);
         }
     }
 ]);
