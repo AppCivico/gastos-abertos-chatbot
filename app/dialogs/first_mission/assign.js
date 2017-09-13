@@ -2,6 +2,7 @@ const library = new builder.Library('firstMissionAssign');
 
 bot.library(require('../contact'));
 bot.library(require('./conclusion'));
+bot.library(require('./details'));
 
 User        = require('../../server/schema/models').user;
 UserMission = require('../../server/schema/models').user_mission;
@@ -66,7 +67,7 @@ library.dialog('/', [
     (session, args) => {
         switch(args.response.entity) {
             case MoreInformations:
-
+                session.beginDialog('firstMissionDetails:/')
                 break;
             case Contact:
                 session.beginDialog('contact:/');
@@ -74,6 +75,15 @@ library.dialog('/', [
             case Restart:
                 session.endDialog();
                 session.beginDialog('/');
+                break;
+            case Conclusion:
+                session.beginDialog(
+                    'firstMissionConclusion:/',
+                    {
+                        user:         user,
+                        user_mission: user_mission
+                    }
+                );
                 break;
         }
     }

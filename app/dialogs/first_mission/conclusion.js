@@ -16,12 +16,14 @@ answers[
 
 var retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 var texts        = require("../../misc/speeches_utils/big-texts");
+var emoji        = require("../../misc/speeches_utils/emojis");
 
 User        = require('../../server/schema/models').user;
 UserMission = require('../../server/schema/models').user_mission;
 
-const Yes = "Sim";
-const No  = "Não";
+const Yes              = "Sim";
+const No               = "Não";
+const MoreInformations = "Detalhes da missão";
 
 let user;
 let user_mission;
@@ -34,7 +36,7 @@ library.dialog('/', [
         session.sendTyping();
         builder.Prompts.choice(session,
             "Pelo o que vi aqui você está na primeira missão, vamos conclui-la?",
-            [Yes, No],
+            [Yes, No, MoreInformations],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: retryPrompts.choice
@@ -49,12 +51,46 @@ library.dialog('/', [
                     session.replaceDialog('/transparencyPortalExists');
                     break;
                 case No:
+                    session.send('Okay! Estarei te esperando para mandarmos ver nessa tarefa!' + emoji.sunglass);
                     session.beginDialog(':/');
+                    break;
+                case MoreInformations:
+                    session.send(texts.first_mission.details);
+                    session.replaceDialog('/conclusionPromptAfterMoreDetails');
                     break;
             }
         }
     }
-])
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+
+library.dialog('/conclusionPromptAfterMoreDetails', [
+    (session) => {
+        session.sendTyping();
+        builder.Prompts.choice(session,
+            "Vamos concluir nossa primeira missão juntos?" + emoji.smile,
+            [Yes, No],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
+    },
+
+    (session, result) => {
+        session.sendTyping();
+        if (result.response) {
+            switch (result.response.entity) {
+                case Yes:
+                    session.replaceDialog('/transparencyPortalExists');
+                    break;
+                case No:
+                    session.send('Okay! Estarei te esperando para mandarmos ver nessa tarefa!'  + emoji.sunglass);
+                    session.endDialog();
+                    break;
+            }
+        }
+    }
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 library.dialog('/transparencyPortalExists', [
     (session) => {
@@ -322,12 +358,12 @@ library.dialog('/userUpdate', [
             session.send("Uhuuu! Concluímos nossa primeira missão!\n\nEu disse que formariamos uma boa equipe!");
 
             session.beginDialog(
-            'secondMissionAssign:/',
-            {
-                user:         user,
-                user_mission: user_mission
-            }
-        );
+                'secondMissionAssign:/',
+                {
+                    user:         user,
+                    user_mission: user_mission
+                }
+            );
         })
         .catch(e => {
             console.log("Error updating mission" + e);
