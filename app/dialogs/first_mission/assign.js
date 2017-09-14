@@ -63,6 +63,7 @@ library.dialog('/', [
                             }
                         }
                     });
+                    session.send(msg);
                 }
                 else if (count < 10 && count == 1) {
                     session.send("E eu vou te dar uma tarefa extra " + emoji.smile + emoji.sunglass + "\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?");
