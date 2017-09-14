@@ -51,10 +51,10 @@ library.dialog('/', [
                               payload:{
                                 template_type:"generic",
                                 elements:[{
-                                    title:"title",
-                                    subtitle:"context",
-                                    image_url:"https://en.wikipedia.org/wiki/Space_Needle.jpg",
-                                    item_url: "http://m.me",
+                                    title:"Olá! Eu sou o Guaxi!",
+                                    subtitle:"O chatbot mais transparente e engajado da internet! Venha conversar comigo!",
+                                    image_url:"https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png",
+                                    item_url: "http://m.me/gastosabertos",
                                     buttons:[{
                                         type:"element_share"
                                       }]
