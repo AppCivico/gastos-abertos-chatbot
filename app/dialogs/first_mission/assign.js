@@ -16,6 +16,7 @@ const No               = "Não";
 
 var retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 var texts        = require("../../misc/speeches_utils/big-texts");
+var emoji        = require("../../misc/speeches_utils/emojis");
 
 let user;
 let user_mission;
@@ -32,14 +33,56 @@ library.dialog('/', [
         .then(UserMission => {
             session.send("Vamos lá! Que comece o processo de missões!");
             session.send(texts.first_mission.assign);
-            builder.Prompts.choice(session,
-            'Posso te ajudar com mais alguma coisa?',
-                [MoreInformations, Conclusion, Contact, Restart],
-                {
-                    listStyle: builder.ListStyle.button,
-                    retryPrompt: retryPrompts.choice
+
+            User.count({
+                where: {
+                    state: user.state
                 }
-            );
+            })
+            .then(count => {
+                if (count < 10 && count != 1) {
+                    session.send("E eu vou te dar uma tarefa extra " + emoji.smile + emoji.sunglass + "\n\nAtualmente há " + count + "líderes no seu estado. Vamos aumentar este número para 10 líderes?");
+                    session.send("Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!");
+                    msg = new builder.Message(session);
+                    msg.sourceEvent({
+                        facebook: {
+                            attachment:{
+                              type:"template",
+                              payload:{
+                                template_type:"generic",
+                                elements:[{
+                                    title:"title",
+                                    subtitle:"context",
+                                    image_url:"https://en.wikipedia.org/wiki/Space_Needle.jpg",
+                                    item_url: "http://m.me",
+                                    buttons:[{
+                                        type:"element_share"
+                                      }]
+                                    }]
+                                }
+                            }
+                        }
+                    });
+                }
+                else if (count < 10 && count == 1) {
+                    session.send("E eu vou te dar uma tarefa extra " + emoji.smile + emoji.sunglass + "\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?");
+                }
+
+                builder.Prompts.choice(session,
+                'Posso te ajudar com mais alguma coisa?',
+                    [MoreInformations, Conclusion, Contact, Restart],
+                    {
+                        listStyle: builder.ListStyle.button,
+                        retryPrompt: retryPrompts.choice
+                    }
+                );
+            })
+            .catch(e => {
+                console.log("Error" + e);
+                session.send("Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde e entre em contato conosco.");
+                session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+                throw e;
+            });
         })
         .catch(e => {
             console.log("Error creating user mission" + e);
@@ -47,6 +90,15 @@ library.dialog('/', [
             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
             throw e;
         });
+
+        // User.count({
+        //     where: {
+        //         state: user.state
+        //     }
+        // })
+        // .then(count => {
+        //     session.send(count + "no seu estado");
+        // });
 
         // User.update({
         //     fb_id: session.message.sourceEvent.sender.id
