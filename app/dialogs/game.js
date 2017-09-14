@@ -1,6 +1,7 @@
 bot.library(require('./contact'));
 bot.library(require('./first_mission/conclusion'));
 bot.library(require('./first_mission/assign'));
+bot.library(require('./second_mission/assign'));
 
 var builder = require('botbuilder');
 var dateFns = require('date-fns');
@@ -119,6 +120,15 @@ library.dialog('/currentMission', [
                         // session.send("Vi aqui que você está na primeira missão.\n\nVocê poderá conclui-la a partir do dia 19/09/2017");
                         // session.endDialog();
                     // } else {
+                    if (user_mission.completed) {
+                        session.beginDialog(
+                            'secondMissionAssign:/',
+                            {
+                                user:         user,
+                                user_mission: user_mission
+                            }
+                        );
+                    } else {
                         session.beginDialog(
                             'firstMissionConclusion:/',
                             {
@@ -126,8 +136,15 @@ library.dialog('/currentMission', [
                                 user_mission: user_mission
                             }
                         );
+                    }
                     // }
                     break;
+                case 2:
+                    if (user_mission.completed) {
+                        session.send("Calma lá! Você já concluiu a missão 2, mas ainda não foi liberada a missão 3.");
+                    } else {
+                        session.send("Calma lá amigo! A conclusão da missão 2 ainda não foi liberada.");
+                    }
             }
         });
     }

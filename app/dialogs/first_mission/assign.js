@@ -92,15 +92,6 @@ library.dialog('/', [
             throw e;
         });
 
-        // User.count({
-        //     where: {
-        //         state: user.state
-        //     }
-        // })
-        // .then(count => {
-        //     session.send(count + "no seu estado");
-        // });
-
         // User.update({
         //     fb_id: session.message.sourceEvent.sender.id
         // }, {
@@ -120,6 +111,7 @@ library.dialog('/', [
     (session, args) => {
         switch(args.response.entity) {
             case MoreInformations:
+                session.endDialog();
                 session.beginDialog('firstMissionDetails:/')
                 break;
             case Contact:
@@ -130,8 +122,9 @@ library.dialog('/', [
                 session.beginDialog('/');
                 break;
             case Conclusion:
+                session.endDialog();
                 session.beginDialog(
-                    'firstMissionConclusion:/',
+                    'secondMissionAssign:/',
                     {
                         user:         user,
                         user_mission: user_mission

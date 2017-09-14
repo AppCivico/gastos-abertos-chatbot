@@ -355,7 +355,7 @@ library.dialog('/userUpdate', [
         })
         .then(result => {
             console.log(result + "Mission updated sucessfuly");
-            session.send("Uhuuu! Concluímos nossa primeira missão!\n\nEu disse que formariamos uma boa equipe!");
+            session.send("Uhuuu! Concluímos nossa primeira missão!\n\nEu disse que formariamos uma boa equipe!" + emoji.sunglass + emoji.clap);
 
             session.beginDialog(
                 'secondMissionAssign:/',
