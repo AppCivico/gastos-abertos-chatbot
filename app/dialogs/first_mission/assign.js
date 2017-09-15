@@ -26,23 +26,23 @@ library.dialog('/', [
         user         = args.user;
         user_mission = args.user_mission;
 
-        if (session.message.sourceEvent.sender.id) {
-            User.update({
-                fb_id: session.message.sourceEvent.sender.id
-            }, {
-                where: {
-                    id: user.id
-                },
-                returning: true,
-            })
-            .then(result => {
-                console.log(result);
-            })
-            .catch(e => {
-                console.log(e);
-                throw e;
-            });
-        }
+        // if (session.message.sourceEvent.sender.id) {
+        //     User.update({
+        //         fb_id: session.message.sourceEvent.sender.id
+        //     }, {
+        //         where: {
+        //             id: user.id
+        //         },
+        //         returning: true,
+        //     })
+        //     .then(result => {
+        //         console.log("User updated sucessfuly");
+        //     })
+        //     .catch(e => {
+        //         console.log(e);
+        //         throw e;
+        //     });
+        // }
 
         UserMission.create({
             user_id: user.id,
@@ -52,16 +52,14 @@ library.dialog('/', [
             session.send("Vamos lá! Que comece o processo de missões!");
             session.send(texts.first_mission.assign);
 
-            
-
             builder.Prompts.choice(session,
                 'Quer o link para alguns portais de transparência para usar como referência?',
-                    [Yes, No],
-                    {
-                        listStyle: builder.ListStyle.button,
-                        retryPrompt: retryPrompts.choice
-                    }
-                );
+                [Yes, No],
+                {
+                    listStyle: builder.ListStyle.button,
+                    retryPrompt: retryPrompts.choice
+                }
+            );
         })
         .catch(e => {
             console.log("Error creating user mission" + e);
@@ -108,12 +106,12 @@ library.dialog('/', [
             })
             .then(count => {
                 if (count < 10 && count != 1) {
-                    session.send("E eu vou te dar uma tarefa extra " + emoji.smile + emoji.sunglass + "\n\nAtualmente há " + count + "líderes no seu estado. Vamos aumentar este número para 10 líderes?");
+                    session.send("E eu vou te dar uma tarefa extra " + emoji.grinningface + emoji.sunglass + "\n\nAtualmente há " + count + " líderes no seu estado. Vamos aumentar este número para 10 líderes?");
                     session.send("Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!");
                     session.send(msg);
                 }
                 else if (count < 10 && count == 1) {
-                    session.send("E eu vou te dar uma tarefa extra " + emoji.smile + emoji.sunglass + "\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?");
+                    session.send("E eu vou te dar uma tarefa extra " + emoji.grinningface + emoji.sunglass + "\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?");
                     session.send("Compartilhe isto com os seus amigos! Assim nós teremos mais força para incentivar a transparência em seu estado!");
                 }   session.send(msg);
             })

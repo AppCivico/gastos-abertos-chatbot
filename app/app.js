@@ -45,6 +45,7 @@ bot.dialog('/getstarted', [
 
 bot.dialog('/promptButtons', [
     (session) => {
+        console.log(session.message)
         session.sendTyping();
         session.send({
                 attachments: [
