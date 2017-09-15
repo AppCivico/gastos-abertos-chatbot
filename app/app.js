@@ -96,6 +96,6 @@ bot.dialog('/promptButtons', [
 bot.dialog('/reset', [
     (session, activity) => {
         session.endDialog();
-        session.beginDialog('/promptButtons');
+        session.beginDialog('/');
     }
 ]);

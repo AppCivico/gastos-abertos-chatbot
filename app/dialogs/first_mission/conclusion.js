@@ -174,14 +174,6 @@ library.dialog('/transparencyPortalExists', [
             }
         }
     },
-
-    (session, args) => {
-        session.sendTyping();
-        // console.log(args);
-        // console.log(session);
-        // Pensar num jeito melhor de conseguir distinguir entre os dois 2 choices acima
-        
-    }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 library.dialog('/transparencyPortalURL', [

@@ -5,7 +5,10 @@ module.exports = {
         {
             assign:
                 [
-                    "Nessa missão, a sua tarefa será realizar um mapeamento da existência e qualidade do portal de transparência do seu município." +
+                    "Nessa missão, a sua tarefa será realizar um mapeamento da existência e qualidade do portal de transparência do seu município."
+                ],
+            reference_transparency_portals:
+                [
                     "\n\n\nVocê poderá utilizar esse dois portais de transparência como referência no Brasil:" +
                     "\n\nCuritiba - http://www.transparencia.curitiba.pr.gov.br/ .\n\nRecife - http://transparencia.recife.pe.gov.br/codigos/web/geral/home.php" +
                     "\n\n\nEles não são perfeitos, mas servem como referência para o trabalho de outros municípios." +
