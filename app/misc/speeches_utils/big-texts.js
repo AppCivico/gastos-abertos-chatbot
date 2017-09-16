@@ -18,6 +18,15 @@ module.exports = {
                 [
                     "A missão 1 consiste em avaliar se existe um portal de transparência em seu município e se ele possui algumas informações básicas." +
                     "\n\n\nPara concluir esta missão você precisará responder algumas perguntas que eu te farei ao iniciar o processo de conclusão."
+                ],
+            questions:
+                [
+                    "-Existência de um portal de transparência;\n\n\n" +
+                    "-URL(link) do portal;\n\n\n" +
+                    "-Dados de despesas e receitas;\n\n\n" +
+                    "-Formatos de arquivo disponíveis para download dos dados;\n\n\n" +
+                    "-Contratos assinados pela prefeitura;\n\n\n" +
+                    "-Licitações\n\n\n"
                 ]
         }
 };

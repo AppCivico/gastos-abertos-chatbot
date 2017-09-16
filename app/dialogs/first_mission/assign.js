@@ -99,6 +99,29 @@ library.dialog('/', [
                 break;
         }
 
+        builder.Prompts.choice(session,
+            'Quer ver quais serão os pontos sobre os quais eu farei perguntas sobre o portal de transparência?',
+            [Yes, No],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
+
+        
+    },
+
+    (session, args) => {
+        switch(args.response.entity) {
+            case Yes:
+                session.send(texts.first_mission.questions);
+                break;
+            case No:
+                session.send("Beleza!");
+                break;
+        }
+
+
         User.count({
                 where: {
                     state: user.state
@@ -121,13 +144,13 @@ library.dialog('/', [
                 }
 
                 builder.Prompts.choice(session,
-            'Posso te ajudar com mais alguma coisa?',
-            [MoreInformations, Conclusion, Contact, Restart],
-            {
-                listStyle: builder.ListStyle.button,
-                retryPrompt: retryPrompts.choice
-            }
-        );
+                    'Posso te ajudar com mais alguma coisa?',
+                    [MoreInformations, Conclusion, Contact, Restart],
+                    {
+                        listStyle: builder.ListStyle.button,
+                        retryPrompt: retryPrompts.choice
+                    }
+                );
             })
             .catch(e => {
                 console.log("Error" + e);
