@@ -2,7 +2,7 @@
   "name": "gastos-abertos-chatbot",
   "version": "1.0.0",
   "description": "Chatbot for the Gastos Abertos (Open Knowledge Brasil)",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "start:dev": "nodemon app/app.js",
     "start": "node app/app.js",
