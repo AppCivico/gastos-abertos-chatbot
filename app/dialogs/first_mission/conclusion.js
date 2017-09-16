@@ -52,7 +52,8 @@ library.dialog('/', [
                     break;
                 case No:
                     session.send('Okay! Estarei te esperando para mandarmos ver nessa tarefa!' + emoji.sunglass);
-                    session.beginDialog(':/');
+                    session.endDialog();
+                    session.beginDialog('/');
                     break;
                 case MoreInformations:
                     session.send(texts.first_mission.details);

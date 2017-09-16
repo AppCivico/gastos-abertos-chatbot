@@ -5,7 +5,8 @@ module.exports = {
         {
             assign:
                 [
-                    "Nessa missão, a sua tarefa será realizar um mapeamento da existência e qualidade do portal de transparência do seu município."
+                    "Nessa missão, a sua tarefa será realizar um mapeamento da existência e qualidade do portal de transparência do seu município." +
+                    "\n\n\n\nE para concluir a missão basta selecionar a opção 'Processo de missões' no início e eu irei te fazer algumas perguntas sobre o portal."
                 ],
             reference_transparency_portals:
                 [

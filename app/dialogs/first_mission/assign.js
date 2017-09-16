@@ -108,23 +108,19 @@ library.dialog('/', [
                 if (count < 10 && count != 1) {
                     session.send("E eu vou te dar uma tarefa extra " + emoji.grinningface + emoji.sunglass + "\n\nAtualmente há " + count + " líderes no seu estado. Vamos aumentar este número para 10 líderes?");
                     session.send("Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!");
-                    session.send(msg);
+                    if (session.message.address.channelId == 'facebook') {
+                        session.send(msg);
+                    }
                 }
                 else if (count < 10 && count == 1) {
                     session.send("E eu vou te dar uma tarefa extra " + emoji.grinningface + emoji.sunglass + "\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?");
                     session.send("Compartilhe isto com os seus amigos! Assim nós teremos mais força para incentivar a transparência em seu estado!");
-                }   session.send(msg);
-            })
-            .catch(e => {
-                console.log("Error" + e);
-                session.send("Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde e entre em contato conosco.");
-                session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-                throw e;
-            });
-    },
+                    if (session.message.address.channelId == 'facebook') {
+                        session.send(msg);
+                    }
+                }
 
-    (session, args) => {
-        builder.Prompts.choice(session,
+                builder.Prompts.choice(session,
             'Posso te ajudar com mais alguma coisa?',
             [MoreInformations, Conclusion, Contact, Restart],
             {
@@ -132,6 +128,13 @@ library.dialog('/', [
                 retryPrompt: retryPrompts.choice
             }
         );
+            })
+            .catch(e => {
+                console.log("Error" + e);
+                session.send("Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde e entre em contato conosco.");
+                session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+                throw e;
+            });
     },
 
     (session, args) => {

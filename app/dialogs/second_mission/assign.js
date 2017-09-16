@@ -24,7 +24,7 @@ library.dialog('/', [
         user_mission = args.user_mission;
         
         builder.Prompts.choice(session,
-            'Quer receber a segunda missão já?',
+            'Vamos ver agora nossa segunda missão?',
             [Yes, No],
             {
                 listStyle: builder.ListStyle.button,
@@ -39,7 +39,7 @@ library.dialog('/', [
                 session.replaceDialog('assign')
                 break;
             case No:
-                session.endDialog;
+                session.endDialog();
                 session.beginDialog('/');
                 break;
         }
