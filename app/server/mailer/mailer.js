@@ -5,6 +5,7 @@ var nodemailer = require("nodemailer");
 
 var mailer = (function() {
     var self = {};
+    
     var listofemails = [];
 
     var sucess_email = [];
