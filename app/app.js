@@ -97,7 +97,6 @@ bot.dialog('/welcomeBack', [
     (session) => {
         session.sendTyping();
         session.send("Olá companheiro! Bem vindo de volta!\n\n\nComo posso te ajudar hoje?");
-        session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
         builder.Prompts.choice(session,
             'Em que assunto eu posso te ajudar?',
             [GastosAbertosInformation, Game, GameSignUpOption, Contact],
