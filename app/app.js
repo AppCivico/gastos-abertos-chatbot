@@ -106,7 +106,7 @@ bot.dialog('/welcomeBack', [
             }
         );
     },
-    (session, args) => {
+    (session, result) => {
         session.sendTyping();
         if (result.response) {
             switch (result.response.entity) {
