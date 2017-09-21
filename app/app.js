@@ -96,7 +96,7 @@ bot.dialog('/promptButtons', [
 bot.dialog('/welcomeBack', [
     (session) => {
         session.sendTyping();
-        session.send("Olá companheiro! Bem vindo de volta!\n\n\nComo posso te ajudar hoje?");
+        session.send("Olá companheiro! Bem vindo de volta!");
         builder.Prompts.choice(session,
             'Em que assunto eu posso te ajudar?',
             [GastosAbertosInformation, Game, GameSignUpOption, Contact],
