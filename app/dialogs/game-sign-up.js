@@ -2,11 +2,16 @@ var builder           = require('botbuilder');
 var GoogleSpreadsheet = require('google-spreadsheet');
 var async             = require('async');
 
+bot.library(require('./contact'));
+
 var emoji        = require('../misc/speeches_utils/emojis');
 var retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const mailer     = require('../server/mailer/mailer.js');
 
 User = require('../server/schema/models').user;
+
+const Contact = "Entrar em contato";
+const Restart = "Ir para o início";
 
 const library = new builder.Library('gameSignUp');
 
@@ -112,6 +117,10 @@ library.dialog('/', [
     (session, args) => {
         session.dialogData.occupation = args.response;
 
+        if (session.message.address.channelId == 'facebook') {
+            var fbId = session.message.sourceEvent.sender.id;
+        }
+
         var user = {
             name: session.dialogData.fullName,
             email: session.dialogData.email,
@@ -119,7 +128,7 @@ library.dialog('/', [
             state: session.dialogData.state,
             city: session.dialogData.city,
             cellphone_number: session.dialogData.cellphoneNumber,
-            occupation: session.dialogData.occupation
+            occupation: session.dialogData.occupation,
         };
 
         User.create({ 
@@ -129,7 +138,8 @@ library.dialog('/', [
             state: user.state,
             city: user.city,
             cellphone_number: user.cellphone_number,
-            occupation: user.occupation 
+            occupation: user.occupation ,
+            fb_id: fbId
         })
         .then(function(User) {
             console.log('User created sucessfully');
@@ -155,8 +165,17 @@ library.dialog('/', [
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
             session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
             session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos.\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!");
-            session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-            return User;
+            // session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+            // return User;
+
+            builder.Prompts.choice(session,
+                'Posso te ajudar com mais alguma coisa?',
+                [ Contact, Restart ],
+                {
+                    listStyle: builder.ListStyle.button,
+                    retryPrompt: retryPrompts.choice
+                }
+            );
         })
         .catch(e => {
             console.log("Error creating user");
@@ -165,6 +184,17 @@ library.dialog('/', [
             throw e;
         });
     },
+    (session, args) => {
+        switch(args.response.entity) {
+            case Contact:
+                session.beginDialog('contact:/');
+                break;
+            case Restart:
+                session.endDialog();
+                session.beginDialog('/');
+                break;
+        }
+    }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 module.exports = library;
