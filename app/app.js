@@ -10,10 +10,11 @@ bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 
-const GameSignUpOption         = "Inscrição 2º Ciclo";
-const GastosAbertosInformation = "Gastos Abertos";
+const GameSignUp               = "Inscrição 2º Ciclo";
+const GastosAbertosInformation = "Sobre o projeto";
 const Contact                  = "Entrar em contato";
 const Game                     = "Processo de missões";
+const Missions                 = "Concluir missões";
 
 var maxSignUpDate = dateFns.format(new Date(2017, 08, 28), 'MM/DD/YYYY');
 var today         = dateFns.format(new Date(), 'MM/DD/YYYY');
@@ -57,7 +58,7 @@ bot.dialog('/promptButtons', [
         session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
         builder.Prompts.choice(session,
             'Em que assunto eu posso te ajudar?',
-            [GastosAbertosInformation, Game, GameSignUpOption, Contact],
+            [GastosAbertosInformation, Game],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: retryPrompts.choice
@@ -71,22 +72,8 @@ bot.dialog('/promptButtons', [
                 case GastosAbertosInformation:
                     session.beginDialog('gastosAbertosInformation:/');
                     break;
-                case GameSignUpOption:
-                    if (today > maxSignUpDate) {
-                        session.send("Oooops...As inscrições para o segundo ciclo de missões do Gastos Abertos já se incerraram.");
-                    } else {
-                        session.beginDialog('gameSignUp:/');
-                    };
-                    break;
-                case Contact:
-                    session.beginDialog('contact:/');
-                    break;
                 case Game:
-                    if (today <= maxSignUpDate) {
-                        session.beginDialog('game:/');
-                    } else {
-                        session.send("Calma lá! O processo de missões começa só no dia 12/09/2017.\n\nNo dia 12/09 basta só me chamar de novo e selecionar esta opção novamente e iremos começar!");
-                    }
+                    session.replaceDialog('/game');
                     break;
             }
         }
@@ -99,7 +86,7 @@ bot.dialog('/welcomeBack', [
         session.send("Olá companheiro! Bem vindo de volta!");
         builder.Prompts.choice(session,
             'Em que assunto eu posso te ajudar?',
-            [GastosAbertosInformation, Game, GameSignUpOption, Contact],
+            [GastosAbertosInformation, Game],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: retryPrompts.choice
@@ -113,27 +100,44 @@ bot.dialog('/welcomeBack', [
                 case GastosAbertosInformation:
                     session.beginDialog('gastosAbertosInformation:/');
                     break;
-                case GameSignUpOption:
+                case Game:
+                    session.replaceDialog('/game');
+                    break;
+            }
+        }
+    }
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+
+bot.dialog('/game', [
+    (session) => {
+        session.sendTyping();
+        builder.Prompts.choice(session,
+            'O que você deseja fazer?',
+            [GameSignUp, Missions],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
+    },
+
+    (session, result) => {
+        if (result.response) {
+            switch (result.response.entity) {
+                case GameSignUp:
                     if (today > maxSignUpDate) {
                         session.send("Oooops...As inscrições para o segundo ciclo de missões do Gastos Abertos já se incerraram.");
                     } else {
                         session.beginDialog('gameSignUp:/');
                     };
                     break;
-                case Contact:
-                    session.beginDialog('contact:/');
-                    break;
-                case Game:
-                    if (today <= maxSignUpDate) {
-                        session.beginDialog('game:/');
-                    } else {
-                        session.send("Calma lá! O processo de missões começa só no dia 12/09/2017.\n\nNo dia 12/09 basta só me chamar de novo e selecionar esta opção novamente e iremos começar!");
-                    }
+                case Missions:
+                    session.beginDialog('game:/');
                     break;
             }
         }
     }
-])
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 bot.dialog('/reset', [
     (session, activity) => {
