@@ -61,6 +61,7 @@ library.dialog('/', [
                 session.sendTyping();
                 session.send("Hmmm...Não consegui encontrar seu cadastro. Tente novamente.");
                 session.endDialog();
+                session.beginDialog('/welcomeBack');
                 return;
             }
         });

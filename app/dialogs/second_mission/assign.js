@@ -39,8 +39,9 @@ library.dialog('/', [
                 session.replaceDialog('assign')
                 break;
             case No:
+                session.send("Okay! Eu estarei aqui esperando para começarmos!");
                 session.endDialog();
-                session.beginDialog('/');
+                session.beginDialog('/welcomeBack');
                 break;
         }
     }

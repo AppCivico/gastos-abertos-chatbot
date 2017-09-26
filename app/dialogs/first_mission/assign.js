@@ -163,8 +163,16 @@ library.dialog('/', [
     (session, args) => {
         switch(args.response.entity) {
             case MoreInformations:
-                session.endDialog();
-                session.beginDialog('firstMissionDetails:/')
+                session.send(texts.first_mission.details);
+                
+                builder.Prompts.choice(session,
+                    'Quer o link para alguns portais de transparência para usar como referência?',
+                    [Yes, No],
+                    {
+                        listStyle: builder.ListStyle.button,
+                        retryPrompt: retryPrompts.choice
+                    }
+                );
                 break;
             case Contact:
                 session.beginDialog('contact:/');
@@ -184,7 +192,81 @@ library.dialog('/', [
                 );
                 break;
         }
-    }
+    },
+
+    (session, args) => {
+        switch(args.response.entity) {
+            case Yes:
+                session.send(texts.first_mission.reference_transparency_portals);
+                break;
+            case No:
+                session.send("Okay! Mas qualquer dúvida pode entrar em contato com a gente aqui do Gastos Abertos tá?");
+                break;
+        }
+
+        builder.Prompts.choice(session,
+            'Quer ver quais serão os pontos sobre os quais eu farei perguntas sobre o portal de transparência?',
+            [Yes, No],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
+    },
+
+    (session, args) => {
+        switch(args.response.entity) {
+            case Yes:
+                session.send(texts.first_mission.questions);
+                break;
+            case No:
+                session.send("Beleza!");
+                break;
+        }
+
+        builder.Prompts.choice(session,
+            'Posso te ajudar com mais alguma coisa?',
+            [MoreInformations, Conclusion, Contact, Restart],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
+    },
+
+    (session, args) => {
+        switch(args.response.entity) {
+            case MoreInformations:
+                session.send(texts.first_mission.details);
+                
+                builder.Prompts.choice(session,
+                    'Quer o link para alguns portais de transparência para usar como referência?',
+                    [Yes, No],
+                    {
+                        listStyle: builder.ListStyle.button,
+                        retryPrompt: retryPrompts.choice
+                    }
+                );
+                break;
+            case Contact:
+                session.beginDialog('contact:/');
+                break;
+            case Restart:
+                session.endDialog();
+                session.beginDialog('/welcomeBack');
+                break;
+            case Conclusion:
+                session.endDialog();
+                session.beginDialog(
+                    'firstMissionConclusion:/',
+                    {
+                        user:         user,
+                        user_mission: user_mission
+                    }
+                );
+                break;
+        }
+    },
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 module.exports = library;

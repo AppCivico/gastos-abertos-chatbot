@@ -1,7 +1,5 @@
 const library = new builder.Library('firstMissionConclusion');
 
-bot.library(require('../second_mission/assign'));
-
 let answers = {};
 answers[
     'transparencyPortalExists',
@@ -53,7 +51,7 @@ library.dialog('/', [
                 case No:
                     session.send('Okay! Estarei te esperando para mandarmos ver nessa tarefa!' + emoji.sunglass);
                     session.endDialog();
-                    session.beginDialog('/');
+                    session.beginDialog('/welcomeBack');
                     break;
                 case MoreInformations:
                     session.send(texts.first_mission.details);
@@ -87,6 +85,7 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
                 case No:
                     session.send('Okay! Estarei te esperando para mandarmos ver nessa tarefa!'  + emoji.sunglass);
                     session.endDialog();
+                    session.beginDialog('/welcomeBack');
                     break;
             }
         }
@@ -96,6 +95,7 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 library.dialog('/transparencyPortalExists', [
     (session) => {
         session.sendTyping();
+        session.send("Caso você queira deixar para outra hora basta digitar 'cancelar' e eu te levarei para o início.");
         builder.Prompts.choice(session,
             'Há um portal para transparência orçamentária na cidade, mantido oficialmente pela prefeitura? (Responda com Sim ou Não)',
             [Yes, No],
@@ -349,15 +349,9 @@ library.dialog('/userUpdate', [
         .then(result => {
             console.log(result + "Mission updated sucessfuly");
             session.send("Uhuuu! Concluímos nossa primeira missão!\n\nEu disse que formariamos uma boa equipe!" + emoji.sunglass + emoji.clap);
-            
+            session.send("Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a segunda missão, okay?" + emoji.smile);
             session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-            session.beginDialog(
-                'secondMissionAssign:/',
-                {
-                    user:         user,
-                    user_mission: user_mission
-                }
-            );
+            session.beginDialog('/welcomeBack');
         })
         .catch(e => {
             console.log("Error updating mission" + e);

@@ -1,10 +1,13 @@
 const library = new builder.Library('firstMissionDetails');
 
+bot.library(require('./conclusion'));
+
 var retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 var texts        = require("../../misc/speeches_utils/big-texts");
 
 const Contact    = "Entrar em contato";
 const Restart    = "Ir para o início";
+const Conclusion = "Concluir a missão";
 
 library.dialog('/', [
     (session) => {
@@ -12,7 +15,7 @@ library.dialog('/', [
 
         builder.Prompts.choice(session,
             'Posso te ajudar com mais alguma coisa?',
-                [Contact, Restart],
+                [Contact, Restart, Conclusion],
                 {
                     listStyle: builder.ListStyle.button,
                     retryPrompt: retryPrompts.choice
@@ -29,6 +32,9 @@ library.dialog('/', [
                 session.endDialog();
                 session.beginDialog('/welcomeBack');
                 break;
+            case Conclusion:
+                session.endDialog();
+                session.beginDialog('firstMissionConclusion:/')
         }
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
