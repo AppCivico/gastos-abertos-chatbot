@@ -122,13 +122,17 @@ library.dialog('/currentMission', [
                         // session.endDialog();
                     // } else {
                     if (user_mission.completed) {
-                        session.beginDialog(
-                            'secondMissionAssign:/',
-                            {
-                                user:         user,
-                                user_mission: user_mission
-                            }
-                        );
+                        // session.beginDialog(
+                        //     'secondMissionAssign:/',
+                        //     {
+                        //         user:         user,
+                        //         user_mission: user_mission
+                        //     }
+                        // );
+                        session.send("Você já concluiu a primeira missão, no entanto a segunda ainda não foi liberada.");
+                        session.send("Pode ficar tranquilo que eu vou te mandar uma mensagem quando ela for liberada.");
+                        session.endDialog();
+                        session.beginDialog('/welcomeBack');
                     } else {
                         session.beginDialog(
                             'firstMissionConclusion:/',
