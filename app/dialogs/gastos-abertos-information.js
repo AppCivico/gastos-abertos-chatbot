@@ -85,7 +85,7 @@ library.dialog('/gastosAbertosCicles', [
                     break;
                 case reset:
                     session.endDialog();
-                    session.beginDialog('/welcomeBack');
+                    session.replaceDialog('/welcomeBack');
                     break;
             }
         }
@@ -126,7 +126,7 @@ library.dialog('/secondGastosAbertosCicle', [
                     break;
                 case reset:
                     session.endDialog();
-                    session.beginDialog('/welcomeBack');
+                    session.replaceDialog('/welcomeBack');
                     break;
             }
         }
@@ -163,7 +163,7 @@ library.dialog('/firstGastosAbertosCicleResults', [
                     break;
                 case reset:
                     session.endDialog();
-                    session.beginDialog('/welcomeBack');
+                    session.replaceDialog('/welcomeBack');
                     break;
             }
         }
@@ -224,7 +224,7 @@ library.dialog('/gameSignUpDeclined', [
                     break;
                 case reset:
                     session.endDialog();
-                    session.beginDialog('/welcomeBack');
+                    session.replaceDialog('/welcomeBack');
                     break;
             }
         }
