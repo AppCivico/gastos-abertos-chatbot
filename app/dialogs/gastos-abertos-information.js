@@ -48,7 +48,7 @@ library.dialog('/', [
                     break;
                 case reset:
                     session.endDialog();
-                    session.beginDialog('/welcomeBack');
+                    session.replaceDialog('/welcomeBack');
                     break;
             }
         }
