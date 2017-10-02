@@ -421,7 +421,7 @@ library.dialog('/userUpdate', [
         switch (args.response.entity) {
             case Confirm:
                 session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-                session.beginDialog('/welcomeBack');
+                session.replaceDialog('/welcomeBack');
                 break;
         }
     }
