@@ -1,14 +1,23 @@
 require('dotenv').config();
 require('./connectorSetup.js')();
 
+var dateFns      = require('date-fns');
+var retryPrompts = require('./misc/speeches_utils/retry-prompts');
+
 bot.library(require('./validators'));
 bot.library(require('./dialogs/game-sign-up'));
 bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
+bot.library(require('./dialogs/game'));
 
-const GameSignUpOption         = "Inscrição 2º Ciclo";
-const GastosAbertosInformation = "Gastos Abertos";
+const GameSignUp               = "Inscrição 2º Ciclo";
+const GastosAbertosInformation = "Sobre o projeto";
 const Contact                  = "Entrar em contato";
+const Game                     = "Processo de missões";
+const Missions                 = "Concluir missões";
+
+var maxSignUpDate = dateFns.format(new Date(2017, 08, 28), 'MM/DD/YYYY');
+var today         = dateFns.format(new Date(), 'MM/DD/YYYY');
 
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
@@ -28,7 +37,7 @@ bot.dialog('/getstarted', [
             session.userData.userid = session.message.sourceEvent.sender.id;
             session.userData.pageid = session.message.sourceEvent.recipient.id;
 
-            session.beginDialog('/promptButtons');
+            session.replaceDialog('/welcomeBack');
         } else {
             session.replaceDialog('/promptButtons');
         }
@@ -49,10 +58,10 @@ bot.dialog('/promptButtons', [
         session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
         builder.Prompts.choice(session,
             'Em que assunto eu posso te ajudar?',
-            [GastosAbertosInformation, GameSignUpOption, Contact],
+            [GastosAbertosInformation, Game],
             {
                 listStyle: builder.ListStyle.button,
-                retryPrompt: "Desculpa, não entendi a opção que você selecionou.\n\nSelecione uma das opções abaixo"
+                retryPrompt: retryPrompts.choice
             }
         );
     },
@@ -63,14 +72,63 @@ bot.dialog('/promptButtons', [
                 case GastosAbertosInformation:
                     session.beginDialog('gastosAbertosInformation:/');
                     break;
-                case GameSignUpOption:
+                case Game:
+                    session.replaceDialog('/game');
+                    break;
+            }
+        }
+    }
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+
+bot.dialog('/welcomeBack', [
+    (session) => {
+        session.sendTyping();
+        session.send("Olá companheiro! Bem vindo de volta!");
+        builder.Prompts.choice(session,
+            'Em que assunto eu posso te ajudar?',
+            [GastosAbertosInformation, Game],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
+    },
+    (session, result) => {
+        session.sendTyping();
+        if (result.response) {
+            switch (result.response.entity) {
+                case GastosAbertosInformation:
+                    session.beginDialog('gastosAbertosInformation:/');
+                    break;
+                case Game:
+                    session.replaceDialog('/game');
+                    break;
+            }
+        }
+    }
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+
+bot.dialog('/game', [
+    (session) => {
+        session.sendTyping();
+        builder.Prompts.choice(session,
+            'O que você deseja fazer?',
+            [GameSignUp, Missions],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
+    },
+
+    (session, result) => {
+        if (result.response) {
+            switch (result.response.entity) {
+                case GameSignUp:
                     session.beginDialog('gameSignUp:/');
                     break;
-                case Contact:
-                    session.beginDialog('contact:/');
-                    break;
-                default :
-                    session.send('Desculpa, não entendi a opção que você selecionou.');
+                case Missions:
+                    session.beginDialog('game:/');
                     break;
             }
         }
@@ -79,7 +137,7 @@ bot.dialog('/promptButtons', [
 
 bot.dialog('/reset', [
     (session, activity) => {
-        activity.GetStateClient().BotState.DeleteStateForUser(activity.ChannelId, activity.From.Id);
-        session.beginDialog('/promptButtons');
+        session.endDialog();
+        session.beginDialog('/');
     }
 ]);

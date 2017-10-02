@@ -1,16 +1,19 @@
 var builder           = require('botbuilder');
 var GoogleSpreadsheet = require('google-spreadsheet');
 var async             = require('async');
-const mailer = require('../server/mailer/mailer.js');
+
+bot.library(require('./contact'));
+
+var emoji        = require('../misc/speeches_utils/emojis');
+var retryPrompts = require('../misc/speeches_utils/retry-prompts');
+const mailer     = require('../server/mailer/mailer.js');
 
 User = require('../server/schema/models').user;
 
-const library = new builder.Library('gameSignUp');
+const Contact = "Entrar em contato";
+const Restart = "Ir para o início";
 
-const emoji_thinking = "\uD83E\uDD14";
-const emoji_clap     = "\uD83D\uDC4F";
-const emoji_smile    = "\uD83E\uDD17";
-const emoji_sunglass = "\uD83D\uDE0E";
+const library = new builder.Library('gameSignUp');
 
 var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
 var sheet;
@@ -26,10 +29,7 @@ library.dialog('/', [
         session.sendTyping();
         session.beginDialog('validators:email', {
             prompt: "Qual é o seu e-mail?",
-            retryPrompt: [
-                emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. Vamos tentar novamente?",
-                emoji_thinking.repeat(3) + "Hummm. Não entendi o e-mail que você digitou. O e-mail deve ter o seguinte formato: exemplo@exemplo.com"
-            ],
+            retryPrompt: retryPrompts.email,
             maxRetries: 10
         });
     },
@@ -51,17 +51,14 @@ library.dialog('/', [
         })
         .then(count => {
             if (count != 0) {
-                session.send("Você já está cadastrado companheiro! " + emoji_sunglass + "Verifique se você recebeu minha mensagem em seu e-mail.\n\n\nEu a enviei para o seguinte e-mail: " + session.dialogData.email + ".");
+                session.send("Você já está cadastrado companheiro! " + emoji.sunglass + "Verifique se você recebeu minha mensagem em seu e-mail.\n\n\nEu a enviei para o seguinte e-mail: " + session.dialogData.email + ".");
                 session.endDialog();
                 return;
             } else {
                 session.sendTyping();
                 session.beginDialog('validators:date', {
                 prompt: "Qual é a sua data de nascimento?",
-                retryPrompt: [
-                    emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Vamos tentar novamente?",
-                    emoji_thinking.repeat(3) + "Hummm. Não entendi a data que você digitou. Não se esqueça que ela deve ter o seguinte formato: 01/01/2000"
-                ],
+                retryPrompt: retryPrompts.date,
                 maxRetries: 10
             });
             }
@@ -79,10 +76,7 @@ library.dialog('/', [
         session.sendTyping();
         session.beginDialog('validators:state', {
             prompt: "Qual é o estado(sigla) que você mora?",
-            retryPrompt: [
-                emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Vamos tentar novamente?",
-                emoji_thinking.repeat(3) + "Hummm. Não entendi o estado que você digitou. Ele dever apenas a sigla como por exemplo a sigla do estado onde eu fui criado: SP",
-            ],
+            retryPrompt: retryPrompts.state,
             maxRetries: 10
         });
     },
@@ -104,10 +98,7 @@ library.dialog('/', [
         session.send("Ufa! Não desanime, parceiro. Faltam apenas 2 perguntas para finalizar sua inscrição. Vamos lá!");
         session.beginDialog('validators:cellphone', {
             prompt: "Qual é o seu número de telefone celular? Não esqueça de colocar o DDD.",
-            retryPrompt: [
-                emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Vamos tentar novamente?",
-                emoji_thinking.repeat(3) + "Hummm. Não entendi o telefone que você digitou. Siga o seguinte exemplo: 11988888888 ou 1188888888",
-            ],
+            retryPrompt: retryPrompts.cellphone,
             maxRetries: 10
         });
     },
@@ -126,6 +117,10 @@ library.dialog('/', [
     (session, args) => {
         session.dialogData.occupation = args.response;
 
+        if (session.message.address.channelId == 'facebook') {
+            var fbId = session.message.sourceEvent.sender.id;
+        }
+
         var user = {
             name: session.dialogData.fullName,
             email: session.dialogData.email,
@@ -133,7 +128,7 @@ library.dialog('/', [
             state: session.dialogData.state,
             city: session.dialogData.city,
             cellphone_number: session.dialogData.cellphoneNumber,
-            occupation: session.dialogData.occupation
+            occupation: session.dialogData.occupation,
         };
 
         User.create({ 
@@ -143,7 +138,8 @@ library.dialog('/', [
             state: user.state,
             city: user.city,
             cellphone_number: user.cellphone_number,
-            occupation: user.occupation 
+            occupation: user.occupation ,
+            fb_id: fbId
         })
         .then(function(User) {
             console.log('User created sucessfully');
@@ -169,8 +165,15 @@ library.dialog('/', [
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
             session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
             session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos.\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!");
-            session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-            return User;
+
+            builder.Prompts.choice(session,
+                'Posso te ajudar com mais alguma coisa?',
+                [ Contact, Restart ],
+                {
+                    listStyle: builder.ListStyle.button,
+                    retryPrompt: retryPrompts.choice
+                }
+            );
         })
         .catch(e => {
             console.log("Error creating user");
@@ -179,6 +182,17 @@ library.dialog('/', [
             throw e;
         });
     },
+    (session, args) => {
+        switch(args.response.entity) {
+            case Contact:
+                session.beginDialog('contact:/');
+                break;
+            case Restart:
+                session.endDialog();
+                session.beginDialog('/welcomeBack');
+                break;
+        }
+    }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 module.exports = library;

@@ -1,19 +1,19 @@
 'use strict';
 module.exports = {
   up: function(queryInterface, Sequelize) {
-    return queryInterface.createTable('email_queue', {
+    return queryInterface.createTable('missions', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      email: {
-        type: Sequelize.STRING,
+      code: {
+        type: Sequelize.INTEGER,
         allowNull: false
       },
-      sucess: {
-        type: Sequelize.INTEGER,
+      name: {
+        type: Sequelize.STRING,
         allowNull: false
       },
       createdAt: {
@@ -27,6 +27,6 @@ module.exports = {
     });
   },
   down: function(queryInterface, Sequelize) {
-    return queryInterface.dropTable('email_queue');
+    return queryInterface.dropTable('missions');
   }
 };
