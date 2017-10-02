@@ -125,11 +125,7 @@ bot.dialog('/game', [
         if (result.response) {
             switch (result.response.entity) {
                 case GameSignUp:
-                    if (today > maxSignUpDate) {
-                        session.send("Oooops...As inscrições para o segundo ciclo de missões do Gastos Abertos já se incerraram.");
-                    } else {
-                        session.beginDialog('gameSignUp:/');
-                    };
+                    session.beginDialog('gameSignUp:/');
                     break;
                 case Missions:
                     session.beginDialog('game:/');

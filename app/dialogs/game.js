@@ -116,19 +116,7 @@ library.dialog('/currentMission', [
 
             switch(user_mission.mission_id) {
                 case 1:
-
-                    // if (today < firstMissionCompleteMinDate) {
-                        // session.send("Vi aqui que você está na primeira missão.\n\nVocê poderá conclui-la a partir do dia 19/09/2017");
-                        // session.endDialog();
-                    // } else {
                     if (user_mission.completed) {
-                        // session.beginDialog(
-                        //     'secondMissionAssign:/',
-                        //     {
-                        //         user:         user,
-                        //         user_mission: user_mission
-                        //     }
-                        // );
                         session.send("Você já concluiu a primeira missão, no entanto a segunda ainda não foi liberada.");
                         session.send("Pode ficar tranquilo que eu vou te mandar uma mensagem quando ela for liberada.");
                         session.endDialog();
@@ -142,7 +130,6 @@ library.dialog('/currentMission', [
                             }
                         );
                     }
-                    // }
                     break;
                 case 2:
                     if (user_mission.completed) {
