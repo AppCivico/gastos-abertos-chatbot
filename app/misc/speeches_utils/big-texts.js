@@ -28,5 +28,12 @@ module.exports = {
                     "-Contratos assinados pela prefeitura;\n\n\n" +
                     "-Licitações\n\n\n"
                 ]
+        },
+    second_mission:
+        {
+            assign:
+                [
+                    "Nessa nossa segunda tarefa chegou a hora de pegarmos o diagnóstico que fizemos na missão anterior e protocolarmos um pedido de acesso à informação para os dados que faltam."
+                ]
         }
-};
+};   
