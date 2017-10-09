@@ -117,10 +117,13 @@ library.dialog('/currentMission', [
             switch(user_mission.mission_id) {
                 case 1:
                     if (user_mission.completed) {
-                        session.send("Você já concluiu a primeira missão, no entanto a segunda ainda não foi liberada.");
-                        session.send("Pode ficar tranquilo que eu vou te mandar uma mensagem quando ela for liberada.");
-                        session.endDialog();
-                        session.beginDialog('/welcomeBack');
+                        session.beginDialog(
+                            'secondMissionAssign:/',
+                            {
+                                user:         user,
+                                user_mission: user_mission
+                            }
+                        );
                     } else {
                         session.beginDialog(
                             'firstMissionConclusion:/',

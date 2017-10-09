@@ -53,6 +53,7 @@ library.dialog('/', [
             if (count != 0) {
                 session.send("Você já está cadastrado companheiro! " + emoji.sunglass + "Verifique se você recebeu minha mensagem em seu e-mail.\n\n\nEu a enviei para o seguinte e-mail: " + session.dialogData.email + ".");
                 session.endDialog();
+                session.beginDialog('/welcomeBack');
                 return;
             } else {
                 session.sendTyping();

@@ -1,16 +1,13 @@
 const library = new builder.Library('secondMissionAssign');
 
-bot.library(require('../contact'));
+bot.library(require('../information-access-request'));
 
 User        = require('../../server/schema/models').user;
 UserMission = require('../../server/schema/models').user_mission;
 
-const MoreInformations = "Mais detalhes";
-const Conclusion       = "Conclusão da missão";
-const Contact          = "Entrar em contato";
-const Restart          = "Ir para o início";
-const Yes              = "Sim";
-const No               = "Não";
+const Yes      = "Sim";
+const No       = "Não";
+const HappyYes = "Vamos nessa!";
 
 var retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 var texts        = require("../../misc/speeches_utils/big-texts");
@@ -36,7 +33,7 @@ library.dialog('/', [
     (session, args) => {
         switch(args.response.entity) {
             case Yes:
-                session.replaceDialog('assign')
+                session.replaceDialog('/assign')
                 break;
             case No:
                 session.send("Okay! Eu estarei aqui esperando para começarmos!");
@@ -47,18 +44,19 @@ library.dialog('/', [
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
-library.dialog('assign', [
+library.dialog('/assign', [
     (session) => {
         UserMission.create({
                 user_id: user.id,
                 mission_id: 2,
+                metadata: { informationAccessRequestGenerated: 0 }
             })
             .then(UserMission => {
-                session.send("Vamos agora para a sua segunda missão!");
-                session.send(texts.first_mission.assign);
+                session.send("Vamos nessa!");
+                session.send(texts.second_mission.assign);
                 builder.Prompts.choice(session,
-                'Posso te ajudar com mais alguma coisa?',
-                    [MoreInformations, Conclusion, Contact, Restart],
+                'Vamos gerar nosso pedido de acesso à informação? Eu precisarei te fazer mais algumas perguntas referente ao portal de transparência.',
+                    [ HappyYes, No ],
                     {
                         listStyle: builder.ListStyle.button,
                         retryPrompt: retryPrompts.choice
@@ -69,18 +67,43 @@ library.dialog('assign', [
 
     (session, args) => {
         switch(args.response.entity) {
-            case MoreInformations:
-
+            case HappyYes:
+                session.beginDialog(
+                    'informationAccessRequest:/',
+                    {
+                        user:         user,
+                        user_mission: user_mission
+                    }
+                );
                 break;
-            case Contact:
-                session.beginDialog('contact:/');
-                break;
-            case Restart:
+            case No:
                 session.endDialog();
                 session.beginDialog('/');
                 break;
         }
     }
-])
+]);
+
+library.dialog('/updateUserMission', [
+    (session) => {
+        UserMission.update({
+            metadata: { informationAccessRequestGenerated: 1 }
+        }, {
+            where: {
+                user_id: user.id,
+                mission_id: 2,
+                completed: false
+            },
+            returning: true,
+        })
+        .then(result => {
+            console.log(result + "Mission updated sucessfuly");
+        })
+        .catch(e => {
+            console.log("Error updating mission" + e);
+            throw e;
+        });
+    }
+]);
 
 module.exports = library;
