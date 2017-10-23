@@ -2,6 +2,7 @@ bot.library(require('./contact'));
 
 var builder = require('botbuilder');
 var pdf     = require('html-pdf');
+var fs      = require('fs');
 
 var emoji        = require('../misc/speeches_utils/emojis');
 var retryPrompts = require('../misc/speeches_utils/retry-prompts');
@@ -412,17 +413,27 @@ library.dialog('/looseRequest', [
                 break;
         }
 
-        // for (var i = 0; itens[i] = undef; i++) {
-            
-        // }
-        itens.join("");
-        var html = '<p style="font-size:5pt">Eu, incluir seu nome, com fundamento na Lei 12.527, de 18 de novembro de 2011, e na Lei Complementar 131, de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="font-size:5pt"">'
-        + itens.join("") +
-        '</div><div style="font-size:5pt"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível, solicito que a impossibilidade de apresentação de informações seja motivada, sob pena de responsabilidade, e que a série histórica mais longa disponível à Prefeitura das informações seja disponibilizada em página oficial na internet e que acompanhe a resposta a esta solicitação.</p></div>';
+        builder.Prompts.text(session, "Qual é o seu nome completo?");
+    },
 
-        pdf.create(html, options).toFile('./businesscard.pdf', function(err, res) {
-        if (err) return console.log(err);
-            console.log(res); // { filename: '/app/businesscard.pdf' }
+    (session, args) => {
+        session.dialogData.name = args.response;
+
+        var html = '<p style="font-size:7pt">Eu, ' + session.dialogData.name + ', com fundamento na Lei 12.527, de 18 de novembro de 2011, e na Lei Complementar 131, de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="font-size:7pt"">'
+        + itens.join("") +
+        '</div><div style="font-size:7pt"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível, solicito que a impossibilidade de apresentação de informações seja motivada, sob pena de responsabilidade, e que a série histórica mais longa disponível à Prefeitura das informações seja disponibilizada em página oficial na internet e que acompanhe a resposta a esta solicitação.</p></div>';
+
+        pdf.create(html).toStream((err, stream) => {
+            var pdf = stream.pipe(fs.createWriteStream('/tmp/' + session.dialogData.name + 'lai.pdf'));
+            session.send({
+                attachments: [
+                    {
+                        contentType: 'application/pdf',
+                        contentUrl: pdf.path,
+                    }
+                ]
+            });
+            fs.unlink(pdf.path);
         });
         itens.length = 0;
     },

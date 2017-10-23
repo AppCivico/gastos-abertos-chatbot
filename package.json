@@ -30,6 +30,7 @@
     "date-fns": "^1.28.5",
     "dotenv": "^4.0.0",
     "email-validator": "^1.1.1",
+    "fs": "0.0.1-security",
     "google-spreadsheet": "^2.0.4",
     "html-pdf": "^2.2.0",
     "http": "0.0.0",
