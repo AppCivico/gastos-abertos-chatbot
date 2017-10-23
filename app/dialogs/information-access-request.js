@@ -428,10 +428,12 @@ library.dialog('/looseRequest', [
             msg = new builder.Message(session);
             msg.sourceEvent({
                 facebook: {
-                    attachment:{
-                      type:"file",
-                      payload:{
-                        url: pdf.path,
+                    message: {
+                        attachment:{
+                            type:"file",
+                            payload:{
+                                url: pdf.path,
+                            }
                         }
                     }
                 }
