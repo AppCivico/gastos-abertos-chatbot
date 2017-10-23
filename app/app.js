@@ -15,6 +15,7 @@ const GastosAbertosInformation = "Sobre o projeto";
 const Contact                  = "Entrar em contato";
 const Game                     = "Processo de missões";
 const Missions                 = "Concluir missões";
+const InformationAcessRequest  = "Gerar pedido";
 
 var maxSignUpDate = dateFns.format(new Date(2017, 08, 28), 'MM/DD/YYYY');
 var today         = dateFns.format(new Date(), 'MM/DD/YYYY');
@@ -58,7 +59,7 @@ bot.dialog('/promptButtons', [
         session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
         builder.Prompts.choice(session,
             'Em que assunto eu posso te ajudar?',
-            [GastosAbertosInformation, Game],
+            [GastosAbertosInformation, Game, InformationAcessRequest],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: retryPrompts.choice
@@ -74,6 +75,9 @@ bot.dialog('/promptButtons', [
                     break;
                 case Game:
                     session.replaceDialog('/game');
+                    break;
+                case InformationAcessRequest:
+                    session.beginDialog('informationAccessRequest:/');
                     break;
             }
         }
