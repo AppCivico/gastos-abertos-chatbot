@@ -1,9 +1,11 @@
 bot.library(require('./contact'));
 
-var builder = require('botbuilder');
-var pdf     = require('html-pdf');
-var fs      = require('fs');
-
+var request    = require('request');
+var builder    = require('botbuilder');
+var pdf        = require('html-pdf');
+var fs         = require('fs');
+var Base64File = require('js-base64-file');
+ 
 var emoji        = require('../misc/speeches_utils/emojis');
 var retryPrompts = require('../misc/speeches_utils/retry-prompts');
 
@@ -27,6 +29,17 @@ var options = {
     },
 
     "font-size": "10px"
+};
+
+const generatedRequest = new Base64File;
+const path             = '/tmp/';
+
+var apiUri  = process.env.MAILCHIMP_API_URI;
+var apiUser = process.env.MAILCHIMP_API_USER;
+var apiKey  = process.env.MAILCHIMP_API_KEY;
+
+var headers = {
+    'content-type': 'application/json'
 };
 
 library.dialog('/', [
@@ -424,21 +437,49 @@ library.dialog('/looseRequest', [
         '</div><div style="font-size:7pt"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível, solicito que a impossibilidade de apresentação de informações seja motivada, sob pena de responsabilidade, e que a série histórica mais longa disponível à Prefeitura das informações seja disponibilizada em página oficial na internet e que acompanhe a resposta a esta solicitação.</p></div>';
 
         pdf.create(html).toStream((err, stream) => {
-            var pdf = stream.pipe(fs.createWriteStream('/tmp/' + session.dialogData.name + 'lai.pdf'));
-            msg = new builder.Message(session);
-            msg.sourceEvent({
-                facebook: {
-                    message: {
-                        attachment:{
-                            type:"file",
-                            payload:{
-                                url: pdf.path,
+            var pdf = stream.pipe(fs.createWriteStream('/tmp/' + session.dialogData.name + 'LAI.pdf'));
+            const file = pdf.path;
+
+            var data = generatedRequest.loadSync(file);
+            data = JSON.stringify(data);
+
+            // Uploading the PDF to the MailChimp
+            var dataString = '{"name":"' + session.dialogData.name + 'LAI.pdf" , "file_data":' + data + '}'
+
+            var options = {
+                url: apiUri,
+                method: 'POST',
+                headers: headers,
+                body: dataString,
+                auth: {
+                    'user': apiUser,
+                    'pass': apiKey
+                }
+            };
+
+            function callback(error, response, body) {
+                if (!error && response.statusCode == 200) {
+                    var obj = JSON.parse(body);
+                    console.log(obj.full_size_url);
+
+                    msg = new builder.Message(session);
+                    msg.sourceEvent({
+                        facebook: {
+                            message: {
+                                attachment:{
+                                    type:"file",
+                                    payload:{
+                                        url: obj.full_size_url,
+                                    }
+                                }
                             }
                         }
-                    }
+                    });
+                    session.send(msg);
                 }
-            });
-            session.send(msg);
+            }
+
+            request(options,callback);
             fs.unlink(pdf.path);
         });
         itens.length = 0;
