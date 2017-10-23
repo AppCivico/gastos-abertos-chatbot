@@ -90,7 +90,7 @@ bot.dialog('/welcomeBack', [
         session.send("Olá companheiro! Bem vindo de volta!");
         builder.Prompts.choice(session,
             'Em que assunto eu posso te ajudar?',
-            [GastosAbertosInformation, Game],
+            [GastosAbertosInformation, Game, InformationAcessRequest],
             {
                 listStyle: builder.ListStyle.button,
                 retryPrompt: retryPrompts.choice
@@ -106,6 +106,9 @@ bot.dialog('/welcomeBack', [
                     break;
                 case Game:
                     session.replaceDialog('/game');
+                    break;
+                case InformationAcessRequest:
+                    session.beginDialog('informationAccessRequest:/');
                     break;
             }
         }
