@@ -438,9 +438,9 @@ library.dialog('/looseRequest', [
 
         pdf.create(html).toStream((err, stream) => {
             var pdf = stream.pipe(fs.createWriteStream('/tmp/' + session.dialogData.name + 'LAI.pdf'));
-            const file = pdf.path;
+            const file = pdf.path.slice(5);
 
-            var data = generatedRequest.loadSync(file);
+            var data = generatedRequest.loadSync(path, file);
             data = JSON.stringify(data);
 
             // Uploading the PDF to the MailChimp
