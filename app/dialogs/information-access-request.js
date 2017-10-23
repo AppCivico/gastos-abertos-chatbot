@@ -425,14 +425,18 @@ library.dialog('/looseRequest', [
 
         pdf.create(html).toStream((err, stream) => {
             var pdf = stream.pipe(fs.createWriteStream('/tmp/' + session.dialogData.name + 'lai.pdf'));
-            session.send({
-                attachments: [
-                    {
-                        contentType: 'application/pdf',
-                        contentUrl: pdf.path,
+            msg = new builder.Message(session);
+            msg.sourceEvent({
+                facebook: {
+                    attachment:{
+                      type:"file",
+                      payload:{
+                        url: pdf.path,
+                        }
                     }
-                ]
+                }
             });
+            session.send(msg);
             fs.unlink(pdf.path);
         });
         itens.length = 0;
