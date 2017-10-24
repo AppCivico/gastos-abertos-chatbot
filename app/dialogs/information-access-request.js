@@ -153,16 +153,16 @@ library.dialog('/looseRequest', [
             case Yes:
                 break;
             case No:
-                builder.Prompts.choice(session,
-                    "Seu município identifica de onde vêm os recursos que ele recebe? \n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.",
-                    [Yes, No],
-                    {
-                        listStyle: builder.ListStyle.button,
-                        retryPrompt: retryPrompts.choice
-                    }
-                );
                 break;
         }
+        builder.Prompts.choice(session,
+            "Seu município identifica de onde vêm os recursos que ele recebe? \n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.",
+            [Yes, No],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
     },
 
     (session, args) => {
