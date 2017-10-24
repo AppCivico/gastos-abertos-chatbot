@@ -493,6 +493,18 @@ library.dialog('/generateRequest', [
                 msg = new builder.Message(session);
                 msg.sourceEvent({
                     facebook: {
+                        attachment: {
+                            type: "file",
+                            payload: {
+                                template-type: "generic",
+                                elements: [
+                                    {
+                                        title: "Pedido de acesso à informação gerado pelo Guaxi para" + name,
+                                        type: "web_url"
+                                    }
+                                ]
+                            }
+                        }
                         message: {
                             attachment:{
                                 type:"file",
