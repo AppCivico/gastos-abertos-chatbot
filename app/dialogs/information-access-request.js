@@ -494,7 +494,7 @@ library.dialog('/generateRequest', [
                 msg.sourceEvent({
                     facebook: {
                         attachment: {
-                            type: "file",
+                            type: "template",
                             payload: {
                                 template_type: "generic",
                                 elements: [
