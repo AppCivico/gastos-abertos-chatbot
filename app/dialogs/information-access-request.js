@@ -496,21 +496,17 @@ library.dialog('/generateRequest', [
                         attachment: {
                             type: "file",
                             payload: {
-                                template-type: "generic",
+                                template_type: "generic",
                                 elements: [
                                     {
                                         title: "Pedido de acesso à informação gerado pelo Guaxi para" + name,
-                                        type: "web_url"
+                                        buttons: [{
+                                            type: "web_url",
+                                            url: obj.full_size_url,
+                                            title: "Ver seu pedido"
+                                        }]
                                     }
                                 ]
-                            }
-                        }
-                        message: {
-                            attachment:{
-                                type:"file",
-                                payload:{
-                                    url: obj.full_size_url,
-                                }
                             }
                         }
                     }
