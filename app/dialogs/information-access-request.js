@@ -13,10 +13,11 @@ User = require('../server/schema/models').user;
 
 const library = new builder.Library('informationAccessRequest');
 
-const Yes = "Sim";
-const No  = "Não";
+const Yes      = "Sim";
+const No       = "Não";
+const HappyYes = "Vamos lá!";
 
-let user, user_mission;
+let user, user_mission, name;
 
 let itens = [];
 
@@ -33,6 +34,7 @@ var options = {
 
 const generatedRequest = new Base64File;
 const path             = '/tmp/';
+let file = "";
 
 var apiUri  = process.env.MAILCHIMP_API_URI;
 var apiUser = process.env.MAILCHIMP_API_USER;
@@ -430,7 +432,7 @@ library.dialog('/looseRequest', [
     },
 
     (session, args) => {
-        session.dialogData.name = args.response;
+        name = args.response;
 
         var html = '<p style="font-size:7pt">Eu, ' + session.dialogData.name + ', com fundamento na Lei 12.527, de 18 de novembro de 2011, e na Lei Complementar 131, de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="font-size:7pt"">'
         + itens.join("") +
@@ -438,55 +440,77 @@ library.dialog('/looseRequest', [
 
         pdf.create(html).toStream((err, stream) => {
             var pdf = stream.pipe(fs.createWriteStream('/tmp/' + session.dialogData.name + 'LAI.pdf'));
-            const file = pdf.path.slice(5);
+            file = pdf.path;
 
-            var data = generatedRequest.loadSync(path, file);
-            data = JSON.stringify(data);
-
-            // Uploading the PDF to the MailChimp
-            var dataString = '{"name":"' + session.dialogData.name + 'LAI.pdf" , "file_data":' + data + '}'
-
-            var options = {
-                url: apiUri,
-                method: 'POST',
-                headers: headers,
-                body: dataString,
-                auth: {
-                    'user': apiUser,
-                    'pass': apiKey
+            console.log(file);
+            builder.Prompts.choice(session,
+                "Muito bem! Acabamos! Vamos gerar seu pedido?",
+                [HappyYes],
+                {
+                    listStyle: builder.ListStyle.button,
+                    retryPrompt: retryPrompts.choice
                 }
-            };
-
-            function callback(error, response, body) {
-                if (!error && response.statusCode == 200) {
-                    var obj = JSON.parse(body);
-                    console.log(obj.full_size_url);
-
-                    msg = new builder.Message(session);
-                    msg.sourceEvent({
-                        facebook: {
-                            message: {
-                                attachment:{
-                                    type:"file",
-                                    payload:{
-                                        url: obj.full_size_url,
-                                    }
-                                }
-                            }
-                        }
-                    });
-                    session.send(msg);
-                }
-            }
-
-            request(options,callback);
-            fs.unlink(pdf.path);
+            );
         });
+
         itens.length = 0;
     },
 
-
+    (session, args) => {
+        switch(args.response.entity) {
+            case HappyYes:
+                session.beginDialog('/generateRequest');
+                break;
+        }
+    }
 
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+
+library.dialog('/generateRequest', [
+    (session) => {
+        var data = generatedRequest.loadSync(path, file.slice(5));
+        data = JSON.stringify(data);
+
+        // Uploading the PDF to the MailChimp
+        var dataString = '{"name":"' + name + 'LAI.pdf" , "file_data":' + data + '}'
+
+        var options = {
+            url: apiUri,
+            method: 'POST',
+            headers: headers,
+            body: dataString,
+            auth: {
+                'user': apiUser,
+                'pass': apiKey
+            }
+        };
+
+        function callback(error, response, body) {
+            if (!error && response.statusCode == 200) {
+                var obj = JSON.parse(body);
+                console.log(obj.full_size_url);
+
+                msg = new builder.Message(session);
+                msg.sourceEvent({
+                    facebook: {
+                        message: {
+                            attachment:{
+                                type:"file",
+                                payload:{
+                                    url: obj.full_size_url,
+                                }
+                            }
+                        }
+                    }
+                });
+                session.send(msg);
+            }
+        }
+
+        request(options,callback);
+        fs.unlink(file);
+    }
+]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+
 
 module.exports = library;
