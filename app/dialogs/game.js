@@ -138,7 +138,13 @@ library.dialog('/currentMission', [
                     if (user_mission.completed) {
                         session.send("Calma lá! Você já concluiu a missão 2, mas ainda não foi liberada a missão 3.");
                     } else {
-                        session.send("Calma lá amigo! A conclusão da missão 2 ainda não foi liberada.");
+                        session.beginDialog(
+                            'secondMissionConclusion:/',
+                            {
+                                user:         user,
+                                user_mission: user_mission
+                            }
+                        );
                     }
             }
         });
