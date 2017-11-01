@@ -457,7 +457,7 @@ library.dialog('/generateRequest', [
                         completed: false
                     },
                     returning: true
-                },
+                }
             )
             .then(result => {
                 console.log(result + "Mission updated sucessfuly");
