@@ -2,6 +2,7 @@ bot.library(require('./contact'));
 bot.library(require('./first_mission/conclusion'));
 bot.library(require('./first_mission/assign'));
 bot.library(require('./second_mission/assign'));
+bot.library(require('./second_mission/conclusion'));
 
 var builder = require('botbuilder');
 var dateFns = require('date-fns');
