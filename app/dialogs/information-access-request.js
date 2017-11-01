@@ -9,13 +9,15 @@ var Base64File = require('js-base64-file');
 var emoji        = require('../misc/speeches_utils/emojis');
 var retryPrompts = require('../misc/speeches_utils/retry-prompts');
 
-User = require('../server/schema/models').user;
+User        = require('../server/schema/models').user;
+UserMission = require('../server/schema/models').user_mission;
 
 const library = new builder.Library('informationAccessRequest');
 
 const Yes      = "Sim";
 const No       = "Não";
 const HappyYes = "Vamos lá!";
+const Confirm  = "Beleza!";
 
 let user, user_mission, name;
 
@@ -46,87 +48,12 @@ var headers = {
 
 library.dialog('/', [
     (session, args) => {
-        // if (args.user && args.user_mission) {
-        //     user         = args.user;
-        //     user_mission = args.user_mission;
-
-        //     session.replaceDialog('/userPartOfTheGame');
-        // } else {
-            session.replaceDialog('/looseRequest');
-        // }
-    }
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
-
-library.dialog('/userPartOfTheGame', [
-    (session) => {
-        var firstMissionAnswers = user_mission.metadata;
-
-        console.log(firstMissionAnswers);
-
-        if (!firstMissionAnswers.transparencyPortalExists) {
+        if (args.user && args.user_mission) {
+            user         = args.user;
+            user_mission = args.user_mission;
         }
 
-        session.sendTyping();
-        builder.Prompts.choice(session,
-            "A respeito dos gastos, o site permite que você identifique todos os seguintes itens?" +
-            "\n\n\n - Qual o número do processo que deu origem aquele gasto;" +
-            "\n\n\n - O bem fornecido ou o serviço prestado ao seu município;" +
-            "\n\n\n - Pessoa física ou jurídica beneficiária do pagamento;" +
-            "\n\n\n - E, quando for o caso, o procedimento licitatório realizado.",
-            [Yes, No],
-            {
-                listStyle: builder.ListStyle.button,
-                retryPrompt: retryPrompts.choice
-            }
-        );
-    },
-
-    (session, args) => {
-        console.log(args.response);
-        switch(args.response.entity) {
-            case Yes:
-                break;
-            case No:
-                builder.Prompts.choice(session,
-                    "Seu município identifica de onde vêm os recursos que ele recebe? \n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.",
-                    [Yes, No],
-                    {
-                        listStyle: builder.ListStyle.button,
-                        retryPrompt: retryPrompts.choice
-                    }
-                );
-                break;
-        }
-
-    },
-
-    (session, args) => {
-        switch(args.response.entity) {
-            case Yes:
-                break;
-            case No:
-                itens.push("<p> - Disponibilização sobre receitas, despesas e endividamento público, nos termos da Lei Complementar 131, de 27 de maio de 2009, e demais regras aplicáveis;\n\n</p>");
-                break;
-        }
-
-        builder.Prompts.choice(session,
-            "O portal de transparência disponibiliza dados referentes a remuneração de cada um dos agentes públicos, individualizada?",
-            [Yes, No],
-            {
-                listStyle: builder.ListStyle.button,
-                retryPrompt: retryPrompts.choice
-            }
-        );
-    },
-
-    (session, args) => {
-        switch(args.response.entity) {
-            case Yes:
-                break;
-            case No:
-                itens.push("<p> - Disponibilização sobre remuneração de cada um dos agentes públicos, individualizada – o modelo do Portal da Transparência do Governo Federal é um exemplo;</p>");
-                break;
-        }
+        session.replaceDialog('/looseRequest');
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
@@ -517,6 +444,48 @@ library.dialog('/generateRequest', [
 
         request(options,callback);
         fs.unlink(file);
+    },
+
+    (session) => {
+        if (user && user_mission) {
+            UserMission.update(
+                { metadata: '{ request_generated: 1 }' },
+                {
+                    where: {
+                        user_id: user.id,
+                        mission_id: 2,
+                        completed: false
+                    },
+                    returning: true
+                },
+            )
+            .then(result => {
+                console.log(result + "Mission updated sucessfuly");
+                builder.Prompts.choice(session,
+                    "Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ou levar esse pedido em formato físico e protocola-lo.",
+                    [ Confirm ],
+                    {
+                        listStyle: builder.ListStyle.button,
+                        retryPrompt: retryPrompts.choice
+                    }
+                );
+            })
+            .catch(e => {
+                console.log("Error updating mission" + e);
+                session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
+                session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+                throw e;
+            });
+        }
+    },
+
+    (session, args) => {
+        switch (args.response.entity) {
+            case Confirm:
+                session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+                session.replaceDialog('/welcomeBack');
+                break;
+        }
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
