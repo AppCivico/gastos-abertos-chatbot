@@ -51,6 +51,8 @@ library.dialog('/', [
         if (args && args.user && args.user_mission) {
             user         = args.user;
             user_mission = args.user_mission;
+            session.send("Esse é um processo bem extenso e tem bastante conteúdo. Caso você tenha qualquer tipo de dúvidas nos mande!\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)");
+            session.send("Além disso você pode a qualquer momento digitar 'cancelar' e eu te levo para o início");
         } else {
             session.send("Você está gerando um pedido de acesso à informação avulso.");
         }
