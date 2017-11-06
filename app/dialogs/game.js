@@ -175,13 +175,16 @@ library.dialog('/currentMission', [
                         session.send("Você está na segunda missão, no entanto não gerou um pedido de acesso à informação.");
                         session.replaceDialog("/sendToInformationAccessRequest");
                     } else {
-                        session.beginDialog(
-                            'secondMissionConclusion:/',
-                            {
-                                user:         user,
-                                user_mission: user_mission
-                            }
-                        );
+                        session.send("Calma lá! A conclusão da missão 2 ainda não foi liberada.");
+                        session.endDialog();
+                        session.beginDialog('/welcomeBack')
+                        // session.beginDialog(
+                        //     'secondMissionConclusion:/',
+                        //     {
+                        //         user:         user,
+                        //         user_mission: user_mission
+                        //     }
+                        // );
                     }
             }
         });
