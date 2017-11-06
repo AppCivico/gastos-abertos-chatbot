@@ -23,9 +23,6 @@ let user, user_mission, name;
 
 let itens = [];
 
-if (session.message.address.channelId == 'facebook') {
-            var fbId = session.message.sourceEvent.sender.id;
-
 var options = { 
     "border": {
         "top": "5em",
@@ -54,28 +51,29 @@ library.dialog('/', [
         if (args && args.user && args.user_mission) {
             user         = args.user;
             user_mission = args.user_mission;
-        } else if (session.message.address.channelId == 'facebook' && !args) {
-            var fbId = session.message.sourceEvent.sender.id;
+        } 
+        // else if (session.message.address.channelId == 'facebook' && !args) {
+        //     var fbId = session.message.sourceEvent.sender.id;
 
-            // User.findOne({
-            //     where: {
-            //         email: email,
-            //         fb_id: fbId
-            //     }
-            // }).then(User => {
-            //     user = User.dataValues;
+        //     User.findOne({
+        //         where: {
+        //             email: email,
+        //             fb_id: fbId
+        //         }
+        //     }).then(User => {
+        //         user = User.dataValues;
 
-            //     builder.Prompts.choice(session,
-            //         user.name + "você está gerando um ",
-            //         [Yes, No],
-            //         {
-            //             listStyle: builder.ListStyle.button,
-            //             retryPrompt: retryPrompts.choice
-            //         }
-            //     );
+        //         builder.Prompts.choice(session,
+        //             user.name + "você está gerando um ",
+        //             [Yes, No],
+        //             {
+        //                 listStyle: builder.ListStyle.button,
+        //                 retryPrompt: retryPrompts.choice
+        //             }
+        //         );
 
-            // });
-        }
+        //     });
+        // }
 
         session.replaceDialog('/looseRequest');
     }
