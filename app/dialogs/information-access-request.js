@@ -519,7 +519,6 @@ library.dialog('/generateRequest', [
         switch (args.response.entity) {
             case Confirm:
                 session.endDialog();
-                session.endDialog();
                 session.replaceDialog('/welcomeBack');
                 break;
         }
