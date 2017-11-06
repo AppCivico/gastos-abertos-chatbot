@@ -31,7 +31,6 @@ bot.dialog('/', [
 
 bot.dialog('/getstarted', [
     (session) => {
-        session.reset();
         console.log(session.userData);
         session.sendTyping();
         if( !session.userData.firstRun ) {
