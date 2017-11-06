@@ -463,15 +463,7 @@ library.dialog('/generateRequest', [
                     }
                 });
                 session.send(msg);
-            }
-        }
-
-        request(options,callback);
-        fs.unlink(file);
-    },
-
-    (session) => {
-        if (user && user_mission) {
+                 if (user && user_mission) {
             UserMission.update(
                 { metadata: { request_generated: 1 } },
                 {
@@ -514,7 +506,58 @@ library.dialog('/generateRequest', [
                 }
             );
         }
+            }
+        }
+
+        request(options,callback);
+        fs.unlink(file);
     },
+
+    // (session) => {
+    //     if (user && user_mission) {
+    //         UserMission.update(
+    //             { metadata: { request_generated: 1 } },
+    //             {
+    //                 where: {
+    //                     user_id: user.id,
+    //                     mission_id: 2,
+    //                     completed: false
+    //                 },
+    //                 returning: true
+    //             }
+    //         )
+    //         .then(result => {
+    //             console.log(result + "Mission updated sucessfuly");
+    //             session.send("Ae!! Conseguimos! Demorou mas chegamos ao final");
+    //             session.send("Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ou levar esse pedido em formato físico e protocola-lo.");
+    //             session.send("No entanto o poder público tem um tempo limite de 20 dias para responder o seu pedido");
+    //             session.send("E precisamos dessa resposta para completar nossa segunda missão");
+    //             builder.Prompts.choice(session,
+    //                 "Então pode ficar tranquilo que te chamo quando for liberada a conclusão ;D",
+    //                 [ Confirm ],
+    //                 {
+    //                     listStyle: builder.ListStyle.button,
+    //                     retryPrompt: retryPrompts.choice
+    //                 }
+    //             );
+    //         })
+    //         .catch(e => {
+    //             console.log("Error updating mission" + e);
+    //             session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
+    //             session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+    //             throw e;
+    //         });
+    //     } else {
+    //         builder.Prompts.choice(session,
+    //             "Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ou levar esse pedido em formato físico e protocola-lo.",
+    //             [ Confirm ],
+    //             {
+    //                 listStyle: builder.ListStyle.button,
+    //                 retryPrompt: retryPrompts.choice
+    //             }
+    //         );
+    //     }
+    // },
 
     (session, args) => {
         switch (args.response.entity) {
