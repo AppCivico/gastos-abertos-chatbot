@@ -49,7 +49,7 @@ library.dialog('/assign', [
         UserMission.create({
                 user_id: user.id,
                 mission_id: 2,
-                metadata: { informationAccessRequestGenerated: 0 }
+                metadata: { request_generated: 0 }
             })
             .then(UserMission => {
                 session.send("Vamos nessa!");
@@ -68,30 +68,13 @@ library.dialog('/assign', [
     (session, args) => {
         switch(args.response.entity) {
             case HappyYes:
-                UserMission.update({
-                    metadata: { informationAccessRequestGenerated: 1 }
-                }, {
-                    where: {
-                        user_id: user.id,
-                        mission_id: 2,
-                        completed: false
-                    },
-                    returning: true,
-                })
-                .then(result => {
-                    console.log(result + "Mission updated sucessfuly");
-                    session.beginDialog(
+                session.beginDialog(
                     'informationAccessRequest:/',
                     {
                         user:         user,
                         user_mission: user_mission
                     }
                 );
-                })
-                .catch(e => {
-                    console.log("Error updating mission" + e);
-                    throw e;
-                });
                 break;
             case No:
                 session.send("Beleza! Estarei te esperando aqui para seguirmos em frente!");
