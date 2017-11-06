@@ -1,7 +1,9 @@
 bot.library(require('./contact'));
+bot.library(require('./information-access-request'));
 bot.library(require('./first_mission/conclusion'));
 bot.library(require('./first_mission/assign'));
 bot.library(require('./second_mission/assign'));
+bot.library(require('./second_mission/conclusion'));
 
 var builder = require('botbuilder');
 var dateFns = require('date-fns');
@@ -75,32 +77,64 @@ library.dialog('/missionStatus', [
             tabela 'user_mission'. Caso ele não tenha nenhuma entrada, está aprovado mas está
             inativo. Devo então iniciar o processo da primeira missão
         */
-        User.findOne({
-            where: {
-                email: email
-            }
-        }).then(User => {
-            user = User.dataValues;
+        if (session.message.address.channelId == 'facebook') {
+            var fbId = session.message.sourceEvent.sender.id;
 
-            UserMission.count({
-                where: {
-                    user_id: user.id
-                }
-            })
-            .then(count => {
-                if (count === 0 && !user.active && user.approved) {
-                    session.beginDialog(
-                        'firstMissionAssign:/',
-                        {   
-                           user:         user,
-                           user_mission: user_mission
-                        }); 
-                    return user;
-                } else {
-                    session.replaceDialog('/currentMission');
-                }
+            User.findOne({
+            where: {
+                email: email,
+                fb_id: fbId
+            }
+            }).then(User => {
+                user = User.dataValues;
+
+                UserMission.count({
+                    where: {
+                        user_id: user.id
+                    }
+                })
+                .then(count => {
+                    if (count === 0 && !user.active && user.approved) {
+                        session.beginDialog(
+                            'firstMissionAssign:/',
+                            {   
+                               user:         user,
+                               user_mission: user_mission
+                            }); 
+                        return user;
+                    } else {
+                        session.replaceDialog('/currentMission');
+                    }
+                });
             });
-        });
+        } else {
+            User.findOne({
+                where: {
+                    email: email,
+                }
+            }).then(User => {
+                user = User.dataValues;
+
+                UserMission.count({
+                    where: {
+                        user_id: user.id
+                    }
+                })
+                .then(count => {
+                    if (count === 0 && !user.active && user.approved) {
+                        session.beginDialog(
+                            'firstMissionAssign:/',
+                            {   
+                               user:         user,
+                               user_mission: user_mission
+                            }); 
+                        return user;
+                    } else {
+                        session.replaceDialog('/currentMission');
+                    }
+                });
+            });
+        }
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
@@ -137,12 +171,56 @@ library.dialog('/currentMission', [
                 case 2:
                     if (user_mission.completed) {
                         session.send("Calma lá! Você já concluiu a missão 2, mas ainda não foi liberada a missão 3.");
+                    } else if (user_mission.metadata.request_generated === 0) {
+                        session.send("Você está na segunda missão, no entanto não gerou um pedido de acesso à informação.");
+                        session.replaceDialog("/sendToInformationAccessRequest");
                     } else {
-                        session.send("Calma lá amigo! A conclusão da missão 2 ainda não foi liberada.");
+                        session.send("Calma lá! A conclusão da missão 2 ainda não foi liberada.");
+                        session.endDialog();
+                    session.replaceDialog('/welcomeBack');
+                        // session.beginDialog(
+                        //     'secondMissionConclusion:/',
+                        //     {
+                        //         user:         user,
+                        //         user_mission: user_mission
+                        //     }
+                        // );
                     }
             }
         });
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+
+library.dialog('/sendToInformationAccessRequest', [
+    (session) => {
+        builder.Prompts.choice(session,
+            'Vamos gerar seu pedido?',
+            [Yes, No],
+            {
+                listStyle: builder.ListStyle.button,
+                retryPrompt: retryPrompts.choice
+            }
+        );
+    },
+
+    (session, args) => {
+         switch(args.response.entity) {
+            case Yes:
+                session.beginDialog(
+                    'informationAccessRequest:/',
+                    {
+                        user:         user,
+                        user_mission: user_mission
+                    }
+                );
+                break;
+            case No:
+                session.send("Okay! Eu estarei aqui esperando para começarmos!");
+                session.endDialog();
+                session.replaceDialog('/welcomeBack');
+                break;
+        }
+    }
+]);
 
 module.exports = library;

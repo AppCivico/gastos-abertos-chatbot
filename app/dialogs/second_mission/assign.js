@@ -49,7 +49,7 @@ library.dialog('/assign', [
         UserMission.create({
                 user_id: user.id,
                 mission_id: 2,
-                metadata: { informationAccessRequestGenerated: 0 }
+                metadata: { request_generated: 0 }
             })
             .then(UserMission => {
                 session.send("Vamos nessa!");
@@ -77,32 +77,11 @@ library.dialog('/assign', [
                 );
                 break;
             case No:
+                session.send("Beleza! Estarei te esperando aqui para seguirmos em frente!");
                 session.endDialog();
-                session.beginDialog('/');
+                session.beginDialog('/welcomeBack');
                 break;
         }
-    }
-]);
-
-library.dialog('/updateUserMission', [
-    (session) => {
-        UserMission.update({
-            metadata: { informationAccessRequestGenerated: 1 }
-        }, {
-            where: {
-                user_id: user.id,
-                mission_id: 2,
-                completed: false
-            },
-            returning: true,
-        })
-        .then(result => {
-            console.log(result + "Mission updated sucessfuly");
-        })
-        .catch(e => {
-            console.log("Error updating mission" + e);
-            throw e;
-        });
     }
 ]);
 

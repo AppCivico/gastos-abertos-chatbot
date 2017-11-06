@@ -420,8 +420,8 @@ library.dialog('/userUpdate', [
     (session, args) => {
         switch (args.response.entity) {
             case Confirm:
-                session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-                session.replaceDialog('/welcomeBack');
+                session.endDialog();
+                session.beginDialog('/welcomeBack');
                 break;
         }
     }
