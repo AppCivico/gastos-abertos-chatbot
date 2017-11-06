@@ -176,6 +176,8 @@ library.dialog('/currentMission', [
                         session.replaceDialog("/sendToInformationAccessRequest");
                     } else {
                         session.send("Calma lá! A conclusão da missão 2 ainda não foi liberada.");
+                        session.endDialog();
+                    session.replaceDialog('/welcomeBack');
                         // session.beginDialog(
                         //     'secondMissionConclusion:/',
                         //     {
@@ -215,7 +217,7 @@ library.dialog('/sendToInformationAccessRequest', [
             case No:
                 session.send("Okay! Eu estarei aqui esperando para começarmos!");
                 session.endDialog();
-                session.beginDialog('/welcomeBack');
+                session.replaceDialog('/welcomeBack');
                 break;
         }
     }
