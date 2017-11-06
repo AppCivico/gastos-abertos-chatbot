@@ -51,7 +51,9 @@ library.dialog('/', [
         if (args && args.user && args.user_mission) {
             user         = args.user;
             user_mission = args.user_mission;
-        } 
+        } else {
+            session.send("Você está gerando um pedido de acesso à informação avulso.");
+        }
         // else if (session.message.address.channelId == 'facebook' && !args) {
         //     var fbId = session.message.sourceEvent.sender.id;
 
