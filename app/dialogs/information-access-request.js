@@ -498,13 +498,19 @@ library.dialog('/generateRequest', [
             })
             .catch(e => {
                 console.log("Error updating mission" + e);
-                session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
+                session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
                 session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
                 throw e;
             });
         } else {
-            session.endDialog();
-            session.replaceDialog('/welcomeBack');
+            builder.Prompts.choice(session,
+                "Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ou levar esse pedido em formato físico e protocola-lo.",
+                [ Confirm ],
+                {
+                    listStyle: builder.ListStyle.button,
+                    retryPrompt: retryPrompts.choice
+                }
+            );
         }
     },
 

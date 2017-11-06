@@ -68,13 +68,30 @@ library.dialog('/assign', [
     (session, args) => {
         switch(args.response.entity) {
             case HappyYes:
-                session.beginDialog(
+                UserMission.update({
+                    metadata: { informationAccessRequestGenerated: 1 }
+                }, {
+                    where: {
+                        user_id: user.id,
+                        mission_id: 2,
+                        completed: false
+                    },
+                    returning: true,
+                })
+                .then(result => {
+                    console.log(result + "Mission updated sucessfuly");
+                    session.beginDialog(
                     'informationAccessRequest:/',
                     {
                         user:         user,
                         user_mission: user_mission
                     }
                 );
+                })
+                .catch(e => {
+                    console.log("Error updating mission" + e);
+                    throw e;
+                });
                 break;
             case No:
                 session.send("Beleza! Estarei te esperando aqui para seguirmos em frente!");
@@ -82,28 +99,6 @@ library.dialog('/assign', [
                 session.beginDialog('/welcomeBack');
                 break;
         }
-    }
-]);
-
-library.dialog('/updateUserMission', [
-    (session) => {
-        UserMission.update({
-            metadata: { informationAccessRequestGenerated: 1 }
-        }, {
-            where: {
-                user_id: user.id,
-                mission_id: 2,
-                completed: false
-            },
-            returning: true,
-        })
-        .then(result => {
-            console.log(result + "Mission updated sucessfuly");
-        })
-        .catch(e => {
-            console.log("Error updating mission" + e);
-            throw e;
-        });
     }
 ]);
 
