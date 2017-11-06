@@ -177,7 +177,6 @@ library.dialog('/currentMission', [
                     } else {
                         session.send("Calma lá! A conclusão da missão 2 ainda não foi liberada.");
                         session.endDialog();
-                        session.beginDialog('/welcomeBack')
                         // session.beginDialog(
                         //     'secondMissionConclusion:/',
                         //     {
