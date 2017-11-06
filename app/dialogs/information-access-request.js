@@ -23,6 +23,9 @@ let user, user_mission, name;
 
 let itens = [];
 
+if (session.message.address.channelId == 'facebook') {
+            var fbId = session.message.sourceEvent.sender.id;
+
 var options = { 
     "border": {
         "top": "5em",
@@ -48,9 +51,30 @@ var headers = {
 
 library.dialog('/', [
     (session, args) => {
-        if (args.user && args.user_mission) {
+        if (args && args.user && args.user_mission) {
             user         = args.user;
             user_mission = args.user_mission;
+        } else if (session.message.address.channelId == 'facebook' && !args) {
+            var fbId = session.message.sourceEvent.sender.id;
+
+            // User.findOne({
+            //     where: {
+            //         email: email,
+            //         fb_id: fbId
+            //     }
+            // }).then(User => {
+            //     user = User.dataValues;
+
+            //     builder.Prompts.choice(session,
+            //         user.name + "você está gerando um ",
+            //         [Yes, No],
+            //         {
+            //             listStyle: builder.ListStyle.button,
+            //             retryPrompt: retryPrompts.choice
+            //         }
+            //     );
+
+            // });
         }
 
         session.replaceDialog('/looseRequest');
@@ -366,7 +390,7 @@ library.dialog('/looseRequest', [
         '</div><div style="font-size:7pt"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível, solicito que a impossibilidade de apresentação de informações seja motivada, sob pena de responsabilidade, e que a série histórica mais longa disponível à Prefeitura das informações seja disponibilizada em página oficial na internet e que acompanhe a resposta a esta solicitação.</p></div>';
 
         pdf.create(html).toStream((err, stream) => {
-            var pdf = stream.pipe(fs.createWriteStream('/tmp/' + session.dialogData.name + 'LAI.pdf'));
+            var pdf = stream.pipe(fs.createWriteStream('/tmp/' + name + 'LAI.pdf'));
             file = pdf.path;
 
             console.log(file);
@@ -449,7 +473,7 @@ library.dialog('/generateRequest', [
     (session) => {
         if (user && user_mission) {
             UserMission.update(
-                { metadata: '{ request_generated: 1 }' },
+                { metadata: { request_generated: 1 } },
                 {
                     where: {
                         user_id: user.id,
@@ -461,8 +485,12 @@ library.dialog('/generateRequest', [
             )
             .then(result => {
                 console.log(result + "Mission updated sucessfuly");
+                session.send("Ae!! Conseguimos! Demorou mas chegamos ao final");
+                session.send("Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ou levar esse pedido em formato físico e protocola-lo.");
+                session.send("No entanto o poder público tem um tempo limite de 20 dias para responder o seu pedido");
+                session.send("E precisamos dessa resposta para completar nossa segunda missão");
                 builder.Prompts.choice(session,
-                    "Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ou levar esse pedido em formato físico e protocola-lo.",
+                    "Então pode ficar tranquilo que te chamo quando for liberada a conclusão ;D",
                     [ Confirm ],
                     {
                         listStyle: builder.ListStyle.button,
@@ -476,6 +504,9 @@ library.dialog('/generateRequest', [
                 session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
                 throw e;
             });
+        } else {
+            session.endDialog();
+            session.replaceDialog('/welcomeBack');
         }
     },
 

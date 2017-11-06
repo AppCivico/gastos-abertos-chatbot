@@ -33,7 +33,9 @@ module.exports = {
         {
             assign:
                 [
-                    "Nessa nossa segunda tarefa chegou a hora de pegarmos o diagnóstico que fizemos na missão anterior e protocolarmos um pedido de acesso à informação para os dados que faltam."
+                    "Nossa segunda missão é o seguinte:\n\n" +
+                    "- Avaliar alguns pontos bem mais detalhados do portal de transparência de seu município;\n\n" +
+                    "- Protocolar um pedido de acesso à informação exigindo os dados ausentes."
                 ]
         }
 };   

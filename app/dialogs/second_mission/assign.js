@@ -77,8 +77,9 @@ library.dialog('/assign', [
                 );
                 break;
             case No:
+                session.send("Beleza! Estarei te esperando aqui para seguirmos em frente!");
                 session.endDialog();
-                session.beginDialog('/');
+                session.beginDialog('/welcomeBack');
                 break;
         }
     }
