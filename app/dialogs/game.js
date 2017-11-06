@@ -25,6 +25,7 @@ const No               = "Não";
 let email = "";
 let user;
 let user_mission;
+let fbId;
 
 var firstMissionCompleteMinDate = dateFns.format(new Date(2017, 08, 19), 'MM/DD/YYYY');
 var today                       = dateFns.format(new Date(), 'MM/DD/YYYY');
@@ -32,11 +33,15 @@ var today                       = dateFns.format(new Date(), 'MM/DD/YYYY');
 library.dialog('/', [
     (session) => {
         session.sendTyping();
-        session.beginDialog('validators:email', {
-            prompt: "Qual é o e-mail que você utilizou para se cadastrar como líder?",
-            retryPrompt: retryPrompts.email,
-            maxRetries: 10
-        });
+        if (session.message.address.channelId != 'facebook') {
+            session.beginDialog('validators:email', {
+                prompt: "Qual é o e-mail que você utilizou para se cadastrar como líder?",
+                retryPrompt: retryPrompts.email,
+                maxRetries: 10
+            });
+        } else {
+            fbId = session.message.sourceEvent.sender.id;
+        }
     },
     (session, args) => {
         if (args.resumed) {
@@ -46,27 +51,48 @@ library.dialog('/', [
             return;
         }
 
-        email = args.response;
-        session.sendTyping();
+        if (args) { 
+            email = args.response;
+            session.sendTyping();
 
-        User.count({
-            where: {
-                email: email
-            }
-        })
-        .then(count => {
-            if (count != 0) {
-                session.sendTyping();
-                session.replaceDialog('/missionStatus');
-                return email;
-            } else {
-                session.sendTyping();
-                session.send("Hmmm...Não consegui encontrar seu cadastro. Tente novamente.");
-                session.endDialog();
-                session.beginDialog('/welcomeBack');
-                return;
-            }
-        });
+            User.count({
+                where: {
+                    email: email
+                }
+            })
+            .then(count => {
+                if (count != 0) {
+                    session.sendTyping();
+                    session.replaceDialog('/missionStatus');
+                    return email;
+                } else {
+                    session.sendTyping();
+                    session.send("Hmmm...Não consegui encontrar seu cadastro. Tente novamente.");
+                    session.endDialog();
+                    session.beginDialog('/welcomeBack');
+                    return;
+                }
+            });
+        } else if (session.message.address.channelId == 'facebook') {
+            User.count({
+                where: {
+                    fb_id: fbId
+                }
+            })
+            .then(count => {
+                if (count != 0) {
+                    session.sendTyping();
+                    session.replaceDialog('/missionStatus');
+                    return email;
+                } else {
+                    session.sendTyping();
+                    session.send("Hmmm...Não consegui encontrar seu cadastro. Tente novamente.");
+                    session.endDialog();
+                    session.beginDialog('/welcomeBack');
+                    return;
+                }
+            });
+        }
     },
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
@@ -78,11 +104,9 @@ library.dialog('/missionStatus', [
             inativo. Devo então iniciar o processo da primeira missão
         */
         if (session.message.address.channelId == 'facebook') {
-            var fbId = session.message.sourceEvent.sender.id;
 
             User.findOne({
             where: {
-                email: email,
                 fb_id: fbId
             }
             }).then(User => {
