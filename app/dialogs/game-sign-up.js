@@ -3,7 +3,6 @@ var GoogleSpreadsheet = require('google-spreadsheet');
 var async             = require('async');
 
 bot.library(require('./contact'));
-bot.library(require('./first_mission/assign'));
 
 var emoji        = require('../misc/speeches_utils/emojis');
 var retryPrompts = require('../misc/speeches_utils/retry-prompts');
@@ -11,16 +10,13 @@ const mailer     = require('../server/mailer/mailer.js');
 
 User = require('../server/schema/models').user;
 
-const Contact      = "Entrar em contato";
-const Restart      = "Ir para o início";
-const FirstMission = "Ir para a missão";
+const Contact = "Entrar em contato";
+const Restart = "Ir para o início";
 
 const library = new builder.Library('gameSignUp');
 
 var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
 var sheet;
-
-let userCreated;
 
 library.dialog('/', [
     (session) => {
@@ -148,7 +144,6 @@ library.dialog('/', [
         })
         .then(function(User) {
             console.log('User created sucessfully');
-            userCreated = User.dataValues;
 
             mailer.listofemails.push(session.dialogData.email);
             mailer.massMailer();
@@ -169,11 +164,12 @@ library.dialog('/', [
             ]);
 
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
+            session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
             session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos.\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!");
-            session.send("Você pode também já ver a primeira missão nas opções abaixo.");
+
             builder.Prompts.choice(session,
                 'Posso te ajudar com mais alguma coisa?',
-                [ Contact, Restart, FirstMission ],
+                [ Contact, Restart ],
                 {
                     listStyle: builder.ListStyle.button,
                     retryPrompt: retryPrompts.choice
@@ -196,15 +192,6 @@ library.dialog('/', [
                 session.endDialog();
                 session.beginDialog('/welcomeBack');
                 break;
-            case FirstMission:
-                console.log(userCreated);
-                session.endDialog();
-                session.beginDialog(
-                    'firstMissionAssign:/',
-                    {
-                        user: userCreated
-                    }
-                );
         }
     }
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
