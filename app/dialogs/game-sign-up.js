@@ -17,8 +17,8 @@ const FirstMission = "Ir para a missão";
 
 const library = new builder.Library('gameSignUp');
 
-var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
-var sheet;
+// var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
+// var sheet;
 
 let userCreated;
 
@@ -150,23 +150,23 @@ library.dialog('/', [
             console.log('User created sucessfully');
             userCreated = User.dataValues;
 
-            mailer.listofemails.push(session.dialogData.email);
-            mailer.massMailer();
+            // mailer.listofemails.push(session.dialogData.email);
+            // mailer.massMailer();
 
-            async.series([
-                //Comment this whole block if you're not feeding a Google Spreadsheet
-                function setAuth(step)  {
-                    // This is where you insert your JSON credentials file
-                    var creds = require('./Gastos-abertos-spreadsheet-b1c4c355e003.json');
-                    doc.useServiceAccountAuth(creds, step);
-                },
+            // async.series([
+            //     //Comment this whole block if you're not feeding a Google Spreadsheet
+            //     function setAuth(step)  {
+            //         // This is where you insert your JSON credentials file
+            //         var creds = require('./Gastos-abertos-spreadsheet-b1c4c355e003.json');
+            //         doc.useServiceAccountAuth(creds, step);
+            //     },
 
-                function addEntry(step) {
-                    doc.addRow(process.env.GOOGLE_WORKSHEET_ID, user, function(err, row) {
-                        step();
-                    });
-                }
-            ]);
+            //     function addEntry(step) {
+            //         doc.addRow(process.env.GOOGLE_WORKSHEET_ID, user, function(err, row) {
+            //             step();
+            //         });
+            //     }
+            // ]);
 
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
             session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos.\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!");

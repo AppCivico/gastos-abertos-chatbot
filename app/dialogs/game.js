@@ -170,21 +170,22 @@ library.dialog('/currentMission', [
                     break;
                 case 2:
                     if (user_mission.completed) {
-                        session.send("Calma lá! Você já concluiu a missão 2, mas ainda não foi liberada a missão 3.");
+                        session.send("Parabéns! Você concluiu o processo de missões do Gastos Abertos!");
+                        session.send("Caso você não participe ainda, junte-se a nós no grupo do WhatsApp do Gastos Abertos! Lá temos bastante discussões legais e ajudamos com tudo que conseguimos!");
+                        session.send("Basta clicar no link a seguir: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS");
+                        session.endDialog();
+                        session.beginDialog('/welcomeBack');
                     } else if (user_mission.metadata.request_generated === 0) {
                         session.send("Você está na segunda missão, no entanto não gerou um pedido de acesso à informação.");
                         session.replaceDialog("/sendToInformationAccessRequest");
                     } else {
-                        session.send("Calma lá! A conclusão da missão 2 ainda não foi liberada.");
-                        session.endDialog();
-                    session.replaceDialog('/welcomeBack');
-                        // session.beginDialog(
-                        //     'secondMissionConclusion:/',
-                        //     {
-                        //         user:         user,
-                        //         user_mission: user_mission
-                        //     }
-                        // );
+                        session.beginDialog(
+                            'secondMissionConclusion:/',
+                            {
+                                user:         user,
+                                user_mission: user_mission
+                            }
+                        ); 
                     }
             }
         });
