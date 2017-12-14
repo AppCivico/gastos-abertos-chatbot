@@ -83,7 +83,7 @@ library.dialog('/missionStatus', [
             User.findOne({
             where: {
                 email: email,
-                fb_id: fbId
+                // fb_id: fbId
             }
             }).then(User => {
                 user = User.dataValues;
