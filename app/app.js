@@ -76,6 +76,7 @@ bot.dialog('/promptButtons', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case GastosAbertosInformation:
+				session.beginDialog('gastosAbertosInformation:/');
 				break;
 			case Game:
 				session.replaceDialog('/game');

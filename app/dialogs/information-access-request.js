@@ -501,7 +501,7 @@ library.dialog('/generateRequest', [
 					},
 				});
 				session.send(msg);
-				if (User) { // or maybe its "user"?
+				if (user) {
 					UserMission.update(
 						{ metadata: { request_generated: 1 } },
 						{
