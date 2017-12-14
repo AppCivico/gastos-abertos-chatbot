@@ -1,3 +1,5 @@
+/* global  bot:true */
+
 bot.library(require('./game-sign-up'));
 bot.library(require('./contact'));
 
@@ -20,8 +22,11 @@ library.dialog('/', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'A equipe do Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.\n\n\nQuer conhecer mais sobre:',
-			[gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp, firstGastosAbertosCicleResults, contact, reset],
+			'A equipe do Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
+			'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.' +
+			'\n\n\nQuer conhecer mais sobre:',
+			[gastosAbertosCicles, secondGastosAbertosCicle, gameSignUp,
+				firstGastosAbertosCicleResults, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
@@ -47,7 +52,7 @@ library.dialog('/', [
 			case contact:
 				session.beginDialog('contact:/');
 				break;
-			case reset:
+			default: // reset
 				session.endDialog();
 				session.replaceDialog('/welcomeBack');
 				break;
@@ -85,7 +90,7 @@ library.dialog('/gastosAbertosCicles', [
 			case contact:
 				session.beginDialog('contact:/');
 				break;
-			case reset:
+			default: // reset
 				session.endDialog();
 				session.replaceDialog('/welcomeBack');
 				break;
@@ -127,7 +132,7 @@ library.dialog('/secondGastosAbertosCicle', [
 			case gastosAbertosCicles:
 				session.replaceDialog('/gastosAbertosCicles');
 				break;
-			case reset:
+			default: // reset
 				session.endDialog();
 				session.replaceDialog('/welcomeBack');
 				break;
@@ -141,7 +146,9 @@ library.dialog('/firstGastosAbertosCicleResults', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'No primeiro ciclo do gastos Abertos (2016-2017), tivemos 181 lideranças inscritas, 150 municípios atendidos, 75 portais de transparência avaliados, 25 pedidos realizados, 3 dados públicos de orçamento abertos e 1 carta compromisso assinada. \n\n\nPara o segundo ciclo, queremos atender mais municípios e formar novas lideranças.',
+			'No primeiro ciclo do gastos Abertos (2016-2017), tivemos 181 lideranças inscritas, 150 municípios atendidos,' +
+			'75 portais de transparência avaliados, 25 pedidos realizados, 3 dados públicos de orçamento abertos e 1 carta compromisso assinada.' +
+			'\n\n\nPara o segundo ciclo, queremos atender mais municípios e formar novas lideranças.',
 			[gameSignUp, contact, secondGastosAbertosCicle, gastosAbertosCicles, reset],
 			{
 				listStyle: builder.ListStyle.button,
@@ -165,7 +172,7 @@ library.dialog('/firstGastosAbertosCicleResults', [
 			case secondGastosAbertosCicle:
 				session.replaceDialog('/secondGastosAbertosCicle');
 				break;
-			case reset:
+			default: // reset
 				session.endDialog();
 				session.replaceDialog('/welcomeBack');
 				break;
@@ -179,7 +186,8 @@ library.dialog('/gameSignUpConfirmation', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.\n\n\nCom Guaxi, missão dada é missão cumprida.\nVamos começar?',
+			'Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
+			'\n\n\nCom Guaxi, missão dada é missão cumprida.\nVamos começar?',
 			[yes, no],
 			{
 				listStyle: builder.ListStyle.button,
@@ -194,7 +202,7 @@ library.dialog('/gameSignUpConfirmation', [
 			case yes:
 				session.beginDialog('gameSignUp:/');
 				break;
-			case no:
+			default: // no
 				session.replaceDialog('/gameSignUpDeclined');
 				break;
 			}
@@ -208,7 +216,8 @@ library.dialog('/gameSignUpDeclined', [
 		builder.Prompts.choice(
 			session,
 			'Ok! Posso te ajudar com alguma informação sobre',
-			[secondGastosAbertosCicle, firstGastosAbertosCicleResults, gastosAbertosCicles, contact, reset],
+			[secondGastosAbertosCicle, firstGastosAbertosCicleResults,
+				gastosAbertosCicles, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
@@ -228,7 +237,7 @@ library.dialog('/gameSignUpDeclined', [
 			case contact:
 				session.beginDialog('contact:/');
 				break;
-			case reset:
+			default: // reset
 				session.endDialog();
 				session.replaceDialog('/welcomeBack');
 				break;

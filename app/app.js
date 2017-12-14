@@ -14,6 +14,7 @@ bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 
+
 const GameSignUp = 'Inscrição 2º Ciclo';
 const GastosAbertosInformation = 'Sobre o projeto';
 const Contact = 'Entrar em contato';
@@ -35,7 +36,6 @@ bot.dialog('/', [
 
 bot.dialog('/getstarted', [
 	(session) => {
-		console.log(session.userData);
 		session.sendTyping();
 		if (!session.userData.firstRun) {
 			session.userData.userid = session.message.sourceEvent.sender.id;
@@ -76,7 +76,6 @@ bot.dialog('/promptButtons', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case GastosAbertosInformation:
-				session.beginDialog('gastosAbertosInformation:/');
 				break;
 			case Game:
 				session.replaceDialog('/game');
