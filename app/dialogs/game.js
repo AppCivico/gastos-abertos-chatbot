@@ -27,7 +27,8 @@ let user;
 let user_mission;
 
 var firstMissionCompleteMinDate = dateFns.format(new Date(2017, 08, 19), 'MM/DD/YYYY');
-var today = dateFns.format(new Date(), 'MM/DD/YYYY');
+var today                       = dateFns.format(new Date(), 'MM/DD/YYYY');
+
 library.dialog('/', [
     (session) => {
         session.sendTyping();
@@ -96,10 +97,10 @@ library.dialog('/missionStatus', [
                     if (count === 0 && !user.active && user.approved) {
                         session.beginDialog(
                             'firstMissionAssign:/',
-                            {
+                            {   
                                user:         user,
                                user_mission: user_mission
-                            });
+                            }); 
                         return user;
                     } else {
                         session.replaceDialog('/currentMission');
@@ -123,10 +124,10 @@ library.dialog('/missionStatus', [
                     if (count === 0 && !user.active && user.approved) {
                         session.beginDialog(
                             'firstMissionAssign:/',
-                            {
+                            {   
                                user:         user,
                                user_mission: user_mission
-                            });
+                            }); 
                         return user;
                     } else {
                         session.replaceDialog('/currentMission');
@@ -184,7 +185,7 @@ library.dialog('/currentMission', [
                                 user:         user,
                                 user_mission: user_mission
                             }
-                        );
+                        ); 
                     }
             }
         });

@@ -15,7 +15,7 @@ const Restart = "Ir para o início";
 
 const library = new builder.Library('gameSignUp');
 
-//var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
+var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
 var sheet;
 
 library.dialog('/', [
@@ -132,7 +132,7 @@ library.dialog('/', [
             occupation: session.dialogData.occupation,
         };
 
-        User.create({
+        User.create({ 
             name: user.name,
             email: user.email,
             birth_date: user.birth_date,
@@ -147,27 +147,27 @@ library.dialog('/', [
 
             mailer.listofemails.push(session.dialogData.email);
             mailer.massMailer();
-            //
-            // async.series([
-            //     //Comment this whole block if you're not feeding a Google Spreadsheet
-            //     function setAuth(step)  {
-            //         // This is where you insert your JSON credentials file
-            //         var creds = require('./Gastos-abertos-spreadsheet-b1c4c355e003.json');
-            //         doc.useServiceAccountAuth(creds, step);
-            //     },
-            //
-            //     function addEntry(step) {
-            //         doc.addRow(process.env.GOOGLE_WORKSHEET_ID, user, function(err, row) {
-            //             step();
-            //         });
-            //     }
-            // ]);
+
+            async.series([
+                //Comment this whole block if you're not feeding a Google Spreadsheet
+                function setAuth(step)  {
+                    // This is where you insert your JSON credentials file
+                    var creds = require('./Gastos-abertos-spreadsheet-b1c4c355e003.json');
+                    doc.useServiceAccountAuth(creds, step);
+                },
+
+                function addEntry(step) {
+                    doc.addRow(process.env.GOOGLE_WORKSHEET_ID, user, function(err, row) {
+                        step();
+                    });
+                }
+            ]);
+
             session.send("Muito bom, parceiro! Finalizamos sua inscrição.");
             session.send("Nossa equipe vai enviar em seu email a confirmação deste cadastro.");
             session.send("Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos.\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!");
 
             builder.Prompts.choice(session,
-
                 'Posso te ajudar com mais alguma coisa?',
                 [ Contact, Restart ],
                 {
