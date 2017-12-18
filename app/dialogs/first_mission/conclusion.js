@@ -28,12 +28,14 @@ const MoreInformations = 'Detalhes da missão';
 const Confirm = 'Beleza!';
 
 let user;
-let user_mission;
+// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
+// let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
-		user = args.user;
-		user_mission = args.user_mission;
+		[user] = [args.user];
+		//		missionUser = args.user_mission;
+
 
 		session.sendTyping();
 		builder.Prompts.choice(

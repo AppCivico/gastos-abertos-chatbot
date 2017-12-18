@@ -4,7 +4,7 @@ const library = new builder.Library('secondMissionAssign');
 
 bot.library(require('../information-access-request'));
 
-const User = require('../../server/schema/models').user;
+// const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 
 const Yes = 'Sim';
@@ -15,12 +15,13 @@ const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 
 let user;
-let user_mission;
+// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
+let MissionUser;
 
 library.dialog('/', [
 	(session, args) => {
-		user = args.user;
-		user_mission = args.user_mission;
+		[user] = [args.user];
+		MissionUser = args.user_mission;
 
 		builder.Prompts.choice(
 			session,
@@ -54,7 +55,8 @@ library.dialog('/assign', [
 			mission_id: 2,
 			metadata: { request_generated: 0 },
 		})
-			.then((UserMission) => {
+			// .then((UserMission) => {
+			.then(() => {
 				session.send('Vamos nessa!');
 				session.send(texts.second_mission.assign);
 				builder.Prompts.choice(
@@ -76,7 +78,7 @@ library.dialog('/assign', [
 				'informationAccessRequest:/',
 				{
 					user,
-					user_mission,
+					user_mission: MissionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;

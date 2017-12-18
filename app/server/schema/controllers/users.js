@@ -3,7 +3,7 @@ const User = require('../models').user;
 module.exports = {
 	// Create a new author using model.create()
 	create_user(session) {
-		console.log(session.dialogData.fullName);
+	// console.log(session.dialogData.fullName);
 		User.create({
 			name: session.dialogData.fullName,
 			email: session.dialogData.email,

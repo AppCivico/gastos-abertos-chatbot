@@ -25,9 +25,10 @@ let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
-		user = args.user;
-		console.log(user);
+		[user] = [args.user];
 		missionUser = args.user_mission;
+		console.log('imprimindo');
+		console.log(missionUser);
 		if (session.message.address.channelId === 'facebook') {
 			User.update({
 				fb_id: session.message.sourceEvent.sender.id,

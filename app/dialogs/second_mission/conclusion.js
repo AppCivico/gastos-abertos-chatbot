@@ -8,10 +8,9 @@ const answers = [
 	'answerWasSatisfactory',
 ];
 
-
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 
-const User = require('../../server/schema/models').user;
+// const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 
 const HappyYes = 'Vamos lá!';
@@ -19,7 +18,8 @@ const Yes = 'Sim';
 const No = 'No';
 
 let user;
-let user_mission;
+// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
+// let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
@@ -29,8 +29,8 @@ library.dialog('/', [
 			session.beginDialog('/welcomeBack');
 		}
 
-		user = args.user;
-		user_mission = args.user_mission;
+		[user] = [args.user];
+		//		missionUser = args.user_mission;
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -59,7 +59,9 @@ library.dialog('/', [
 ]);
 
 library.dialog('/secondMissionQuestions', [
-	(session, args) => {
+	(session) => {
+		// (session, args) => {
+
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -138,7 +140,8 @@ library.dialog('/secondMissionQuestions', [
 ]);
 
 library.dialog('/conclusion', [
-	(session, args) => {
+	(session) => {
+		//		(session, args) => {
 		UserMission.update({
 			completed: true,
 			metadata: answers,

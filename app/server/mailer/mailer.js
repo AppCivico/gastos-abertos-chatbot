@@ -14,7 +14,7 @@ const mailer = (function aa() {
 
 	let transporter;
 
-	self.massMailer = function () {
+	self.massMailer = () => {
 		transporter = nodemailer.createTransport({
 			service: 'SMTP',
 			host: process.env.SMTP_SERVER,
@@ -30,14 +30,14 @@ const mailer = (function aa() {
 		self.invokeOperation();
 	};
 
-	self.invokeOperation = function () {
+	self.invokeOperation = () => {
 		async.each(listofemails, self.SendEmail, () => {
 			console.log(successEmail);
 			console.log(failureEmail);
 		});
 	};
 
-	self.SendEmail = function (Email, callback) {
+	self.SendEmail = (Email, callback) => {
 		self.status = false;
 
 		async.waterfall([

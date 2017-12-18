@@ -93,7 +93,7 @@ bot.dialog('/promptButtons', [
 bot.dialog('/welcomeBack', [
 	(session) => {
 		session.sendTyping();
-		session.send('Olá companheiro! Bem vindo de volta!');
+		session.send('Olá, companheiro! Bem vindo de volta!');
 		builder.Prompts.choice(
 			session,
 			'Em que assunto eu posso te ajudar?',

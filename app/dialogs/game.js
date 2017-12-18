@@ -23,7 +23,7 @@ const No = 'Não';
 let email = '';
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser;
+let missionUser; // Vazio?
 
 // TODO mudanças provisórias para teste
 // const dateFns = require('date-fns');
@@ -77,11 +77,10 @@ library.dialog('/missionStatus', [
 						tabela 'user_mission'. Caso ele não tenha nenhuma entrada, está aprovado mas está
 						inativo. Devo então iniciar o processo da primeira missão
 				*/
-	//	if (session.message.address.channelId === 'facebook') {
-	//		const fbId = session.message.sourceEvent.sender.id;
-		if (1 === 1) {
-			const fbId = '100004770631443';
-
+		if (session.message.address.channelId === 'facebook') {
+			const fbId = session.message.sourceEvent.sender.id;
+			//	if (1 === 1) {
+			//		const fbId = '100004770631443';
 			// jordan@teste.com
 			User.findOne({
 				where: {
@@ -96,8 +95,8 @@ library.dialog('/missionStatus', [
 					},
 				})
 					.then((count) => {
-						//		if (count === 0 && !user.active && user.approved) {
-						if (1 === 1) {
+						if (count === 0 && !user.active && user.approved) {
+							//	if (1 === 1) {
 							session.beginDialog(
 								'firstMissionAssign:/',
 								{
@@ -151,7 +150,7 @@ library.dialog('/currentMission', [
 			},
 		})
 			.then((UserMissionData) => {
-				missionUser = UserMissionData[UserMission.length - 1].dataValues;
+				missionUser = UserMissionData[UserMissionData.length - 1].dataValues;
 
 				switch (missionUser.mission_id) {
 				case 1:
