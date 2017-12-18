@@ -23,7 +23,7 @@ module.exports = {
 		]);
 	},
 
-	down(queryInterface, Sequelize) {
+	down(queryInterface) {
 		queryInterface.bulkInsert('missions', [
 			{ code: 1 },
 			{ code: 2 },

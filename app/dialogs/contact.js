@@ -20,7 +20,7 @@ library.dialog('/', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Obrigado por seu interesse. Mas, diga como posso te ajudar?',
+			'Obrigado por seu interesse. Mas diga, como posso te ajudar?',
 			[SignUpProblems, Informations, MissionsInformations],
 			{
 				listStyle: builder.ListStyle.button,

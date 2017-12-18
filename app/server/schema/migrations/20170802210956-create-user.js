@@ -46,7 +46,8 @@ module.exports = {
 			},
 		});
 	},
-	down(queryInterface, Sequelize) {
+	// down(queryInterface, Sequelize) {
+	down(queryInterface) {
 		return queryInterface.dropTable('user');
 	},
 };
