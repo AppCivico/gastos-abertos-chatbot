@@ -25,6 +25,7 @@ const InformationAcessRequest = 'Gerar pedido';
 
 const maxSignUpDate = dateFns.format(new Date(2017, 8, 28), 'M/DD/YYYY');
 const today = dateFns.format(new Date(), 'MM/DD/YYYY');
+
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
 

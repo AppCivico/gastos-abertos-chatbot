@@ -50,8 +50,8 @@ const headers = {
 library.dialog('/', [
 	(session, args) => {
 		if (args && args.user && args.user_mission) {
-			const { user } = args;
-			const MissionUser = args.user_mission;
+			// const { user } = args;
+			// const MissionUser = args.user_mission;
 			session.send('Esse é um processo bem extenso e tem bastante conteúdo. Caso você tenha qualquer tipo de dúvidas nos mande!' +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
 			session.send("Além disso você pode a qualquer momento digitar 'cancelar' e eu te levo para o início");
@@ -424,10 +424,9 @@ library.dialog('/looseRequest', [
 			' e que acompanhe a resposta a esta solicitação.</p></div>';
 
 		pdf.create(html).toStream((err, stream) => {
-			const pdf = stream.pipe(fs.createWriteStream(`/tmp/${name}LAI.pdf`));
-			file = pdf.path;
+			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${name}LAI.pdf`));
+			file = pdfFile.path;
 
-			console.log(file);
 			builder.Prompts.choice(
 				session,
 				'Muito bem! Acabamos! Vamos gerar seu pedido?',
@@ -448,7 +447,7 @@ library.dialog('/looseRequest', [
 			session.beginDialog('/generateRequest');
 			break;
 		default: // Not Happy
-			session.beginDialog('/generateRequest');
+			session.send('Ocorreu um erro.');
 			break;
 		}
 	},
@@ -460,7 +459,7 @@ library.dialog('/generateRequest', [
 		let data = generatedRequest.loadSync(path, file.slice(5));
 		data = JSON.stringify(data);
 
-		// Uploading the PDF to the MailChimp
+		// Uploading the generated PDF to MailChimp
 		const dataString = `{"name":"${name}LAI.pdf" , "file_data":${data}}`;
 
 		const options = {
@@ -475,7 +474,7 @@ library.dialog('/generateRequest', [
 		};
 
 		function callback(error, response, body) {
-			if (!error && response.statusCode === 200) {
+			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
 				console.log(obj.full_size_url);
 
@@ -501,12 +500,12 @@ library.dialog('/generateRequest', [
 					},
 				});
 				session.send(msg);
-				if (user) {
+				if (User) {
 					UserMission.update(
 						{ metadata: { request_generated: 1 } },
 						{
 							where: {
-								user_id: user.id,
+								user_id: User.id,
 								mission_id: 2,
 								completed: false,
 							},
@@ -516,7 +515,8 @@ library.dialog('/generateRequest', [
 						.then((result) => {
 							console.log(`${result}Mission updated sucessfuly`);
 							session.send('Ae!! Conseguimos! Demorou mas chegamos ao final');
-							session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ou levar esse pedido em formato físico e protocola-lo.');
+							session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
+							'ou levar esse pedido em formato físico e protocola-lo.');
 							session.send('No entanto o poder público tem um tempo limite de 20 dias para responder o seu pedido');
 							session.send('E precisamos dessa resposta para completar nossa segunda missão');
 							builder.Prompts.choice(
@@ -538,7 +538,8 @@ library.dialog('/generateRequest', [
 				} else {
 					builder.Prompts.choice(
 						session,
-						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ou levar esse pedido em formato físico e protocola-lo.',
+						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura,' +
+						' ou levar esse pedido em formato físico e protocola-lo.',
 						[Confirm],
 						{
 							listStyle: builder.ListStyle.button,
@@ -548,7 +549,7 @@ library.dialog('/generateRequest', [
 				}
 			}
 		}
-
+		session.send('fim');
 		request(options, callback);
 		fs.unlink(file);
 	},

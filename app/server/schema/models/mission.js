@@ -1,5 +1,5 @@
 
-module.exports = function (sequelize, DataTypes) {
+module.exports = (sequelize, DataTypes) => {
 	const mission = sequelize.define('mission', {
 		code: DataTypes.INTEGER,
 		name: DataTypes.STRING,

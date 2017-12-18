@@ -20,13 +20,14 @@ const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 
 let user;
-let user_mission;
+// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
+let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
 		user = args.user;
-		user_mission = args.user_mission;
-
+		console.log(user);
+		missionUser = args.user_mission;
 		if (session.message.address.channelId === 'facebook') {
 			User.update({
 				fb_id: session.message.sourceEvent.sender.id,
@@ -39,9 +40,9 @@ library.dialog('/', [
 				.then(() => {
 					console.log('User updated sucessfuly');
 				})
-				.catch((e) => {
-					console.log(e);
-					throw e;
+				.catch((err) => {
+					console.log(err);
+					throw err;
 				});
 		}
 
@@ -49,7 +50,7 @@ library.dialog('/', [
 			user_id: user.id,
 			mission_id: 1,
 		})
-			.then((UserMission) => {
+			.then(() => {
 				session.send('Vamos lá! Que comece o processo de missões!');
 				session.send(texts.first_mission.assign);
 
@@ -63,11 +64,11 @@ library.dialog('/', [
 					} // eslint-disable-line comma-dangle
 				);
 			})
-			.catch((e) => {
-				console.log(`Error creating user mission${e}`);
+			.catch((err) => {
+				console.log(`Error creating user mission${err}`);
 				session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde e entre em contato conosco.');
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-				throw e;
+				throw err;
 			});
 	},
 	(session, args) => {
@@ -140,7 +141,7 @@ library.dialog('/', [
 				'firstMissionConclusion:/',
 				{
 					user,
-					user_mission,
+					user_mission: missionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;
@@ -217,7 +218,7 @@ library.dialog('/', [
 				'firstMissionConclusion:/',
 				{
 					user,
-					user_mission,
+					user_mission: missionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;

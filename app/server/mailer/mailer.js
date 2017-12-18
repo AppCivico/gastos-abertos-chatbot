@@ -3,7 +3,7 @@ const async = require('async');
 // const http = require('http');
 const nodemailer = require('nodemailer');
 
-const mailer = (function aaa() {
+const mailer = (function aa() {
 	const self = {};
 
 	const listofemails = [];
@@ -46,7 +46,9 @@ const mailer = (function aaa() {
 					from: 'Guaxi <no_reply@gastosabertos.org>',
 					to: Email,
 					subject: 'Guaxi - Recebi sua inscrição com sucesso!',
-					html: 'Olá!<br><br>Eu, Guaxi, vi que você se inscreveu para o segundo ciclo do processo de missões do Gastos Abertos.<br><br>Em breve um membro da equipe do Gastos Abertos irá entrar em contato através do e-mail que você cadastrou.<br><br>Muito obrigado parceiro!',
+					html: 'Olá!<br><br>Eu, Guaxi, vi que você se inscreveu para o segundo ciclo do processo de missões do Gastos Abertos.' +
+					'<br><br>Em breve um membro da equipe do Gastos Abertos irá entrar em contato através do e-mail que você cadastrou.' +
+					'<br><br>Muito obrigado parceiro!',
 				};
 				listofemails.pop(Email);
 				transporter.sendMail(mailOptions, (error, info) => {
