@@ -26,6 +26,7 @@ const Yes = 'Sim';
 const No = 'Não';
 const MoreInformations = 'Detalhes da missão';
 const Confirm = 'Beleza!';
+const WelcomeBack = 'Voltar para o início';
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
@@ -418,7 +419,7 @@ library.dialog('/userUpdate', [
 				builder.Prompts.choice(
 					session,
 					`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a segunda missão, okay?${emoji.smile}`,
-					[Confirm],
+					[Confirm, WelcomeBack],
 					{
 						listStyle: builder.ListStyle.button,
 						retryPrompt: retryPrompts.choice,
@@ -436,12 +437,14 @@ library.dialog('/userUpdate', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Confirm:
+		// TODO melhorar isso aqui
+			session.send('No momento, pararemos por aqui. ' +
+		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
+			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
 			session.endDialog();
-			session.beginDialog('/welcomeBack');
 			break;
-		default:
-			session.endDialog();
-			session.beginDialog('/welcomeBack');
+		default: // WelcomeBack
+			session.replaceDialog('/welcomeBack');
 		}
 	},
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });

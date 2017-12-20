@@ -1,6 +1,7 @@
 /* global  bot:true builder:true */
 
 bot.library(require('./contact'));
+const emoji = require('node-emoji');
 
 const request = require('request');
 const pdf = require('html-pdf');
@@ -52,9 +53,9 @@ library.dialog('/', [
 		if (args && args.user && args.user_mission) {
 			// const { user } = args;
 			// const MissionUser = args.user_mission;
-			session.send('Esse é um processo bem extenso e tem bastante conteúdo. Caso você tenha qualquer tipo de dúvidas nos mande!' +
+			session.send(`Esse é um processo bem extenso e tem bastante conteúdo. Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')}` +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
-			session.send("Além disso você pode a qualquer momento digitar 'cancelar' e eu te levo para o início");
+			session.send("Além disso, você pode a qualquer momento digitar 'cancelar' e eu te levo para o início");
 		} else {
 			session.send('Você está gerando um pedido de acesso à informação avulso.');
 		}
@@ -268,18 +269,20 @@ library.dialog('/looseRequest', [
 		);
 	},
 
-	(session, args) => {
+	/* (session, args) => {
 		switch (args.response.entity) {
 		case Yes:
 			break;
 		default: // No
-			itens.push('<p> - Disponibilização do controle de estoque da prefeitura, com lista de entradas e saídas de bens patrimoniais, além da relação de cessões, permutas e doação de bens</p>');
+			itens.push('<p>-Disponibilização do controle de estoque da prefeitura, com lista de entradas'+
+			' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
 			break;
 		}
 
 		builder.Prompts.choice(
 			session,
-			'O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos?',
+		'O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas que '+
+		'deram origem a pagamentos?',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -287,6 +290,7 @@ library.dialog('/looseRequest', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
+*/
 
 	(session, args) => {
 		switch (args.response.entity) {
@@ -408,7 +412,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		builder.Prompts.text(session, 'Qual é o seu nome completo?');
+		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
 
 	(session, args) => {
@@ -513,15 +517,15 @@ library.dialog('/generateRequest', [
 						} // eslint-disable-line comma-dangle
 					)
 						.then((result) => {
-							console.log(`${result}Mission updated sucessfuly`);
-							session.send('Ae!! Conseguimos! Demorou mas chegamos ao final');
+							console.log(`${result} Mission updated sucessfuly`);
+							session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
 							session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
 							'ou levar esse pedido em formato físico e protocola-lo.');
-							session.send('No entanto o poder público tem um tempo limite de 20 dias para responder o seu pedido');
-							session.send('E precisamos dessa resposta para completar nossa segunda missão');
+							session.send('No entanto, o poder público tem um tempo limite de 20 dias para responder o seu pedido.');
+							session.send(`E precisamos dessa resposta para completar nossa segunda missão. ${emoji.get('page_facing_up')}`);
 							builder.Prompts.choice(
 								session,
-								'Então pode ficar tranquilo que te chamo quando for liberada a conclusão ;D',
+								`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
 								[Confirm],
 								{
 									listStyle: builder.ListStyle.button,
@@ -539,7 +543,7 @@ library.dialog('/generateRequest', [
 					builder.Prompts.choice(
 						session,
 						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura,' +
-						' ou levar esse pedido em formato físico e protocola-lo.',
+						' ou levar esse pedido em formato físico e protocolizá-lo.',
 						[Confirm],
 						{
 							listStyle: builder.ListStyle.button,
@@ -549,7 +553,6 @@ library.dialog('/generateRequest', [
 				}
 			}
 		}
-		session.send('fim');
 		request(options, callback);
 		fs.unlink(file);
 	},

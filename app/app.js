@@ -7,6 +7,8 @@ require('./connectorSetup.js')();
 
 const dateFns = require('date-fns');
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
+// const emoji = require('node-emoji');
+// ${emoji.get('coffee')
 
 bot.library(require('./validators'));
 bot.library(require('./dialogs/game-sign-up'));
@@ -60,7 +62,8 @@ bot.dialog('/promptButtons', [
 				},
 			],
 		});
-		session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
+		session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.' +
+		'\n\nUtilize o menu abaixo para interagir comigo.');
 		builder.Prompts.choice(
 			session,
 			'Em que assunto eu posso te ajudar?',
@@ -93,7 +96,7 @@ bot.dialog('/promptButtons', [
 bot.dialog('/welcomeBack', [
 	(session) => {
 		session.sendTyping();
-		session.send('Olá, companheiro! Bem vindo de volta!');
+		session.send('Olá, parceiro! Bem vindo de volta!');
 		builder.Prompts.choice(
 			session,
 			'Em que assunto eu posso te ajudar?',

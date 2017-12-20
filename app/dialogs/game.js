@@ -1,4 +1,4 @@
-/* global  bot:true */
+/* global  bot:true builder:true */
 
 bot.library(require('./contact'));
 bot.library(require('./information-access-request'));
@@ -7,9 +7,7 @@ bot.library(require('./first_mission/assign'));
 bot.library(require('./second_mission/assign'));
 bot.library(require('./second_mission/conclusion'));
 
-
-const builder = require('botbuilder');
-
+const emoji = require('node-emoji');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 
 const User = require('../server/schema/models').user;
@@ -62,9 +60,8 @@ library.dialog('/', [
 					return email;
 				}
 				session.sendTyping();
-				session.send('Hmmm...Não consegui encontrar seu cadastro. Tente novamente.');
-				session.endDialog();
-				session.beginDialog('/welcomeBack');
+				session.send(`Hmmm...Não consegui encontrar seu cadastro. ${emoji.get('dizzy_face')}\nO e-mail está correto? Por favor, tente novamente. `);
+				session.replaceDialog('/');
 				return undefined;
 			});
 	},
@@ -174,13 +171,15 @@ library.dialog('/currentMission', [
 					break;
 				default: // 2
 					if (missionUser.completed) {
-						session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos!');
-						session.send('Caso você não participe ainda, junte-se a nós no grupo do WhatsApp do Gastos Abertos! Lá temos bastante discussões legais e ajudamos com tudo que conseguimos!');
+						session.send(`Parabéns! Você concluiu o processo de missões do Gastos Abertos! ${emoji.get('tada').repeat(3)}`);
+						session.send('Caso você não participe ainda, junte-se a nós no grupo do WhatsApp do Gastos Abertos! Lá, temos bastante discussões legais e ajudamos com tudo que conseguimos!');
 						session.send('Basta clicar no link a seguir: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
 						session.endDialog();
 						session.beginDialog('/welcomeBack');
 					} else if (missionUser.metadata.request_generated === 0) {
-						session.send('Você está na segunda missão, no entanto não gerou um pedido de acesso à informação.');
+						session.send(`Você está na segunda missão, no entanto não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
+						session.send('EXPLICAÇÃO DO PEDIDO');
+						// TODO Explicação do pedido
 						session.replaceDialog('/sendToInformationAccessRequest');
 					} else {
 						session.beginDialog(
@@ -221,7 +220,7 @@ library.dialog('/sendToInformationAccessRequest', [
 			);
 			break;
 		default: // No
-			session.send('Okay! Eu estarei aqui esperando para começarmos!');
+			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
 			session.endDialog();
 			session.replaceDialog('/welcomeBack');
 			break;

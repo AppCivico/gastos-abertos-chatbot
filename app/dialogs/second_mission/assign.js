@@ -1,6 +1,7 @@
 /* global  bot:true builder:true */
 
 const library = new builder.Library('secondMissionAssign');
+const emoji = require('node-emoji');
 
 bot.library(require('../information-access-request'));
 
@@ -25,7 +26,7 @@ library.dialog('/', [
 
 		builder.Prompts.choice(
 			session,
-			'Vamos ver agora nossa segunda missão?',
+			'Agora, vamos ver nossa segunda missão?',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -40,7 +41,7 @@ library.dialog('/', [
 			session.replaceDialog('/assign');
 			break;
 		default: // No
-			session.send('Okay! Eu estarei aqui esperando para começarmos!');
+			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('thumbsup')}`);
 			session.endDialog();
 			session.beginDialog('/welcomeBack');
 			break;
@@ -83,7 +84,7 @@ library.dialog('/assign', [
 			);
 			break;
 		default: // No
-			session.send('Beleza! Estarei te esperando aqui para seguirmos em frente!');
+			session.send(`Beleza! Estarei te esperando aqui para seguirmos em frente! ${emoji.get('thumbsup')}`);
 			session.endDialog();
 			session.beginDialog('/welcomeBack');
 			break;

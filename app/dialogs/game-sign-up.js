@@ -8,10 +8,12 @@ bot.library(require('./contact'));
 // const GoogleSpreadsheet = require('google-spreadsheet');
 // var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
 // const async = require('async');
+// const emoji = require('../misc/speeches_utils/emojis');
 // let sheet;
 const User = require('../server/schema/models').user;
+// ${emoji.get('email')}
 
-const emoji = require('../misc/speeches_utils/emojis');
+const emoji = require('node-emoji');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const mailer = require('../server/mailer/mailer.js');
 
@@ -24,14 +26,16 @@ const library = new builder.Library('gameSignUp');
 library.dialog('/', [
 	(session) => {
 		session.sendTyping();
-		session.send('Tenho o maior respeito pela sua privacidade e tomarei todo cuidado com seus dados. Se tiver dúvidas, confira os termos de uso do Gastos Abertos: https://gastosabertos.org/termos .');
-		builder.Prompts.text(session, 'Qual é o seu nome completo?');
+		session.send(`Tenho o maior respeito pela sua privacidade e tomarei todo cuidado com seus dados. ${emoji.get('zipper_mouth_face')}` +
+		'Se tiver dúvidas, confira os termos de uso do Gastos Abertos: https://gastosabertos.org/termos .');
+		session.send('Agora vou te fazer algumas perguntas para seu cadastro, ok? São só 7 perguntinhas...');
+		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
 	(session, args) => {
 		session.dialogData.fullName = args.response;
 		session.sendTyping();
 		session.beginDialog('validators:email', {
-			prompt: 'Qual é o seu e-mail?',
+			prompt: `Qual é o seu e-mail? ${emoji.get('email')}`,
 			retryPrompt: retryPrompts.email,
 			maxRetries: 10,
 		});
@@ -54,13 +58,14 @@ library.dialog('/', [
 		})
 			.then((count) => {
 				if (count !== 0) {
-					session.send(`Você já está cadastrado, companheiro! ${emoji.sunglass}Verifique se você recebeu minha mensagem em seu e-mail.\n\n\nEu a enviei para o seguinte e-mail: ${session.dialogData.email}.`);
+					session.send(`Você já está cadastrado, companheiro! ${emoji.get('sunglasses')} Verifique se você recebeu minha mensagem em seu e-mail. '+
+					' \n\n\nEu a enviei para o seguinte e-mail: ${session.dialogData.email}.`);
 					session.endDialog();
 					session.beginDialog('/welcomeBack');
 				} else {
 					session.sendTyping();
 					session.beginDialog('validators:date', {
-						prompt: 'Qual é a sua data de nascimento?',
+						prompt: `Qual é a sua data de nascimento? Por exemplo, a minha é 22/08/2017. ${emoji.get('calendar')}`,
 						retryPrompt: retryPrompts.date,
 						maxRetries: 10,
 					});
@@ -78,7 +83,7 @@ library.dialog('/', [
 		session.dialogData.birthDate = args.response;
 		session.sendTyping();
 		session.beginDialog('validators:state', {
-			prompt: 'Qual é o estado(sigla) que você mora?',
+			prompt: `Qual é o estado(sigla) que você mora? ${emoji.get('flag-br')}`,
 			retryPrompt: retryPrompts.state,
 			maxRetries: 10,
 		});
@@ -93,18 +98,20 @@ library.dialog('/', [
 
 		session.dialogData.state = args.response;
 		session.sendTyping();
-		builder.Prompts.text(session, 'Qual é o município que você representará?');
+		builder.Prompts.text(session, `Qual é o município que você representará? ${emoji.get('cityscape')}`);
 	},
 	(session, args) => {
 		session.dialogData.city = args.response;
 		session.sendTyping();
-		session.send('Ufa! Não desanime, parceiro. Faltam apenas 2 perguntas para finalizar sua inscrição. Vamos lá!');
+		session.send('Ufa! Não desanime, parceiro. Faltam apenas 2 perguntas para finalizar sua inscrição. ' +
+			`Vamos lá! ${emoji.get('slightly_smiling_face').repeat(2)}`);
 		session.beginDialog('validators:cellphone', {
-			prompt: 'Qual é o seu número de telefone celular? Não esqueça de colocar o DDD.',
+			prompt: `Qual é o seu número de telefone celular? Não esqueça de colocar o DDD. Por exemplo: 11987654321 ${emoji.get('iphone')}`,
 			retryPrompt: retryPrompts.cellphone,
 			maxRetries: 10,
 		});
 	},
+
 	(session, args) => {
 		if (args.resumed) {
 			session.sendTyping();
@@ -112,10 +119,9 @@ library.dialog('/', [
 			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 			return;
 		}
-
 		session.dialogData.cellphoneNumber = args.response;
 		session.sendTyping();
-		builder.Prompts.text(session, 'Qual a sua ocupação?');
+		builder.Prompts.text(session, `Qual a sua profissão? ${emoji.get('construction_worker')}`);
 	},
 	(session, args) => {
 		session.dialogData.occupation = args.response;
@@ -164,9 +170,10 @@ library.dialog('/', [
 				//         });
 				//     }
 				// ]);
-				session.send('Muito bom, parceiro! Finalizamos sua inscrição.');
+				session.send(`Muito bom, parceiro! Finalizamos sua inscrição. ${emoji.get('tada').repeat(3)}`);
 				session.send('Nossa equipe vai enviar em seu email a confirmação deste cadastro.');
-				session.send('Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos.\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!');
+				session.send(`Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos. ${emoji.get('busts_in_silhouette')}` +
+				'\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!');
 
 				builder.Prompts.choice(
 					session,

@@ -1,6 +1,7 @@
 /* global builder:true */
 
 const library = new builder.Library('secondMissionConclusion');
+const emoji = require('node-emoji');
 
 const answers = [
 	'userProtocoledRequest',
@@ -16,6 +17,8 @@ const UserMission = require('../../server/schema/models').user_mission;
 const HappyYes = 'Vamos lá!';
 const Yes = 'Sim';
 const No = 'No';
+const Confirm = 'Beleza!';
+const WelcomeBack = 'Voltar para o início';
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
@@ -35,7 +38,7 @@ library.dialog('/', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Pelo o que vi aqui você está na segunda missão, vamos conclui-la?',
+			`Pelo o que vi aqui você está na segunda missão, vamos conclui-la?  ${emoji.get('slightly_smiling_face')}`,
 			[HappyYes],
 			{
 				listStyle: builder.ListStyle.button,
@@ -90,8 +93,9 @@ library.dialog('/secondMissionQuestions', [
 				);
 				break;
 			default: // No
-				session.send('Que pena! No entanto, recomendamos que você o protocole mesmo assim. Pois é bem importante que a sociedade civil demande dados.');
-				session.send('Agora vou te levar para o início');
+				session.send(`Que pena! ${emoji.get('cold_sweat')} No entanto, recomendamos que você o protocolize mesmo assim ` +
+				'pois é muito importante que a sociedade civil demande dados.');
+				session.send('Agora vou te levar para o início.');
 				session.endDialog();
 				session.beginDialog('/welcomeBack');
 				break;
@@ -116,7 +120,7 @@ library.dialog('/secondMissionQuestions', [
 				break;
 			default: // No
 				answers.govAnswered = 0;
-				session.send('Que pena! No entanto não vamos desistir!');
+				session.send(`Que pena! ${emoji.get('cold_sweat')} No entanto, não vamos desistir!`);
 				session.replaceDialog('/conclusion');
 				break;
 			}
@@ -168,14 +172,36 @@ library.dialog('/conclusion', [
 
 library.dialog('/congratulations', [
 	(session) => {
-		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado de participar comigo nessa!');
+		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo nessa! ');
 		session.send('Aposto que eu e você aprendemos muitas coisas novas nesse processo!');
-		session.send('No entanto eu irei te dar uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!');
+		session.send('No entanto, eu irei te dar uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!');
 		session.send('Essa tarefa extra será buscar a assinatura de seu prefeito(a) para a Carta Compromisso do Gastos Abertos!');
 		session.send('Você pode encontrar a Carta nesse link: https://gastosabertos.org/participe/GastosAbertosCartaCompromisso.pdf');
-		session.send('Mande uma mensagem lá no nosso grupo! Tá cheio de gente para ajudar!');
-		session.endDialog();
-		session.beginDialog('/welcomeBack');
+		session.send('Mande uma mensagem lá no nosso grupo! Tá cheio de gente para te ajudar!');
+
+		builder.Prompts.choice(
+			session,
+			`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a terceira missão, okay?${emoji.smile}`,
+			[Confirm, WelcomeBack],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choice,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+
+	(session, args) => {
+		switch (args.response.entity) {
+		case Confirm:
+		// TODO melhorar isso aqui e ali em cima com a terceira missão
+			session.send('No momento, pararemos por aqui. ' +
+		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
+			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
+			session.endDialog();
+			break;
+		default: // WelcomeBack
+			session.replaceDialog('/welcomeBack');
+		}
 	},
 ]);
 

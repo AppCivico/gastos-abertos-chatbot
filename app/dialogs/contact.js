@@ -1,4 +1,4 @@
-/* global  builder:true */
+/* global  bot: true builder:true */
 
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor":
 ["session"] }] */
@@ -13,6 +13,7 @@ const library = new builder.Library('contact');
 const SignUpProblems = 'Inscrição';
 const Informations = 'Informações';
 const MissionsInformations = 'Processo de missões';
+let TrelloListId = '';
 let Subject = '';
 
 library.dialog('/', [
@@ -21,6 +22,7 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session,
 			'Obrigado por seu interesse. Mas diga, como posso te ajudar?',
+			// TODO essa frase
 			[SignUpProblems, Informations, MissionsInformations],
 			{
 				listStyle: builder.ListStyle.button,
@@ -31,29 +33,20 @@ library.dialog('/', [
 	(session, result) => {
 		session.sendTyping();
 		if (result.response) {
+			session.beginDialog('validators:email', {
+				prompt: 'Deixe seu email, a equipe Gastos Abertos entrará em contato.',
+				retryPrompt: retryPrompts.email,
+				maxRetries: 10,
+			});
+
 			switch (result.response.entity) {
 			case SignUpProblems:
-				session.beginDialog('validators:email', {
-					prompt: 'Deixe seu email, a equipe Gastos Abertos entrará em contato.',
-					retryPrompt: retryPrompts.email,
-					maxRetries: 10,
-				});
 				Subject = SignUpProblems;
 				break;
 			case Informations:
-				session.beginDialog('validators:email', {
-					prompt: 'Deixe seu email, a equipe Gastos Abertos entrará em contato.',
-					retryPrompt: retryPrompts.email,
-					maxRetries: 10,
-				});
 				Subject = Informations;
 				break;
 			default: // MissionsInformations
-				session.beginDialog('validators:email', {
-					prompt: 'Deixe seu email, a equipe Gastos Abertos entrará em contato.',
-					retryPrompt: retryPrompts.email,
-					maxRetries: 10,
-				});
 				Subject = MissionsInformations;
 				break;
 			}
@@ -66,7 +59,6 @@ library.dialog('/', [
 			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 		} else {
 			session.dialogData.email = args.response;
-
 			builder.Prompts.text(session, 'Qual é a sua mensagem para nós?');
 		}
 	},
@@ -74,53 +66,29 @@ library.dialog('/', [
 		session.dialogData.message = args.response;
 
 		if (Subject === SignUpProblems) {
-			trello.addCard(
-				`e-mail: ${session.dialogData.email}`, session.dialogData.message, process.env.TRELLO_LIST_ID_1,
-				(error) => {
-					if (error) {
-						console.log('Could not add card:', error);
-						session.send('Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente.');
-						session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-					} else {
-						console.log('Added card:');
-						session.send('Recebemos seu contato com sucesso! Em breve você receberá em seu e-mail uma resposta!');
-						session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-					}
-				} // eslint-disable-line comma-dangle
-			);
+			TrelloListId = process.env.TRELLO_LIST_ID_1;
 		}
 		if (Subject === Informations) {
-			trello.addCard(
-				`e-mail: ${session.dialogData.email}`, session.dialogData.message, process.env.TRELLO_LIST_ID_2,
-				(error) => {
-					if (error) {
-						console.log('Could not add card:', error);
-						session.send('Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente.');
-						session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-					} else {
-						console.log('Added card:');
-						session.send('Recebemos seu contato com sucesso! Em breve você receberá em seu e-mail uma resposta!');
-						session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-					}
-				} // eslint-disable-line comma-dangle
-			);
+			TrelloListId = process.env.TRELLO_LIST_ID_2;
 		}
 		if (Subject === MissionsInformations) {
-			trello.addCard(
-				`e-mail: ${session.dialogData.email}`, session.dialogData.message, process.env.TRELLO_LIST_ID_3,
-				(error) => {
-					if (error) {
-						console.log('Could not add card:', error);
-						session.send('Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente.');
-						session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-					} else {
-						console.log('Added card:');
-						session.send('Recebemos seu contato com sucesso! Em breve você receberá em seu e-mail uma resposta!');
-						session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
-					}
-				} // eslint-disable-line comma-dangle
-			);
+			TrelloListId = process.env.TRELLO_LIST_ID_3;
 		}
+
+		trello.addCard(
+			`e-mail: ${session.dialogData.email}`, session.dialogData.message, TrelloListId,
+			(error) => {
+				if (error) {
+					console.log('Could not add card:', error);
+					session.send('Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente.');
+					session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+				} else {
+					console.log('Added card:');
+					session.send('Recebemos seu contato com sucesso! Em breve, você receberá uma resposta em seu e-mail!');
+					session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+				}
+			} // eslint-disable-line comma-dangle
+		);
 	},
 ]).cancelAction('cancel', null, { matches: /^cancel/i });
 
