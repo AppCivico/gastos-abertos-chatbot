@@ -1,7 +1,8 @@
 const emoji = require('node-emoji');
 
 module.exports = {
-	choice: `Desculpa ${emoji.get('dizzy_face').repeat(2)}, não entendi a opção que você selecionou, pois por enquanto eu não entendo muito bem discurso livre apenas os botões.\n\nSelecione uma das opções abaixo`,
+	choice: `Desculpe ${emoji.get('dizzy_face').repeat(2)}, não entendi a opção que você selecionou, pois por enquanto ` +
+	' eu não entendo muito bem discurso livre apenas os botões.\n\nSelecione uma das opções abaixo:',
 	email:
 				[
 					`${emoji.get('thinking_face').repeat(3)} Hummm. Não entendi o e-mail que você digitou. O e-mail deve ter o seguinte formato: exemplo@exemplo.com`,

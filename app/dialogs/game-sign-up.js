@@ -65,7 +65,7 @@ library.dialog('/', [
 				} else {
 					session.sendTyping();
 					session.beginDialog('validators:date', {
-						prompt: `Qual é a sua data de nascimento? Por exemplo, a minha é 22/08/2017. ${emoji.get('calendar')}`,
+						prompt: `Qual é a sua data de nascimento? Por exemplo, a minha é 13/07/2017. ${emoji.get('calendar')}`,
 						retryPrompt: retryPrompts.date,
 						maxRetries: 10,
 					});
