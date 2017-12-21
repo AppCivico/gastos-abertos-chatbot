@@ -12,7 +12,7 @@ const UserMission = require('../../server/schema/models').user_mission;
 const MoreInformations = 'Mais detalhes';
 const Conclusion = 'Conclusão da missão';
 const Contact = 'Entrar em contato';
-const Restart = 'Ir para o início';
+const Restart = 'Voltar para o início';
 const Yes = 'Sim';
 const No = 'Não';
 

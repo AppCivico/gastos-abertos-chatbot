@@ -1,4 +1,4 @@
-/* global  bot:true builder:true */
+/* global bot:true builder:true */
 
 bot.library(require('./contact'));
 bot.library(require('./information-access-request'));
@@ -17,6 +17,8 @@ const library = new builder.Library('game');
 
 const Yes = 'Sim';
 const No = 'Não';
+const Contact = 'Entrar em contato';
+const Restart = 'Voltar para o início';
 
 let email = '';
 let user;
@@ -24,9 +26,7 @@ let user;
 let missionUser; // Vazio?
 
 // TODO mudanças provisórias para teste
-// const dateFns = require('date-fns');
-// const firstMissionCompleteMinDate = dateFns.format(new Date(2017, 8, 19), 'MM/DD/YYYY');
-// const today = dateFns.format(new Date(), 'MM/DD/YYYY');
+
 
 library.dialog('/', [
 	(session) => {
@@ -60,12 +60,18 @@ library.dialog('/', [
 					return email;
 				}
 				session.sendTyping();
-				session.send(`Hmmm...Não consegui encontrar seu cadastro. ${emoji.get('dizzy_face')}\nO e-mail está correto? Por favor, tente novamente. `);
+				session.send(`Hmmm...Não consegui encontrar seu cadastro. ${emoji.get('dizzy_face').repeat(2)}` +
+				'\nO e-mail está correto? Por favor, tente novamente. ');
 				session.replaceDialog('/');
 				return undefined;
 			});
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).triggerAction({
+	matches: /^help$/i,
+	onSelectAction: (session) => {
+		session.send('zasdadasd');
+	},
+});
 
 library.dialog('/missionStatus', [
 	(session) => {
@@ -172,10 +178,19 @@ library.dialog('/currentMission', [
 				default: // 2
 					if (missionUser.completed) {
 						session.send(`Parabéns! Você concluiu o processo de missões do Gastos Abertos! ${emoji.get('tada').repeat(3)}`);
-						session.send('Caso você não participe ainda, junte-se a nós no grupo do WhatsApp do Gastos Abertos! Lá, temos bastante discussões legais e ajudamos com tudo que conseguimos!');
+						session.send('Caso você não participe ainda, junte-se a nós no grupo do WhatsApp do Gastos Abertos! ' +
+						'Lá, temos bastante discussões legais e ajudamos com tudo que podemos!');
 						session.send('Basta clicar no link a seguir: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
-						session.endDialog();
-						session.beginDialog('/welcomeBack');
+						builder.Prompts.choice(
+							session,
+
+							'Posso te ajudar com mais alguma coisa?',
+							[Contact, Restart],
+							{
+								listStyle: builder.ListStyle.button,
+								retryPrompt: retryPrompts.choice,
+							} // eslint-disable-line comma-dangle
+						);
 					} else if (missionUser.metadata.request_generated === 0) {
 						session.send(`Você está na segunda missão, no entanto não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
 						session.send('EXPLICAÇÃO DO PEDIDO');
@@ -192,6 +207,18 @@ library.dialog('/currentMission', [
 					}
 				}
 			});
+	},
+
+	(session, args) => {
+		switch (args.response.entity) {
+		case Contact:
+			session.beginDialog('contact:/');
+			break;
+		default: // Restart
+			session.endDialog();
+			session.beginDialog('/welcomeBack');
+			break;
+		}
 	},
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 

@@ -5,9 +5,8 @@
 require('dotenv').config();
 require('./connectorSetup.js')();
 
-const dateFns = require('date-fns');
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
-// const emoji = require('node-emoji');
+const emoji = require('node-emoji');
 // ${emoji.get('coffee')
 
 bot.library(require('./validators'));
@@ -24,9 +23,6 @@ const Informacoes = 'Informações';
 const Game = 'Processo de missões';
 const Missions = 'Concluir missões';
 const InformationAcessRequest = 'Gerar pedido';
-
-const maxSignUpDate = dateFns.format(new Date(2017, 8, 28), 'M/DD/YYYY');
-const today = dateFns.format(new Date(), 'MM/DD/YYYY');
 
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
@@ -62,7 +58,7 @@ bot.dialog('/promptButtons', [
 				},
 			],
 		});
-		session.send('Olá, eu sou o Guaxi.\n\nSou o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.' +
+		session.send('Olá, eu sou o Guaxi, o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.' +
 		'\n\nUtilize o menu abaixo para interagir comigo.');
 		builder.Prompts.choice(
 			session,
@@ -91,12 +87,17 @@ bot.dialog('/promptButtons', [
 			}
 		}
 	},
+
+	(session) => {
+		session.replaceDialog('/welcomeBack');
+	},
+
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 
 bot.dialog('/welcomeBack', [
 	(session) => {
 		session.sendTyping();
-		session.send('Olá, parceiro! Bem vindo de volta!');
+		session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
 		builder.Prompts.choice(
 			session,
 			'Em que assunto eu posso te ajudar?',
@@ -122,6 +123,10 @@ bot.dialog('/welcomeBack', [
 				break;
 			}
 		}
+	},
+
+	(session) => {
+		session.replaceDialog('/welcomeBack');
 	},
 ]).cancelAction('cancelar', null, { matches: /^cancelar/i });
 

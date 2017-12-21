@@ -439,7 +439,7 @@ library.dialog('/userUpdate', [
 		case Confirm:
 		// TODO melhorar isso aqui
 			session.send('No momento, pararemos por aqui. ' +
-		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
+					'\n\nSe quiser conversar comigo novamente em outro momento, basta me mandar qualquer mensagem.');
 			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
 			session.endDialog();
 			break;

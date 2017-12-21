@@ -1,4 +1,4 @@
-/* global  bot: true builder:true */
+/* global builder:true */
 
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor":
 ["session"] }] */
@@ -7,6 +7,7 @@ const Trello = require('trello');
 
 const trello = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_USER_TOKEN);
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
+const emoji = require('node-emoji');
 
 const library = new builder.Library('contact');
 
@@ -21,7 +22,7 @@ library.dialog('/', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Obrigado por seu interesse. Mas diga, como posso te ajudar?',
+			`Obrigado por seu interesse. ${emoji.get('slightly_smiling_face').repeat(2)} Mas diga, como posso te ajudar?`,
 			// TODO essa frase
 			[SignUpProblems, Informations, MissionsInformations],
 			{
@@ -34,7 +35,7 @@ library.dialog('/', [
 		session.sendTyping();
 		if (result.response) {
 			session.beginDialog('validators:email', {
-				prompt: 'Deixe seu email, a equipe Gastos Abertos entrará em contato.',
+				prompt: `Deixe seu email, a equipe Gastos Abertos entrará em contato. ${emoji.get('postal_horn')}`,
 				retryPrompt: retryPrompts.email,
 				maxRetries: 10,
 			});
@@ -80,11 +81,11 @@ library.dialog('/', [
 			(error) => {
 				if (error) {
 					console.log('Could not add card:', error);
-					session.send('Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente.');
+					session.send(`Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente. ${emoji.get('confounded').repeat(2)}`);
 					session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				} else {
 					console.log('Added card:');
-					session.send('Recebemos seu contato com sucesso! Em breve, você receberá uma resposta em seu e-mail!');
+					session.send(`Recebemos seu contato com sucesso! Em breve, você receberá uma resposta em seu e-mail! ${emoji.get('thumbsup').repeat(2)}`);
 					session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
 				}
 			} // eslint-disable-line comma-dangle

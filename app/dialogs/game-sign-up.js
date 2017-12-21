@@ -18,7 +18,7 @@ const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const mailer = require('../server/mailer/mailer.js');
 
 const Contact = 'Entrar em contato';
-const Restart = 'Ir para o início';
+const Restart = 'Voltar para o início';
 let fbId = '';
 
 const library = new builder.Library('gameSignUp');
@@ -58,7 +58,7 @@ library.dialog('/', [
 		})
 			.then((count) => {
 				if (count !== 0) {
-					session.send(`Você já está cadastrado, companheiro! ${emoji.get('sunglasses')} Verifique se você recebeu minha mensagem em seu e-mail. '+
+					session.send(`Você já está cadastrado, parceiro! ${emoji.get('sunglasses')} Verifique se você recebeu minha mensagem em seu e-mail. '+
 					' \n\n\nEu a enviei para o seguinte e-mail: ${session.dialogData.email}.`);
 					session.endDialog();
 					session.beginDialog('/welcomeBack');
@@ -204,6 +204,11 @@ library.dialog('/', [
 			break;
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).triggerAction({
+	matches: /^cancelar$/i,
+	onSelectAction: (session) => {
+		session.send('/welcomeBack');
+	},
+});
 
 module.exports = library;

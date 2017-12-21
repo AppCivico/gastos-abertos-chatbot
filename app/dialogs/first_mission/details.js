@@ -8,7 +8,7 @@ const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 
 const Contact = 'Entrar em contato';
-const Restart = 'Ir para o início';
+const Restart = 'Voltar para o início';
 const Conclusion = 'Concluir a missão';
 
 library.dialog('/', [
