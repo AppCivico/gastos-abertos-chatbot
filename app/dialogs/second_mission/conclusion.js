@@ -59,7 +59,10 @@ library.dialog('/', [
 			}
 		}
 	},
-]);
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
+
 
 library.dialog('/secondMissionQuestions', [
 	(session) => {
@@ -141,7 +144,10 @@ library.dialog('/secondMissionQuestions', [
 
 		session.replaceDialog('/conclusion');
 	},
-]);
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
+
 
 library.dialog('/conclusion', [
 	(session) => {
@@ -168,16 +174,19 @@ library.dialog('/conclusion', [
 				throw e;
 			});
 	} // eslint-disable-line comma-dangle
-]);
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
+
 
 library.dialog('/congratulations', [
 	(session) => {
-		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo nessa! ');
-		session.send('Aposto que eu e você aprendemos muitas coisas novas nesse processo!');
-		session.send('No entanto, eu irei te dar uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!');
-		session.send('Essa tarefa extra será buscar a assinatura de seu prefeito(a) para a Carta Compromisso do Gastos Abertos!');
-		session.send('Você pode encontrar a Carta nesse link: https://gastosabertos.org/participe/GastosAbertosCartaCompromisso.pdf');
-		session.send('Mande uma mensagem lá no nosso grupo! Tá cheio de gente para te ajudar!');
+		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo nessa! ' +
+		'\n\nAposto que eu e você aprendemos muitas coisas novas nesse processo!');
+		session.send('No entanto, eu irei te dar uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!' +
+		'\n\nEssa tarefa extra será buscar a assinatura de seu prefeito(a) para a Carta Compromisso do Gastos Abertos!');
+		session.send('Você pode encontrar a Carta nesse link: https://gastosabertos.org/participe/GastosAbertosCartaCompromisso.pdf' +
+		'\n\nMande uma mensagem lá no nosso grupo! Tá cheio de gente para te ajudar!');
 
 		builder.Prompts.choice(
 			session,
@@ -203,6 +212,9 @@ library.dialog('/congratulations', [
 			session.replaceDialog('/welcomeBack');
 		}
 	},
-]);
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
+
 
 module.exports = library;

@@ -40,6 +40,8 @@ library.dialog('/', [
 			session.beginDialog('firstMissionConclusion:/');
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 module.exports = library;

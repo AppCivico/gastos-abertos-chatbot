@@ -17,7 +17,7 @@ const answers = [
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
-const emoji = require('../../misc/speeches_utils/emojis');
+const emoji = require('node-emoji');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -57,7 +57,7 @@ library.dialog('/', [
 				session.replaceDialog('/transparencyPortalExists');
 				break;
 			case No:
-				session.send(`Okay! Estarei te esperando para mandarmos ver nessa tarefa!${emoji.sunglass}`);
+				session.send(`Okay! Estarei te esperando para mandarmos ver nessa tarefa! ${emoji.get('sunglasses')}`);
 				session.endDialog();
 				session.beginDialog('/welcomeBack');
 				break;
@@ -68,14 +68,16 @@ library.dialog('/', [
 			}
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/conclusionPromptAfterMoreDetails', [
 	(session) => {
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			`Vamos concluir nossa primeira missão juntos?${emoji.smile}`,
+			`Vamos concluir nossa primeira missão juntos? ${emoji.get('slightly_smiling_face')}`,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -92,22 +94,25 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 				session.replaceDialog('/transparencyPortalExists');
 				break;
 			default: // No
-				session.send(`Okay! Estarei te esperando para mandarmos ver nessa tarefa!${emoji.sunglass}`);
+				session.send(`Okay! Estarei te esperando para mandarmos ver nessa tarefa! ${emoji.get('sunglasses')}`);
 				session.endDialog();
 				session.beginDialog('/welcomeBack');
 				break;
 			}
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
+
 
 library.dialog('/transparencyPortalExists', [
 	(session) => {
 		session.sendTyping();
-		session.send("Caso você queira deixar para outra hora basta digitar 'cancelar' e eu te levarei para o início.");
+		session.send("Caso você queira deixar para outra hora, basta digitar 'cancelar' e eu te levarei para o início.");
 		builder.Prompts.choice(
 			session,
-			'Há um portal para transparência orçamentária na cidade, mantido oficialmente pela prefeitura? (Responda com Sim ou Não)',
+			'Há um portal para transparência orçamentária na cidade, mantido oficialmente pela prefeitura? ',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -140,7 +145,7 @@ library.dialog('/transparencyPortalExists', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Há dados sobre a execução orçamentária disponível no portal de transparência? (Responda com Sim ou Não)',
+			'Há dados sobre a execução orçamentária disponível no portal de transparência? ',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -157,7 +162,7 @@ library.dialog('/transparencyPortalExists', [
 				session.dialogData.transparencyPortalHasFinancialData = 1;
 				builder.Prompts.choice(
 					session,
-					'É possível realizar download dos dados orçamentários? (Responda com Sim ou Não)',
+					'É possível realizar download dos dados orçamentários? ',
 					[Yes, No],
 					{
 						listStyle: builder.ListStyle.button,
@@ -177,7 +182,7 @@ library.dialog('/transparencyPortalExists', [
 				session.dialogData.transparencyPortalHasFinancialData = 0;
 				builder.Prompts.choice(
 					session,
-					'Os contratos assinados com a prefeitura estão disponíveis no portal de transparência? (Responda com Sim ou Não)',
+					'Os contratos assinados com a prefeitura estão disponíveis no portal de transparência? ',
 					[Yes, No],
 					{
 						listStyle: builder.ListStyle.button,
@@ -188,7 +193,9 @@ library.dialog('/transparencyPortalExists', [
 			}
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
@@ -200,14 +207,16 @@ library.dialog('/transparencyPortalURL', [
 		answers.transparencyPortalURL = args.response;
 		session.replaceDialog('/transparencyPortalHasFinancialData');
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/transparencyPortalHasFinancialData', [
 	(session) => {
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Há dados sobre a execução orçamentária disponível no portal de transparência? (Responda com Sim ou Não)',
+			'Há dados sobre a execução orçamentária disponível no portal de transparência? ',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -228,14 +237,16 @@ library.dialog('/transparencyPortalHasFinancialData', [
 			break;
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session) => {
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'É possível realizar download dos dados orçamentários? (Responda com Sim ou Não)',
+			'É possível realizar download dos dados orçamentários? ',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -256,7 +267,9 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 			break;
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session) => {
@@ -268,14 +281,16 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 		answers.transparencyPortalFinancialDataFormats = args.response;
 		session.replaceDialog('/transparencyPortalHasContractsData');
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/transparencyPortalHasContractsData', [
 	(session) => {
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Os contratos assinados com a prefeitura estão disponíveis no portal de transparência? (Responda com Sim ou Não)',
+			'Os contratos assinados com a prefeitura estão disponíveis no portal de transparência? ',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -295,14 +310,16 @@ library.dialog('/transparencyPortalHasContractsData', [
 		}
 		session.replaceDialog('/transparencyPortalHasBiddingsData');
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/transparencyPortalHasBiddingsData', [
 	(session) => {
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'As licitações são divulgadas no portal de transparência da cidade? (Responda com Sim ou Não)',
+			'As licitações são divulgadas no portal de transparência da cidade? ',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -322,14 +339,16 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 		}
 		session.replaceDialog('/transparencyPortalHasBiddingProcessData');
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
 	(session) => {
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'É possível acompanhar o status do processo licitatório pelo portal de transparência? (Responda com Sim ou Não)',
+			'É possível acompanhar o status do processo licitatório pelo portal de transparência? ',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -349,7 +368,9 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 		}
 		session.replaceDialog('/userUpdate');
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/userUpdate', [
 	(session) => {
@@ -374,7 +395,8 @@ library.dialog('/userUpdate', [
 			},
 		});
 
-		session.send(`Uhuuu! Concluímos nossa primeira missão!\n\nEu disse que formariamos uma boa equipe!${emoji.sunglass}${emoji.clap}`);
+		session.send('Uhuuu! Concluímos nossa primeira missão! ' +
+			`\n\nEu disse que formariamos uma boa equipe! ${emoji.get('sunglasses')} ${emoji.get('clap').repeat(3)}`);
 
 		User.count({
 			where: {
@@ -383,13 +405,13 @@ library.dialog('/userUpdate', [
 		})
 			.then((count) => {
 				if (count < 10 && count !== 1) {
-					session.send(`E eu vou te dar uma tarefa extra ${emoji.grinningface}${emoji.sunglass}\n\nAtualmente há ${count} líderes no seu estado. Vamos aumentar este número para 10 líderes?`);
+					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}\n\nAtualmente há ${count} líderes no seu estado. Vamos aumentar este número para 10 líderes?`);
 					session.send('Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!');
 					if (session.message.address.channelId === 'facebook') {
 						session.send(msg);
 					}
 				} else if (count < 10 && count === 1) {
-					session.send(`E eu vou te dar uma tarefa extra ${emoji.grinningface}${emoji.sunglass}\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?`);
+					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?`);
 					session.send('Compartilhe isto com os seus amigos! Assim nós teremos mais força para incentivar a transparência em seu estado!');
 					if (session.message.address.channelId === 'facebook') {
 						session.send(msg);
@@ -418,7 +440,7 @@ library.dialog('/userUpdate', [
 				console.log(`${result}Mission updated sucessfuly`);
 				builder.Prompts.choice(
 					session,
-					`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a segunda missão, okay?${emoji.smile}`,
+					`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a segunda missão, okay? ${emoji.get('grinning')}`,
 					[Confirm, WelcomeBack],
 					{
 						listStyle: builder.ListStyle.button,
@@ -447,6 +469,8 @@ library.dialog('/userUpdate', [
 			session.replaceDialog('/welcomeBack');
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 module.exports = library;

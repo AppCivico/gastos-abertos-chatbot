@@ -41,13 +41,15 @@ library.dialog('/', [
 			session.replaceDialog('/assign');
 			break;
 		default: // No
-			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('thumbsup')}`);
+			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup')}`);
 			session.endDialog();
 			session.beginDialog('/welcomeBack');
 			break;
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/assign', [
 	(session) => {
@@ -84,12 +86,14 @@ library.dialog('/assign', [
 			);
 			break;
 		default: // No
-			session.send(`Beleza! Estarei te esperando aqui para seguirmos em frente! ${emoji.get('thumbsup')}`);
+			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup')}`);
 			session.endDialog();
 			session.beginDialog('/welcomeBack');
 			break;
 		}
 	},
-]);
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 module.exports = library;

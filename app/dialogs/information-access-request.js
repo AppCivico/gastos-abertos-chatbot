@@ -1,15 +1,14 @@
 /* global  bot:true builder:true */
 
 bot.library(require('./contact'));
-const emoji = require('node-emoji');
 
 const request = require('request');
 const pdf = require('html-pdf');
 const fs = require('fs');
 const Base64File = require('js-base64-file');
+const emoji = require('node-emoji');
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
-
 const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
 
@@ -53,13 +52,13 @@ library.dialog('/', [
 		if (args && args.user && args.user_mission) {
 			// const { user } = args;
 			// const MissionUser = args.user_mission;
-			// TODO nos mande?
 			session.send('Esse é um processo bem extenso e tem bastante conteúdo. ' +
 				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
 			session.send("Além disso, você pode a qualquer momento digitar 'cancelar' e eu te levo para o início");
 		} else {
-			session.send('Você está gerando um pedido de acesso à informação avulso.');
+			session.send('Você está gerando um pedido de acesso à informação, que poderá ser encaminhado a prefeitura de seu ' +
+			' município quando estão faltando informações nos portais de transparência.');
 		}
 		// else if (session.message.address.channelId == 'facebook' && !args) {
 		// 		var fbId = session.message.sourceEvent.sender.id;
@@ -84,25 +83,23 @@ library.dialog('/', [
 		// 		});
 		// }
 
-		session.replaceDialog('/looseRequest');
+		session.beginDialog('/looseRequest');
 	},
-]).triggerAction({
-	matches: /^cancelar$/i,
-	onSelectAction: (session) => {
-		session.replaceDialog('/welcomeBack');
-	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
 });
 
 library.dialog('/looseRequest', [
 	(session) => {
 		session.sendTyping();
-		builder.Prompts.choice(
-			session,
-			'A respeito dos gastos, o site permite que você identifique todos os seguintes itens?' +
+		session.send('Irei te perguntar se o site permite que você identifique todos os seguintes itens:' +
 						'\n\n\n - Qual o número do processo que deu origem aquele gasto;' +
 						'\n\n\n - O bem fornecido ou o serviço prestado ao seu município;' +
 						'\n\n\n - Pessoa física ou jurídica beneficiária do pagamento;' +
-						'\n\n\n - E, quando for o caso, o procedimento licitatório realizado.',
+						'\n\n\n - E, quando for o caso, o procedimento licitatório realizado.');
+		builder.Prompts.choice(
+			session,
+			'Vamos lá?',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -462,12 +459,8 @@ library.dialog('/looseRequest', [
 			break;
 		}
 	},
-
-]).triggerAction({
-	matches: /^cancelar$/i,
-	onSelectAction: (session) => {
-		session.replaceDialog('/welcomeBack');
-	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
 });
 
 library.dialog('/generateRequest', [
@@ -581,12 +574,8 @@ library.dialog('/generateRequest', [
 			break;
 		}
 	},
-]).triggerAction({
-	matches: /^cancelar$/i,
-	onSelectAction: (session) => {
-		session.replaceDialog('/welcomeBack');
-	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
 });
-
 
 module.exports = library;

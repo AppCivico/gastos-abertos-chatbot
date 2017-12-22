@@ -79,7 +79,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('gastosAbertosInformation:/');
 				break;
 			case Game:
-				session.replaceDialog('/game');
+				session.beginDialog('/game');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -92,7 +92,9 @@ bot.dialog('/promptButtons', [
 		session.replaceDialog('/welcomeBack');
 	},
 
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 bot.dialog('/welcomeBack', [
 	(session) => {
@@ -116,7 +118,7 @@ bot.dialog('/welcomeBack', [
 				session.beginDialog('gastosAbertosInformation:/');
 				break;
 			case Game:
-				session.replaceDialog('/game');
+				session.beginDialog('/game');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -124,11 +126,12 @@ bot.dialog('/welcomeBack', [
 			}
 		}
 	},
-
 	(session) => {
 		session.replaceDialog('/welcomeBack');
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 bot.dialog('/game', [
 	(session) => {
@@ -156,7 +159,9 @@ bot.dialog('/game', [
 			}
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 bot.dialog('/reset', [
 	(session) => {

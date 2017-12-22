@@ -27,7 +27,6 @@ let missionUser; // Vazio?
 
 // TODO mudanças provisórias para teste
 
-
 library.dialog('/', [
 	(session) => {
 		session.sendTyping();
@@ -56,21 +55,21 @@ library.dialog('/', [
 			.then((count) => {
 				if (count !== 0) {
 					session.sendTyping();
-					session.replaceDialog('/missionStatus');
+					session.end();
+					session.beginDialog('/missionStatus');
 					return email;
 				}
 				session.sendTyping();
 				session.send(`Hmmm...Não consegui encontrar seu cadastro. ${emoji.get('dizzy_face').repeat(2)}` +
 				'\nO e-mail está correto? Por favor, tente novamente. ');
-				session.replaceDialog('/');
+				session.end();
+				session.beginDialog('/');
 				return undefined;
 			});
 	},
-]).triggerAction({
-	matches: /^help$/i,
-	onSelectAction: (session) => {
-		session.send('zasdadasd');
-	},
+
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
 });
 
 library.dialog('/missionStatus', [
@@ -143,7 +142,9 @@ library.dialog('/missionStatus', [
 			});
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/currentMission', [
 	(session) => {
@@ -195,7 +196,8 @@ library.dialog('/currentMission', [
 						session.send(`Você está na segunda missão, no entanto não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
 						session.send('EXPLICAÇÃO DO PEDIDO');
 						// TODO Explicação do pedido
-						session.replaceDialog('/sendToInformationAccessRequest');
+						session.endDialog();
+						session.beginDialog('/sendToInformationAccessRequest');
 					} else {
 						session.beginDialog(
 							'secondMissionConclusion:/',
@@ -220,7 +222,9 @@ library.dialog('/currentMission', [
 			break;
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/sendToInformationAccessRequest', [
 	(session) => {
@@ -249,10 +253,12 @@ library.dialog('/sendToInformationAccessRequest', [
 		default: // No
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
 			session.endDialog();
-			session.replaceDialog('/welcomeBack');
+			session.beginDialog('/welcomeBack');
 			break;
 		}
 	},
-]);
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 module.exports = library;

@@ -91,6 +91,8 @@ library.dialog('/', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-]).cancelAction('cancel', null, { matches: /^cancel/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 module.exports = library;

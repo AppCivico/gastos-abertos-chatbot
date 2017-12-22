@@ -8,6 +8,7 @@ bot.library(require('./details'));
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
+const emoji = require('node-emoji');
 
 const MoreInformations = 'Mais detalhes';
 const Conclusion = 'Conclusão da missão';
@@ -52,7 +53,7 @@ library.dialog('/', [
 			mission_id: 1,
 		})
 			.then(() => {
-				session.send('Vamos lá! Que comece o processo de missões!');
+				session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
 				session.send(texts.first_mission.assign);
 
 				builder.Prompts.choice(
@@ -67,7 +68,8 @@ library.dialog('/', [
 			})
 			.catch((err) => {
 				console.log(`Error creating user mission${err}`);
-				session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde e entre em contato conosco.');
+				session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde ou entre em contato conosco.' +
+				` ${emoji.get('dizzy_face').repeat(3)}`);
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw err;
 			});
@@ -78,7 +80,8 @@ library.dialog('/', [
 			session.send(texts.first_mission.reference_transparency_portals);
 			break;
 		default: // No
-			session.send('Okay! Mas qualquer dúvida pode entrar em contato com a gente aqui do Gastos Abertos tá?');
+			session.send('Okay! Mas qualquer dúvida pode entrar em contato com a gente aqui do Gastos Abertos, tá?' +
+			` ${emoji.get('slightly_smiling_face').repeat(2)}`);
 			break;
 		}
 
@@ -155,7 +158,8 @@ library.dialog('/', [
 			session.send(texts.first_mission.reference_transparency_portals);
 			break;
 		default: // No
-			session.send('Okay! Mas qualquer dúvida pode entrar em contato com a gente aqui do Gastos Abertos tá?');
+			session.send('Okay! Mas qualquer dúvida pode entrar em contato com a gente aqui do Gastos Abertos, tá?' +
+			` ${emoji.get('slightly_smiling_face').repeat(2)}`);
 			break;
 		}
 
@@ -225,6 +229,8 @@ library.dialog('/', [
 			break;
 		}
 	},
-]).cancelAction('cancelar', null, { matches: /^cancelar/i });
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 module.exports = library;

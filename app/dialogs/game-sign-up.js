@@ -13,9 +13,9 @@ bot.library(require('./contact'));
 const User = require('../server/schema/models').user;
 // ${emoji.get('email')}
 
-const emoji = require('node-emoji');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const mailer = require('../server/mailer/mailer.js');
+const emoji = require('node-emoji');
 
 const Contact = 'Entrar em contato';
 const Restart = 'Voltar para o início';
@@ -26,7 +26,7 @@ const library = new builder.Library('gameSignUp');
 library.dialog('/', [
 	(session) => {
 		session.sendTyping();
-		session.send(`Tenho o maior respeito pela sua privacidade e tomarei todo cuidado com seus dados. ${emoji.get('zipper_mouth_face')}` +
+		session.send(`Tenho o maior respeito pela sua privacidade e tomarei todo cuidado com seus dados. ${emoji.get('zipper_mouth_face')} ` +
 		'Se tiver dúvidas, confira os termos de uso do Gastos Abertos: https://gastosabertos.org/termos .');
 		session.send('Agora vou te fazer algumas perguntas para seu cadastro, ok? São só 7 perguntinhas...');
 		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
@@ -204,11 +204,8 @@ library.dialog('/', [
 			break;
 		}
 	},
-]).triggerAction({
-	matches: /^cancelar$/i,
-	onSelectAction: (session) => {
-		session.send('/welcomeBack');
-	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
 });
 
 module.exports = library;

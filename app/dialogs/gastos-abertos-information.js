@@ -1,15 +1,15 @@
-/* global  bot:true */
+/* global  bot:true builder:true */
 
 bot.library(require('./game-sign-up'));
 bot.library(require('./contact'));
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
-const builder = require('botbuilder');
+const emoji = require('node-emoji');
 
 const library = new builder.Library('gastosAbertosInformation');
 
 const gastosAbertosCicles = 'O que é um ciclo';
-const gameSignUp = 'Inscrição';
+const gameSignUp = 'Inscrever-se';
 const GastosAbertosCicleResults = 'Resultados';
 const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
@@ -65,7 +65,6 @@ library.dialog('/', [
 	matches: /^cancel$|^cancelar$|^desisto/i,
 });
 
-
 library.dialog('/promptButtons', [
 	(session) => {
 		session.sendTyping();
@@ -102,7 +101,9 @@ library.dialog('/promptButtons', [
 			}
 		}
 	},
-]);
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 library.dialog('/gastosAbertosCicles', [
 	(session) => {
@@ -129,7 +130,7 @@ library.dialog('/gameSignUpConfirmation', [
 		builder.Prompts.choice(
 			session,
 			'Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
-			'\n\n\nCom Guaxi, missão dada é missão cumprida.\nVamos começar?',
+			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns"').repeat(2)}\nVamos começar?`,
 			[yes, no],
 			{
 				listStyle: builder.ListStyle.button,
@@ -145,7 +146,8 @@ library.dialog('/gameSignUpConfirmation', [
 				session.beginDialog('gameSignUp:/');
 				break;
 			default: // no
-				session.send('OK. Estarei aqui caso mudar de ideia.');
+				session.send(`OK. Estarei aqui caso mudar de ideia. ${emoji.get('slightly_smiling_face')} ` +
+				`${emoji.get('upside_down_face')} ${emoji.get('slightly_smiling_face')}`);
 				session.replaceDialog('/promptButtons');
 				break;
 			}
