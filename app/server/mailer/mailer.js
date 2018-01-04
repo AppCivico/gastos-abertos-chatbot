@@ -41,7 +41,7 @@ const mailer = (function aa() {
 		self.status = false;
 
 		async.waterfall([
-			function (callback) {
+			function (callback) { // eslint-disable-line func-names
 				const mailOptions = {
 					from: 'Guaxi <no_reply@gastosabertos.org>',
 					to: Email,
@@ -62,7 +62,7 @@ const mailer = (function aa() {
 					callback(null, self.status, Email);
 				});
 			},
-			function (statusCode, Email, callback) {
+			function (statusCode, Email, callback) { // eslint-disable-line func-names
 				console.log(`Will update DB here for ${Email}With ${statusCode}`);
 				emailQueue.create({
 					email: listofemails,

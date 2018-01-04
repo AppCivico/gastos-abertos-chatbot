@@ -33,10 +33,8 @@ library.dialog('/', [
 			break;
 		case Restart:
 			session.endDialog();
-			session.beginDialog('/welcomeBack');
 			break;
 		default: // Conclusion
-			session.endDialog();
 			session.beginDialog('firstMissionConclusion:/');
 		}
 	},

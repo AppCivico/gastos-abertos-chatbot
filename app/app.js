@@ -7,7 +7,6 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-// ${emoji.get('coffee')
 
 bot.library(require('./validators'));
 bot.library(require('./dialogs/game-sign-up'));
@@ -15,8 +14,7 @@ bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 
-
-const GameSignUp = 'Inscrição 2º Ciclo';
+const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Sobre o projeto';
 const Contact = 'Entrar em contato';
 const Informacoes = 'Informações';

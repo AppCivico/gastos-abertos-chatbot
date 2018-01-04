@@ -18,6 +18,7 @@ const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos lá!';
 const Confirm = 'Beleza!';
+const WelcomeBack = 'Voltar para o início';
 
 let name;
 
@@ -109,23 +110,25 @@ library.dialog('/looseRequest', [
 	},
 
 	(session, args) => {
-		console.log(args.response);
 		switch (args.response.entity) {
 		case Yes:
+			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
+			builder.Prompts.choice(
+				session,
+				'Seu município identifica de onde vêm os recursos que ele recebe? ' +
+				'\n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.',
+				[Yes, No],
+				{
+					listStyle: builder.ListStyle.button,
+					retryPrompt: retryPrompts.choice,
+				} // eslint-disable-line comma-dangle
+			);
 			break;
 		default: // No
+			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
+			session.endDialog();
 			break;
 		}
-		builder.Prompts.choice(
-			session,
-			'Seu município identifica de onde vêm os recursos que ele recebe? ' +
-			'\n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.',
-			[Yes, No],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
 	},
 
 	(session, args) => {
@@ -175,7 +178,8 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
-			itens.push('<p> - Disponibilização da relação de pagamentos de diárias, aquisição de passagens aéreas (destino e motivo da viagem) e adiantamento de despesas</p>');
+			itens.push('<p> - Disponibilização da relação de pagamentos de diárias, aquisição de passagens aéreas (destino e motivo da viagem) ' +
+			'e adiantamento de despesas</p>');
 			break;
 		}
 
@@ -243,7 +247,8 @@ library.dialog('/looseRequest', [
 
 		builder.Prompts.choice(
 			session,
-			'O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, com respectivas fundamentações?',
+			'O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, ' +
+			'com respectivas fundamentações?',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -301,7 +306,8 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
-			itens.push('<p> - Disponibilização do controle de estoque da prefeitura, com lista de entradas e saídas de bens patrimoniais, além da relação de cessões, permutas e doação de bens</p>');
+			itens.push('<p>-Disponibilização do controle de estoque da prefeitura, com lista de entradas' +
+		' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
 			break;
 		}
 
@@ -454,7 +460,7 @@ library.dialog('/looseRequest', [
 		case HappyYes:
 			session.beginDialog('/generateRequest');
 			break;
-		default: // Not Happy
+		default: // Unhappy
 			session.send('Ocorreu um erro.');
 			break;
 		}
@@ -467,7 +473,6 @@ library.dialog('/generateRequest', [
 	(session) => {
 		let data = generatedRequest.loadSync(path, file.slice(5));
 		data = JSON.stringify(data);
-
 		// Uploading the generated PDF to MailChimp
 		const dataString = `{"name":"${name}LAI.pdf" , "file_data":${data}}`;
 
@@ -486,7 +491,6 @@ library.dialog('/generateRequest', [
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
 				console.log(obj.full_size_url);
-
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
 					facebook: {
@@ -531,25 +535,25 @@ library.dialog('/generateRequest', [
 							builder.Prompts.choice(
 								session,
 								`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-								[Confirm],
+								[Confirm, WelcomeBack],
 								{
 									listStyle: builder.ListStyle.button,
 									retryPrompt: retryPrompts.choice,
 								} // eslint-disable-line comma-dangle
 							);
 						})
-						.catch((e) => {
-							console.log(`Error updating mission${e}`);
+						.catch((err) => {
+							console.log(`Error updating mission${err}`);
 							session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
 							session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-							throw e;
+							throw err;
 						});
 				} else {
 					builder.Prompts.choice(
 						session,
 						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura,' +
 						' ou levar esse pedido em formato físico e protocolizá-lo.',
-						[Confirm],
+						[Confirm, WelcomeBack],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
@@ -565,17 +569,18 @@ library.dialog('/generateRequest', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Confirm:
+			session.send('No momento, pararemos por aqui. ' +
+		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
+			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
+			session.endConversation();
+			break;
+		default: // WelcomeBack
 			session.endDialog();
-			session.replaceDialog('/welcomeBack');
-			break;
-		default:
-			session.send('Opção inválida.');
-			session.replaceDialog('/welcomeBack');
-			break;
 		}
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^desisto/i,
 });
+
 
 module.exports = library;

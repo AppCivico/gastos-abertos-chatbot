@@ -19,6 +19,7 @@ const Yes = 'Sim';
 const No = 'Não';
 const Contact = 'Entrar em contato';
 const Restart = 'Voltar para o início';
+const Confirm = 'Por hoje, chega';
 
 let email = '';
 let user;
@@ -43,10 +44,8 @@ library.dialog('/', [
 			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 			return;
 		}
-
 		email = args.response;
 		session.sendTyping();
-
 		User.count({
 			where: {
 				email,
@@ -55,19 +54,16 @@ library.dialog('/', [
 			.then((count) => {
 				if (count !== 0) {
 					session.sendTyping();
-					session.end();
 					session.beginDialog('/missionStatus');
 					return email;
 				}
 				session.sendTyping();
 				session.send(`Hmmm...Não consegui encontrar seu cadastro. ${emoji.get('dizzy_face').repeat(2)}` +
 				'\nO e-mail está correto? Por favor, tente novamente. ');
-				session.end();
 				session.beginDialog('/');
 				return undefined;
 			});
 	},
-
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^desisto/i,
 });
@@ -119,7 +115,6 @@ library.dialog('/missionStatus', [
 				},
 			}).then((UserData) => {
 				user = UserData.dataValues;
-
 				UserMission.count({
 					where: {
 						user_id: user.id,
@@ -179,27 +174,24 @@ library.dialog('/currentMission', [
 				default: // 2
 					if (missionUser.completed) {
 						session.send(`Parabéns! Você concluiu o processo de missões do Gastos Abertos! ${emoji.get('tada').repeat(3)}`);
-						session.send('Caso você não participe ainda, junte-se a nós no grupo do WhatsApp do Gastos Abertos! ' +
-						'Lá, temos bastante discussões legais e ajudamos com tudo que podemos!');
-						session.send('Basta clicar no link a seguir: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
+						session.send('Junte-se a nós no Grupo de Lideranças do Gastos Abertos no WhatsApp do Gastos Abertos.' +
+						`Participe dos debates e compartilhe suas experiências conosco. ${emoji.get('slightly_smiling_face').repeat(2)}`);
+						session.send('Para entrar, basta acessar o link abaixo do seu celular:' +
+						'\n\n https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
 						builder.Prompts.choice(
 							session,
-
 							'Posso te ajudar com mais alguma coisa?',
-							[Contact, Restart],
+							[Contact, Restart, Confirm],
 							{
 								listStyle: builder.ListStyle.button,
 								retryPrompt: retryPrompts.choice,
 							} // eslint-disable-line comma-dangle
 						);
-					} else if (missionUser.metadata.request_generated === 0) {
-						session.send(`Você está na segunda missão, no entanto não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
-						session.send('EXPLICAÇÃO DO PEDIDO');
-						// TODO Explicação do pedido
-						session.endDialog();
-						session.beginDialog('/sendToInformationAccessRequest');
+					} else if (missionUser.metadata.request_generated === 0) { // TODO tem que ser zero(1 pra testar)
+						session.send(`Você está na segunda missão, no entanto, não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
+						session.replaceDialog('/sendToInformationAccessRequest');
 					} else {
-						session.beginDialog(
+						session.replaceDialog(
 							'secondMissionConclusion:/',
 							{
 								user,
@@ -213,13 +205,17 @@ library.dialog('/currentMission', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Contact:
-			session.beginDialog('contact:/');
+		case Confirm:
+			session.send('Então, pararemos por aqui. Agradeçemos sua participação.' +
+		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
+			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
+			session.endConversation();
 			break;
-		default: // Restart
+		case Restart: // WelcomeBack
 			session.endDialog();
-			session.beginDialog('/welcomeBack');
 			break;
+		default: // Contact
+			session.beginDialog('contact:/');
 		}
 	},
 ]).cancelAction('cancelAction', '', {
@@ -230,7 +226,7 @@ library.dialog('/sendToInformationAccessRequest', [
 	(session) => {
 		builder.Prompts.choice(
 			session,
-			'Vamos gerar seu pedido?',
+			'Vamos gerar seu pedido agora?',
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
@@ -253,7 +249,6 @@ library.dialog('/sendToInformationAccessRequest', [
 		default: // No
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
 			session.endDialog();
-			session.beginDialog('/welcomeBack');
 			break;
 		}
 	},

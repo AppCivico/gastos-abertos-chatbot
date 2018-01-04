@@ -23,7 +23,6 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session,
 			`Obrigado por seu interesse. ${emoji.get('slightly_smiling_face').repeat(2)} Mas diga, como posso te ajudar?`,
-			// TODO essa frase
 			[SignUpProblems, Informations, MissionsInformations],
 			{
 				listStyle: builder.ListStyle.button,
@@ -82,11 +81,12 @@ library.dialog('/', [
 				if (error) {
 					console.log('Could not add card:', error);
 					session.send(`Oooops...Houve um problema ao enviar sua mensagem de contato, tente novamente. ${emoji.get('confounded').repeat(2)}`);
-					session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+					//	session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+					session.endDialog();
 				} else {
-					console.log('Added card:');
 					session.send(`Recebemos seu contato com sucesso! Em breve, você receberá uma resposta em seu e-mail! ${emoji.get('thumbsup').repeat(2)}`);
-					session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+					//		session.endDialogWithResult({ resumed: builder.ResumeReason.completed });
+					session.endDialog();
 				}
 			} // eslint-disable-line comma-dangle
 		);

@@ -16,7 +16,7 @@ const UserMission = require('../../server/schema/models').user_mission;
 
 const HappyYes = 'Vamos lá!';
 const Yes = 'Sim';
-const No = 'No';
+const No = 'Não';
 const Confirm = 'Beleza!';
 const WelcomeBack = 'Voltar para o início';
 
@@ -38,7 +38,7 @@ library.dialog('/', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			`Pelo o que vi aqui você está na segunda missão, vamos conclui-la?  ${emoji.get('slightly_smiling_face')}`,
+			`Pelo o que vi aqui você está na segunda missão, vamos concluí-la?  ${emoji.get('slightly_smiling_face')}`,
 			[HappyYes],
 			{
 				listStyle: builder.ListStyle.button,
@@ -96,11 +96,10 @@ library.dialog('/secondMissionQuestions', [
 				);
 				break;
 			default: // No
-				session.send(`Que pena! ${emoji.get('cold_sweat')} No entanto, recomendamos que você o protocolize mesmo assim ` +
+				session.send(`Que pena! ${emoji.get('cold_sweat').repeat(2)} No entanto, recomendamos que você o protocolize mesmo assim ` +
 				'pois é muito importante que a sociedade civil demande dados.');
 				session.send('Agora vou te levar para o início.');
 				session.endDialog();
-				session.beginDialog('/welcomeBack');
 				break;
 			}
 		}
@@ -124,6 +123,9 @@ library.dialog('/secondMissionQuestions', [
 			default: // No
 				answers.govAnswered = 0;
 				session.send(`Que pena! ${emoji.get('cold_sweat')} No entanto, não vamos desistir!`);
+				session.send('Se houve alguma irregularidade no processo ou você ficou com dúvidas, ' +
+				'encaminhe uma mensagem para a Controladoria Geral da União:\n\n' +
+				'https://sistema.ouvidorias.gov.br/publico/Manifestacao/RegistrarManifestacao.aspx');
 				session.replaceDialog('/conclusion');
 				break;
 			}
@@ -147,7 +149,6 @@ library.dialog('/secondMissionQuestions', [
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^desisto/i,
 });
-
 
 library.dialog('/conclusion', [
 	(session) => {
@@ -178,19 +179,20 @@ library.dialog('/conclusion', [
 	matches: /^cancel$|^cancelar$|^desisto/i,
 });
 
-
 library.dialog('/congratulations', [
 	(session) => {
-		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo nessa! ' +
-		'\n\nAposto que eu e você aprendemos muitas coisas novas nesse processo!');
-		session.send('No entanto, eu irei te dar uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!' +
-		'\n\nEssa tarefa extra será buscar a assinatura de seu prefeito(a) para a Carta Compromisso do Gastos Abertos!');
-		session.send('Você pode encontrar a Carta nesse link: https://gastosabertos.org/participe/GastosAbertosCartaCompromisso.pdf' +
-		'\n\nMande uma mensagem lá no nosso grupo! Tá cheio de gente para te ajudar!');
+		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo dessa tarefa! ' +
+		`\n\nAposto que você e eu aprendemos muitas coisas novas nesse processo! ${emoji.get('slightly_smiling_face').repeat(2)}` +
+		'\n\nDarei a você uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!');
+		session.send('Essa tarefa extra será buscar a assinatura de seu prefeito(a) para a Carta Compromisso do Gastos Abertos!' +
+		'\n\nVocê pode encontrar a Carta nesse link: https://gastosabertos.org/participe/GastosAbertosCartaCompromisso.pdf');
+		session.send('Mande uma mensagem lá no nosso grupo! Para entrar no Grupo de Lideranças do Gastos Abertos ' +
+		'basta acessar o link abaixo do seu celular.\n\nTá cheio de gente para ajudar!' +
+		'https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
 
 		builder.Prompts.choice(
 			session,
-			`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a terceira missão, okay?${emoji.smile}`,
+			`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a terceira missão, okay? ${emoji.get('slightly_smiling_face').repeat(2)}`,
 			[Confirm, WelcomeBack],
 			{
 				listStyle: builder.ListStyle.button,
@@ -206,15 +208,14 @@ library.dialog('/congratulations', [
 			session.send('No momento, pararemos por aqui. ' +
 		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
 			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
-			session.endDialog();
+			session.endConversation();
 			break;
 		default: // WelcomeBack
-			session.replaceDialog('/welcomeBack');
+			session.endDialog();
 		}
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^desisto/i,
 });
-
 
 module.exports = library;

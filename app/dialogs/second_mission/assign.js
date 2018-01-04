@@ -41,9 +41,8 @@ library.dialog('/', [
 			session.replaceDialog('/assign');
 			break;
 		default: // No
-			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup')}`);
+			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);
 			session.endDialog();
-			session.beginDialog('/welcomeBack');
 			break;
 		}
 	},
@@ -73,7 +72,6 @@ library.dialog('/assign', [
 				);
 			});
 	},
-
 	(session, args) => {
 		switch (args.response.entity) {
 		case HappyYes:
@@ -86,9 +84,8 @@ library.dialog('/assign', [
 			);
 			break;
 		default: // No
-			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup')}`);
+			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);
 			session.endDialog();
-			session.beginDialog('/welcomeBack');
 			break;
 		}
 	},

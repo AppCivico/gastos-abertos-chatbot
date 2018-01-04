@@ -41,7 +41,7 @@ library.dialog('/', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Pelo o que vi aqui você está na primeira missão, vamos conclui-la?',
+			'Pelo o que vi aqui você está na primeira missão, vamos concluí-la?',
 			[Yes, No, MoreInformations],
 			{
 				listStyle: builder.ListStyle.button,
@@ -54,16 +54,15 @@ library.dialog('/', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case Yes:
-				session.replaceDialog('/transparencyPortalExists');
+				session.beginDialog('/transparencyPortalExists');
 				break;
 			case No:
 				session.send(`Okay! Estarei te esperando para mandarmos ver nessa tarefa! ${emoji.get('sunglasses')}`);
 				session.endDialog();
-				session.beginDialog('/welcomeBack');
 				break;
 			default: // MoreInformations
 				session.send(texts.first_mission.details);
-				session.replaceDialog('/conclusionPromptAfterMoreDetails');
+				session.beginDialog('/conclusionPromptAfterMoreDetails');
 				break;
 			}
 		}
@@ -96,7 +95,6 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 			default: // No
 				session.send(`Okay! Estarei te esperando para mandarmos ver nessa tarefa! ${emoji.get('sunglasses')}`);
 				session.endDialog();
-				session.beginDialog('/welcomeBack');
 				break;
 			}
 		}
@@ -405,13 +403,15 @@ library.dialog('/userUpdate', [
 		})
 			.then((count) => {
 				if (count < 10 && count !== 1) {
-					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}\n\nAtualmente há ${count} líderes no seu estado. Vamos aumentar este número para 10 líderes?`);
+					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
+					`\n\nAtualmente há ${count} líderes no seu estado. Vamos aumentar este número para 10 líderes?`);
 					session.send('Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!');
 					if (session.message.address.channelId === 'facebook') {
 						session.send(msg);
 					}
 				} else if (count < 10 && count === 1) {
-					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?`);
+					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
+					'\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?');
 					session.send('Compartilhe isto com os seus amigos! Assim nós teremos mais força para incentivar a transparência em seu estado!');
 					if (session.message.address.channelId === 'facebook') {
 						session.send(msg);
@@ -448,25 +448,24 @@ library.dialog('/userUpdate', [
 					} // eslint-disable-line comma-dangle
 				);
 			})
-			.catch((e) => {
-				console.log(`Error updating mission${e}`);
+			.catch((err) => {
+				console.log(`Error updating mission${err}`);
 				session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-				throw e;
+				throw err;
 			});
 	},
 
 	(session, args) => {
 		switch (args.response.entity) {
 		case Confirm:
-		// TODO melhorar isso aqui
 			session.send('No momento, pararemos por aqui. ' +
 					'\n\nSe quiser conversar comigo novamente em outro momento, basta me mandar qualquer mensagem.');
 			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
-			session.endDialog();
+			session.endConversation();
 			break;
 		default: // WelcomeBack
-			session.replaceDialog('/welcomeBack');
+			session.endDialog();
 		}
 	},
 ]).cancelAction('cancelAction', '', {

@@ -16,8 +16,6 @@ const reset = 'Voltar ao início';
 const yes = 'Sim, vamos lá!';
 const no = 'Ainda não';
 
-// TODO o cancelar fala alguma mensagem??
-
 library.dialog('/', [
 	(session) => {
 		session.sendTyping();
@@ -56,10 +54,8 @@ library.dialog('/', [
 			}
 		}
 	},
-
-
 	(session) => {
-		session.replaceDialog('/');
+		session.replaceDialog('/promptButtons');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^desisto/i,
@@ -87,7 +83,7 @@ library.dialog('/promptButtons', [
 				session.replaceDialog('/gastosAbertosCicles');
 				break;
 			case gameSignUp:
-				session.replaceDialog('/gameSignUpConfirmation');
+				session.beginDialog('/gameSignUpConfirmation');
 				break;
 			case GastosAbertosCicleResults:
 				session.replaceDialog('/GastosAbertosCicleResults');
@@ -100,6 +96,9 @@ library.dialog('/promptButtons', [
 				break;
 			}
 		}
+	},
+	(session) => {
+		session.replaceDialog('/promptButtons');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^desisto/i,
@@ -130,7 +129,7 @@ library.dialog('/gameSignUpConfirmation', [
 		builder.Prompts.choice(
 			session,
 			'Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
-			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns"').repeat(2)}\nVamos começar?`,
+			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns').repeat(2)}\n\nVamos começar?`,
 			[yes, no],
 			{
 				listStyle: builder.ListStyle.button,
@@ -142,16 +141,18 @@ library.dialog('/gameSignUpConfirmation', [
 		session.sendTyping();
 		if (result.response) {
 			switch (result.response.entity) {
-			case yes:
+			case yes: // Sign up accepted
 				session.beginDialog('gameSignUp:/');
 				break;
 			default: // no
-				session.send(`OK. Estarei aqui caso mudar de ideia. ${emoji.get('slightly_smiling_face')} ` +
+				session.send(`OK. Estarei aqui caso mudar de ideia. ${emoji.get('slightly_smiling_face')}` +
 				`${emoji.get('upside_down_face')} ${emoji.get('slightly_smiling_face')}`);
-				session.replaceDialog('/promptButtons');
 				break;
 			}
 		}
+	},
+	(session) => {
+		session.replaceDialog('/promptButtons');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^desisto/i,

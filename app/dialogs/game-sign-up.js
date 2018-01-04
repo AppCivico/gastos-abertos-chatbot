@@ -18,7 +18,7 @@ const mailer = require('../server/mailer/mailer.js');
 const emoji = require('node-emoji');
 
 const Contact = 'Entrar em contato';
-const Restart = 'Voltar para o início';
+const Restart = 'Voltar';
 let fbId = '';
 
 const library = new builder.Library('gameSignUp');
@@ -58,10 +58,10 @@ library.dialog('/', [
 		})
 			.then((count) => {
 				if (count !== 0) {
-					session.send(`Você já está cadastrado, parceiro! ${emoji.get('sunglasses')} Verifique se você recebeu minha mensagem em seu e-mail. '+
-					' \n\n\nEu a enviei para o seguinte e-mail: ${session.dialogData.email}.`);
+					session.send(`Você já está cadastrado, parceiro! ${emoji.get('sunglasses')} Verifique se você recebeu minha mensagem em seu e-mail. ` +
+					` \n\n\nEla foi enviada para o e-mail: ${session.dialogData.email}.`);
 					session.endDialog();
-					session.beginDialog('/welcomeBack');
+					// session.beginDialog('/welcomeBack');
 				} else {
 					session.sendTyping();
 					session.beginDialog('validators:date', {
@@ -170,9 +170,9 @@ library.dialog('/', [
 				//         });
 				//     }
 				// ]);
-				session.send(`Muito bom, parceiro! Finalizamos sua inscrição. ${emoji.get('tada').repeat(3)}`);
+				session.send(`Muito bom, parceiro! Finalizamos sua inscrição. ${emoji.get('tada').repeat(2)}`);
 				session.send('Nossa equipe vai enviar em seu email a confirmação deste cadastro.');
-				session.send(`Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos. ${emoji.get('busts_in_silhouette')}` +
+				session.send(`Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos. ${emoji.get('busts_in_silhouette').repeat(3)}` +
 				'\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!');
 
 				builder.Prompts.choice(
@@ -199,8 +199,7 @@ library.dialog('/', [
 			session.beginDialog('contact:/');
 			break;
 		default: // Restart
-			session.endDialog();
-			session.beginDialog('/welcomeBack');
+		//	session.endDialog();
 			break;
 		}
 	},
