@@ -129,6 +129,9 @@ library.dialog('/', [
 		if (session.message.address.channelId === 'facebook') {
 			fbId = session.message.sourceEvent.sender.id;
 		}
+		// TODO fix Error creating user
+		// Unhandled rejection SequelizeValidationError: string violation:
+		// email cannot be an array or an object
 
 		const user = {
 			name: session.dialogData.fullName,

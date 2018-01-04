@@ -59,7 +59,7 @@ library.dialog('/', [
 				}
 				session.sendTyping();
 				session.send(`Hmmm...Não consegui encontrar seu cadastro. ${emoji.get('dizzy_face').repeat(2)}` +
-				'\nO e-mail está correto? Por favor, tente novamente. ');
+				'\nO e-mail está correto? Por favor, tente novamente. Ou digite \'cancelar\' para retornar ao menu.');
 				session.beginDialog('/');
 				return undefined;
 			});
