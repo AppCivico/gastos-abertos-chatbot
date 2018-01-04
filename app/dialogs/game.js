@@ -187,7 +187,8 @@ library.dialog('/currentMission', [
 								retryPrompt: retryPrompts.choice,
 							} // eslint-disable-line comma-dangle
 						);
-					} else if (missionUser.metadata.request_generated === 0) { // TODO tem que ser zero(1 pra testar)
+					} else if (missionUser.metadata.request_generated === 0) {
+						// TODO tem que ser zero(1 pra testar)
 						session.send(`Você está na segunda missão, no entanto, não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
 						session.replaceDialog('/sendToInformationAccessRequest');
 					} else {

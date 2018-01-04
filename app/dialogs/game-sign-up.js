@@ -8,10 +8,8 @@ bot.library(require('./contact'));
 // const GoogleSpreadsheet = require('google-spreadsheet');
 // var doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID);
 // const async = require('async');
-// const emoji = require('../misc/speeches_utils/emojis');
 // let sheet;
 const User = require('../server/schema/models').user;
-// ${emoji.get('email')}
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const mailer = require('../server/mailer/mailer.js');
