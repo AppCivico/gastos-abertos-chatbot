@@ -24,7 +24,7 @@ const Confirm = 'Por hoje, chega';
 let email = '';
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser; // Vazio?
+let missionUser;
 
 // TODO mudanças provisórias para teste
 
@@ -76,14 +76,14 @@ library.dialog('/missionStatus', [
 						inativo. Devo então iniciar o processo da primeira missão
 				*/
 		if (session.message.address.channelId === 'facebook') {
-			const fbId = session.message.sourceEvent.sender.id;
+			// const fbId = session.message.sourceEvent.sender.id; // TODO teste
 			//	if (1 === 1) {
 			//		const fbId = '100004770631443';
 			// jordan@teste.com
 			User.findOne({
 				where: {
 					email,
-					fb_id: fbId,
+				//	fb_id: fbId,
 				},
 			}).then((UserData) => {
 				user = UserData.dataValues;
@@ -94,7 +94,7 @@ library.dialog('/missionStatus', [
 				})
 					.then((count) => {
 						if (count === 0 && !user.active && user.approved) {
-							//	if (1 === 1) {
+							//	if (1 === 1) { // TODO teste
 							session.beginDialog(
 								'firstMissionAssign:/',
 								{
@@ -172,6 +172,7 @@ library.dialog('/currentMission', [
 					}
 					break;
 				default: // 2
+
 					if (missionUser.completed) {
 						session.send(`Parabéns! Você concluiu o processo de missões do Gastos Abertos! ${emoji.get('tada').repeat(3)}`);
 						session.send('Junte-se a nós no Grupo de Lideranças do Gastos Abertos no WhatsApp do Gastos Abertos.' +
@@ -188,7 +189,6 @@ library.dialog('/currentMission', [
 							} // eslint-disable-line comma-dangle
 						);
 					} else if (missionUser.metadata.request_generated === 0) {
-						// TODO tem que ser zero(1 pra testar)
 						session.send(`Você está na segunda missão, no entanto, não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
 						session.replaceDialog('/sendToInformationAccessRequest');
 					} else {

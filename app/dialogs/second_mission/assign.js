@@ -11,6 +11,7 @@ const UserMission = require('../../server/schema/models').user_mission;
 const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos nessa!';
+const NotYet = 'Ainda não';
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
@@ -64,7 +65,7 @@ library.dialog('/assign', [
 				builder.Prompts.choice(
 					session,
 					'Vamos gerar nosso pedido de acesso à informação? Eu precisarei te fazer mais algumas perguntas referente ao portal de transparência.',
-					[HappyYes, No],
+					[HappyYes, NotYet],
 					{
 						listStyle: builder.ListStyle.button,
 						retryPrompt: retryPrompts.choice,
@@ -83,7 +84,7 @@ library.dialog('/assign', [
 				} // eslint-disable-line comma-dangle
 			);
 			break;
-		default: // No
+		default: // NotYet
 			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);
 			session.endDialog();
 			break;

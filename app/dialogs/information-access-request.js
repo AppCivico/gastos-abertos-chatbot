@@ -9,7 +9,7 @@ const Base64File = require('js-base64-file');
 const emoji = require('node-emoji');
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
-const User = require('../server/schema/models').user;
+// const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
 
 const library = new builder.Library('informationAccessRequest');
@@ -18,8 +18,11 @@ const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos lá!';
 const Confirm = 'Beleza!';
-const WelcomeBack = 'Voltar para o início';
+const Contact = 'Contato';
 
+let user;
+// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
+let missionUser;
 let name;
 
 const itens = [];
@@ -51,8 +54,8 @@ const headers = {
 library.dialog('/', [
 	(session, args) => {
 		if (args && args.user && args.user_mission) {
-			// const { user } = args;
-			// const MissionUser = args.user_mission;
+			user = args.user; // eslint-disable-line prefer-destructuring
+			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
 			session.send('Esse é um processo bem extenso e tem bastante conteúdo. ' +
 				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
@@ -278,7 +281,8 @@ library.dialog('/looseRequest', [
 		);
 	},
 
-	/* (session, args) => {
+	/* Pergunta repetida
+	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
 			break;
@@ -488,8 +492,10 @@ library.dialog('/generateRequest', [
 		};
 
 		function callback(error, response, body) {
-			if (!error || response.statusCode === 200) {
-				const obj = JSON.parse(body);
+			// if (!error || response.statusCode === 200) {
+			if (error) {
+			//	const obj = JSON.parse(body);
+				const obj = 'hrhrb';
 				console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
@@ -513,12 +519,12 @@ library.dialog('/generateRequest', [
 					},
 				});
 				session.send(msg);
-				if (User) {
+				if (user && missionUser) {
 					UserMission.update(
 						{ metadata: { request_generated: 1 } },
 						{
 							where: {
-								user_id: User.id,
+								user_id: user.id,
 								mission_id: 2,
 								completed: false,
 							},
@@ -535,7 +541,7 @@ library.dialog('/generateRequest', [
 							builder.Prompts.choice(
 								session,
 								`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-								[Confirm, WelcomeBack],
+								[Confirm, Contact],
 								{
 									listStyle: builder.ListStyle.button,
 									retryPrompt: retryPrompts.choice,
@@ -553,7 +559,7 @@ library.dialog('/generateRequest', [
 						session,
 						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura,' +
 						' ou levar esse pedido em formato físico e protocolizá-lo.',
-						[Confirm, WelcomeBack],
+						[Confirm, Contact],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
@@ -574,7 +580,7 @@ library.dialog('/generateRequest', [
 			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
 			session.endConversation();
 			break;
-		default: // WelcomeBack
+		default: // Contact
 			session.endDialog();
 		}
 	},

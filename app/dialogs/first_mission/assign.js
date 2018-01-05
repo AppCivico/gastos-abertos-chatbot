@@ -72,7 +72,7 @@ library.dialog('/promptButtons', [
 		builder.Prompts.choice(
 			session,
 			'Posso te ajudar com mais alguma coisa?',
-			[MoreInformations, Conclusion, Contact, Restart],
+			[Conclusion, MoreInformations, Contact, Restart],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,

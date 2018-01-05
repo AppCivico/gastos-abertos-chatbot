@@ -53,7 +53,7 @@ library.dialog('/', [
 			case HappyYes:
 				session.replaceDialog('/secondMissionQuestions');
 				break;
-			default:
+			default: // unlikelyYes
 				session.replaceDialog('/secondMissionQuestions');
 				break;
 			}

@@ -1,9 +1,9 @@
 const emailQueue = require('../schema/models').email_queue;
 const async = require('async');
-// const http = require('http');
 const nodemailer = require('nodemailer');
+// const http = require('http');
 
-const mailer = (function aa() {
+const mailer = (function () { // eslint-disable-line func-names
 	const self = {};
 
 	const listofemails = [];
@@ -26,7 +26,6 @@ const mailer = (function aa() {
 			tls: { rejectUnauthorized: false },
 			debug: true,
 		});
-
 		self.invokeOperation();
 	};
 
@@ -47,8 +46,8 @@ const mailer = (function aa() {
 					to: Email,
 					subject: 'Guaxi - Recebi sua inscrição com sucesso!',
 					html: 'Olá!<br><br>Eu, Guaxi, vi que você se inscreveu para o segundo ciclo do processo de missões do Gastos Abertos.' +
-					'<br><br>Em breve um membro da equipe do Gastos Abertos irá entrar em contato através do e-mail que você cadastrou.' +
-					'<br><br>Muito obrigado, parceiro!',
+			'<br><br>Em breve um membro da equipe do Gastos Abertos irá entrar em contato através do e-mail que você cadastrou.' +
+			'<br><br>Muito obrigado, parceiro!',
 				};
 				listofemails.pop(Email);
 				transporter.sendMail(mailOptions, (error, info) => {
@@ -63,7 +62,7 @@ const mailer = (function aa() {
 				});
 			},
 			function (statusCode, Email, callback) { // eslint-disable-line func-names
-				console.log(`Will update DB here for ${Email}With ${statusCode}`);
+				console.log(`Will update DB here for ${Email} With ${statusCode}`);
 				emailQueue.create({
 					email: listofemails,
 					sucess: successEmail ? successEmail[0] : failureEmail[0],
