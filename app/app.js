@@ -149,6 +149,8 @@ bot.dialog('/game', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case GameSignUp:
+				session.send('Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
+			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns').repeat(2)}`);
 				session.beginDialog('gameSignUp:/');
 				break;
 			default: // Missions:

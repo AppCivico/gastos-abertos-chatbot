@@ -265,7 +265,8 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
-			itens.push('<p> - Disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, com respectivas fundamentações</p>');
+			itens.push('<p> - Disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, ' +
+			'com respectivas fundamentações</p>');
 			break;
 		}
 
@@ -492,10 +493,8 @@ library.dialog('/generateRequest', [
 		};
 
 		function callback(error, response, body) {
-			// if (!error || response.statusCode === 200) {
-			if (error) {
-			//	const obj = JSON.parse(body);
-				const obj = 'hrhrb';
+			if (!error || response.statusCode === 200) {
+				const obj = JSON.parse(body);
 				console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
@@ -577,7 +576,7 @@ library.dialog('/generateRequest', [
 		case Confirm:
 			session.send('No momento, pararemos por aqui. ' +
 		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
+			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
 			session.endConversation();
 			break;
 		default: // Contact

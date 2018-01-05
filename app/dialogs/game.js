@@ -26,8 +26,6 @@ let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let missionUser;
 
-// TODO mudanças provisórias para teste
-
 library.dialog('/', [
 	(session) => {
 		session.sendTyping();
@@ -76,10 +74,6 @@ library.dialog('/missionStatus', [
 						inativo. Devo então iniciar o processo da primeira missão
 				*/
 		if (session.message.address.channelId === 'facebook') {
-			// const fbId = session.message.sourceEvent.sender.id; // TODO teste
-			//	if (1 === 1) {
-			//		const fbId = '100004770631443';
-			// jordan@teste.com
 			User.findOne({
 				where: {
 					email,
@@ -94,7 +88,6 @@ library.dialog('/missionStatus', [
 				})
 					.then((count) => {
 						if (count === 0 && !user.active && user.approved) {
-							//	if (1 === 1) { // TODO teste
 							session.beginDialog(
 								'firstMissionAssign:/',
 								{
@@ -209,7 +202,7 @@ library.dialog('/currentMission', [
 		case Confirm:
 			session.send('Então, pararemos por aqui. Agradeçemos sua participação.' +
 		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
+			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
 			session.endConversation();
 			break;
 		case Restart: // WelcomeBack

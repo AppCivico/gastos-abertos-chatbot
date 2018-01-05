@@ -16,7 +16,7 @@ const mailer = require('../server/mailer/mailer.js');
 const emoji = require('node-emoji');
 
 const Contact = 'Entrar em contato';
-const Restart = 'Voltar';
+const Restart = 'Voltar ao início';
 let fbId = '';
 
 const library = new builder.Library('gameSignUp');
@@ -171,10 +171,9 @@ library.dialog('/', [
 				//         });
 				//     }
 				// ]);
-				session.send(`Muito bom, parceiro! Finalizamos sua inscrição. ${emoji.get('tada').repeat(2)}`);
-				session.send('Nossa equipe vai enviar em seu email a confirmação deste cadastro.');
-				session.send(`Enquanto isso, nossa próxima tarefa é convidar mais pessoas para o 2º Ciclo Gastos Abertos. ${emoji.get('busts_in_silhouette').repeat(3)}` +
-				'\n\n\nSegue link para compartilhamento: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!');
+				session.send(`Muito bom, parceiro! Vamos te enviar em email confirmando. ${emoji.get('tada').repeat(2)}`);
+				session.send(`Convide mais pessoas para participar do Gastos Abertos. ${emoji.get('busts_in_silhouette').repeat(3)}` +
+				'\n\n\nCompartilhe nosso link: https://www.facebook.com/messages/t/gastosabertos.\n\n\nAté a próxima missão!');
 
 				builder.Prompts.choice(
 					session,
@@ -200,7 +199,7 @@ library.dialog('/', [
 			session.beginDialog('contact:/');
 			break;
 		default: // Restart
-		//	session.endDialog();
+			session.endDialog();
 			break;
 		}
 	},

@@ -165,11 +165,11 @@ library.dialog('/conclusion', [
 			returning: true,
 		})
 			.then((result) => {
-				console.log(`${result}Mission updated sucessfuly`);
+				console.log(`Mission updated sucessfuly: ${result}`);
 				session.replaceDialog('/congratulations');
 			})
 			.catch((e) => {
-				console.log(`Error updating mission${e}`);
+				console.log(`Error updating mission: ${e}`);
 				session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw e;
@@ -192,7 +192,8 @@ library.dialog('/congratulations', [
 
 		builder.Prompts.choice(
 			session,
-			`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a terceira missão, okay? ${emoji.get('slightly_smiling_face').repeat(2)}`,
+			'Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a terceira missão, okay? ' +
+			`${emoji.get('slightly_smiling_face').repeat(2)}`,
 			[Confirm, WelcomeBack],
 			{
 				listStyle: builder.ListStyle.button,
@@ -207,7 +208,7 @@ library.dialog('/congratulations', [
 		// TODO melhorar isso aqui e ali em cima com a terceira missão
 			session.send('No momento, pararemos por aqui. ' +
 		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
+			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
 			session.endConversation();
 			break;
 		default: // WelcomeBack

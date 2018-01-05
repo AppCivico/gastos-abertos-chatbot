@@ -460,8 +460,8 @@ library.dialog('/userUpdate', [
 		switch (args.response.entity) {
 		case Confirm:
 			session.send('No momento, pararemos por aqui. ' +
-					'\n\nSe quiser conversar comigo novamente em outro momento, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed')}`);
+					'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
+			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
 			session.endConversation();
 			break;
 		default: // WelcomeBack
