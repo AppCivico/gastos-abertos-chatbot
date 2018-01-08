@@ -56,8 +56,9 @@ bot.dialog('/promptButtons', [
 				},
 			],
 		});
-		session.send('Olá, eu sou o Guaxi, o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.' +
-		'\n\nUtilize o menu abaixo para interagir comigo.');
+		session.send('Olá, eu sou o Guaxi, o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
+		session.send(`\n\nVocê pode utilizar o menu abaixo para interagir comigo. ${emoji.get('hugging_face').repeat(2)}` +
+		`\n\nPara retornar á este menu durante algum processo, basta digitar 'cancelar'. ${emoji.get('slightly_smiling_face').repeat(2)}`);
 		builder.Prompts.choice(
 			session,
 			'Em que assunto eu posso te ajudar?',

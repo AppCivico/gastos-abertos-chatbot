@@ -493,6 +493,7 @@ library.dialog('/generateRequest', [
 		};
 
 		function callback(error, response, body) {
+			// TODO teste
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
 				console.log(obj.full_size_url);

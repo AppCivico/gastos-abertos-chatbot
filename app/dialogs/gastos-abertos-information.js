@@ -146,7 +146,8 @@ library.dialog('/gameSignUpConfirmation', [
 				break;
 			default: // no
 				session.send(`OK. Estarei aqui caso mudar de ideia. ${emoji.get('slightly_smiling_face')}` +
-				`${emoji.get('upside_down_face')} ${emoji.get('slightly_smiling_face')}`);
+				`${emoji.get('upside_down_face')}${emoji.get('slightly_smiling_face')}`);
+				session.endDialog();
 				break;
 			}
 		}
