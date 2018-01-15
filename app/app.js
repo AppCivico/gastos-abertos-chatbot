@@ -30,7 +30,7 @@ bot.dialog('/', [
 bot.dialog('/getstarted', [
 	(session) => {
 		session.sendTyping();
-
+        if (!session.userData.firstRun) {
             session.userData.userid = session.message.sourceEvent.sender.id;
             session.userData.pageid = session.message.sourceEvent.recipient.id;
 
