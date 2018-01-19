@@ -62,7 +62,7 @@ library.dialog('/', [
 			session.send("Além disso, você pode a qualquer momento digitar 'cancelar' e eu te levo para o início");
 		} else {
 			session.send('Você está gerando um pedido de acesso à informação, que poderá ser encaminhado a prefeitura de seu ' +
-			' município quando estão faltando informações nos portais de transparência.');
+			'município quando estão faltando informações nos portais de transparência.');
 		}
 		// else if (session.message.address.channelId == 'facebook' && !args) {
 		// 		var fbId = session.message.sourceEvent.sender.id;
@@ -415,7 +415,6 @@ library.dialog('/looseRequest', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-
 
 	(session, args) => {
 		switch (args.response.entity) {

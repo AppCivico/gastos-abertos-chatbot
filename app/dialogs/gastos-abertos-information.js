@@ -108,7 +108,7 @@ library.dialog('/gastosAbertosCicles', [
 	(session) => {
 		session.send('Um ciclo do Gastos Abertos é um período onde pessoas desenvolvem missões (avaliação de portal de transparência da cidade, ' +
 				'formulação de um pedido de acesso a informação e avaliação das respostas obtidas pelas prefeituras) para tornarem-se lideranças regionais.' +
-				'\n\nEssas missões impactarão a transparência no município que o líder representa.' +
+				'Essas missões impactarão a transparência no município que o líder representa.' +
 				'\n\nParticipe!');
 		session.replaceDialog('/promptButtons');
 	},
