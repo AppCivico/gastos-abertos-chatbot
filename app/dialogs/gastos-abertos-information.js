@@ -28,7 +28,7 @@ library.dialog('/', [
 				gameSignUp, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: retryPrompts.about,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -58,7 +58,8 @@ library.dialog('/', [
 		session.replaceDialog('/promptButtons');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/promptButtons', [
@@ -71,7 +72,7 @@ library.dialog('/promptButtons', [
 				gameSignUp, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: retryPrompts.about,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -101,7 +102,8 @@ library.dialog('/promptButtons', [
 		session.replaceDialog('/promptButtons');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/gastosAbertosCicles', [
@@ -156,7 +158,8 @@ library.dialog('/gameSignUpConfirmation', [
 		session.replaceDialog('/promptButtons');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 module.exports = library;

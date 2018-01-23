@@ -39,8 +39,14 @@ intents.matches('missioes', 'gastosAbertosInformation:/');
 intents.matches('Default Welcome Intent', '/greetings');
 intents.matches('Default Fallback Intent', '/greetings');
 
-bot.dialog('/', intents);
+// bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
+
+bot.dialog('/', [
+	(session) => {
+		session.replaceDialog('/promptButtons');
+	},
+]).triggerAction({ matches: ['Inscrição 2º Ciclo', 'Informações', 'Entrar em contato'] });
 
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
@@ -85,7 +91,7 @@ bot.dialog('/promptButtons', [
 			[GastosAbertosInformation, Game, InformationAcessRequest],
 			{
 				listStyle: builder.ListStyle.button,
-				// retryPrompt: retryPrompts.choice, TODO aaaa
+				retryPrompt: retryPrompts.choiceIntent,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -110,7 +116,6 @@ bot.dialog('/promptButtons', [
 	(session) => {
 		session.replaceDialog('/welcomeBack');
 	},
-
 ]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
 	matches: 'ajuda',
 }).beginDialogAction('missoes', 'informationAccessRequest:/', {
@@ -151,7 +156,8 @@ bot.dialog('/welcomeBack', [
 		session.replaceDialog('/welcomeBack');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 bot.dialog('/game', [
@@ -183,7 +189,7 @@ bot.dialog('/game', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
 });
 
 bot.dialog('/reset', [

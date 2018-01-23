@@ -68,7 +68,8 @@ library.dialog('/', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/conclusionPromptAfterMoreDetails', [
@@ -100,7 +101,8 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 
@@ -192,7 +194,8 @@ library.dialog('/transparencyPortalExists', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/transparencyPortalURL', [
@@ -206,7 +209,8 @@ library.dialog('/transparencyPortalURL', [
 		session.replaceDialog('/transparencyPortalHasFinancialData');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/transparencyPortalHasFinancialData', [
@@ -236,7 +240,8 @@ library.dialog('/transparencyPortalHasFinancialData', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
@@ -266,7 +271,8 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
@@ -280,7 +286,8 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 		session.replaceDialog('/transparencyPortalHasContractsData');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/transparencyPortalHasContractsData', [
@@ -309,7 +316,8 @@ library.dialog('/transparencyPortalHasContractsData', [
 		session.replaceDialog('/transparencyPortalHasBiddingsData');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/transparencyPortalHasBiddingsData', [
@@ -338,7 +346,8 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 		session.replaceDialog('/transparencyPortalHasBiddingProcessData');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
@@ -367,7 +376,8 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 		session.replaceDialog('/userUpdate');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/userUpdate', [
@@ -469,7 +479,8 @@ library.dialog('/userUpdate', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 module.exports = library;
