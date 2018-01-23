@@ -14,8 +14,8 @@ const UserMission = require('../server/schema/models').user_mission;
 
 const library = new builder.Library('informationAccessRequest');
 
-const Yes = 'Sim';
-const No = 'Não';
+const Yes = 'Gerar Pedido';
+const No = 'Ainda não';
 const HappyYes = 'Vamos lá!';
 const Confirm = 'Beleza!';
 const Contact = 'Contato';
@@ -90,7 +90,8 @@ library.dialog('/', [
 		session.beginDialog('/looseRequest');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/looseRequest', [
@@ -470,7 +471,8 @@ library.dialog('/looseRequest', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/generateRequest', [
@@ -495,7 +497,7 @@ library.dialog('/generateRequest', [
 			// TODO teste
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
-				console.log(obj.full_size_url);
+				// console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
 					facebook: {
@@ -584,7 +586,8 @@ library.dialog('/generateRequest', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 
