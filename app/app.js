@@ -14,6 +14,8 @@ bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 
+const DialogFlowReconizer = require('./dialogflow_recognizer');
+
 const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Sobre o projeto';
 const Contact = 'Entrar em contato';
@@ -22,10 +24,26 @@ const Game = 'Processo de missões';
 const Missions = 'Concluir missões';
 const InformationAcessRequest = 'Gerar pedido';
 
+const intents = new builder.IntentDialog({
+	recognizers: [
+		DialogFlowReconizer,
+	],
+	intentThreshold: 0.2,
+	recognizeOrder: builder.RecognizeOrder.series,
+});
+
+bot.recognizer(intents);
+
+intents.matches('ajuda', 'gastosAbertosInformation:/');
+intents.matches('Default Welcome Intent', '/greetings');
+intents.matches('Default Fallback Intent', '/greetings');
+
+bot.dialog('/', intents);
+
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
 
-bot.dialog('/', [
+bot.dialog('/greetings', [
 	(session) => {
 		session.replaceDialog('/promptButtons');
 	},
@@ -46,6 +64,7 @@ bot.dialog('/getstarted', [
 ]);
 
 bot.dialog('/promptButtons', [
+
 	(session) => {
 		session.sendTyping();
 		session.send({
@@ -65,7 +84,7 @@ bot.dialog('/promptButtons', [
 			[GastosAbertosInformation, Game, InformationAcessRequest],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				// retryPrompt: retryPrompts.choice, TODO aaaa
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -91,9 +110,7 @@ bot.dialog('/promptButtons', [
 		session.replaceDialog('/welcomeBack');
 	},
 
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
-});
+]);
 
 bot.dialog('/welcomeBack', [
 	(session) => {
