@@ -10,7 +10,7 @@ module.exports = {
 
 		request.on('response', (response) => {
 			const { result } = response;
-
+			console.log(`Result => ${Object.entries(result)}`);
 			callback(null, {
 				intent: result.metadata.intentName,
 				score: result.score,

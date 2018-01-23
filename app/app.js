@@ -35,10 +35,12 @@ const intents = new builder.IntentDialog({
 bot.recognizer(intents);
 
 intents.matches('ajuda', 'gastosAbertosInformation:/');
+intents.matches('missioes', 'gastosAbertosInformation:/');
 intents.matches('Default Welcome Intent', '/greetings');
 intents.matches('Default Fallback Intent', '/greetings');
 
 bot.dialog('/', intents);
+// console.log(`intents: ${Object.entries(intents.actions)}`);
 
 bot.beginDialogAction('getstarted', '/getstarted');
 bot.beginDialogAction('reset', '/reset');
@@ -64,7 +66,6 @@ bot.dialog('/getstarted', [
 ]);
 
 bot.dialog('/promptButtons', [
-
 	(session) => {
 		session.sendTyping();
 		session.send({
@@ -80,7 +81,7 @@ bot.dialog('/promptButtons', [
 		`\n\nPara retornar á este menu durante algum processo, basta digitar 'cancelar'. ${emoji.get('slightly_smiling_face').repeat(2)}`);
 		builder.Prompts.choice(
 			session,
-			'Em que assunto eu posso te ajudar?',
+			`Em que assunto eu posso te ajudar? ${emoji.get('hugging_face').repeat(2)}`,
 			[GastosAbertosInformation, Game, InformationAcessRequest],
 			{
 				listStyle: builder.ListStyle.button,
@@ -110,7 +111,11 @@ bot.dialog('/promptButtons', [
 		session.replaceDialog('/welcomeBack');
 	},
 
-]);
+]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
+	matches: 'ajuda',
+}).beginDialogAction('missoes', 'informationAccessRequest:/', {
+	matches: 'missoes',
+});
 
 bot.dialog('/welcomeBack', [
 	(session) => {
