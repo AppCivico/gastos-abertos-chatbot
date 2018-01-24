@@ -38,7 +38,7 @@ intents.matches('ajuda', 'gastosAbertosInformation:/');
 intents.matches('missoes', 'game:/');
 intents.matches('pedido', 'gastosAbertosInformation:/');
 intents.matches('Default Welcome Intent', '/greetings');
-intents.matches('Default Fallback Intent', '/greetings');
+intents.matches('Default Fallback Intent', '/welcomeBack');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
