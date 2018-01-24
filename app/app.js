@@ -158,12 +158,9 @@ bot.dialog('/welcomeBack', [
 	(session) => {
 		session.replaceDialog('/welcomeBack');
 	},
-]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
-	matches: 'ajuda',
-}).beginDialogAction('pedido', 'informationAccessRequest:/', {
-	matches: 'pedido',
-}).beginDialogAction('missoes', 'informationAccessRequest:/', {
-	matches: 'missoes',
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 bot.dialog('/game', [
