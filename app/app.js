@@ -123,6 +123,7 @@ bot.dialog('/promptButtons', [
 	matches: /^[\w]+/,
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents);
+		// session.beginDialog(aaa);
 	},
 });
 // ]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
