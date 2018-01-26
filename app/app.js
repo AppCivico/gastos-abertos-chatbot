@@ -32,6 +32,8 @@ const intents = new builder.IntentDialog({
 	recognizeOrder: builder.RecognizeOrder.series,
 });
 
+const custom = require('./custom_intents');
+
 bot.recognizer(intents);
 
 intents.matches('ajuda', 'gastosAbertosInformation:/');
@@ -117,13 +119,19 @@ bot.dialog('/promptButtons', [
 	(session) => {
 		session.replaceDialog('/welcomeBack');
 	},
-]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
-	matches: 'ajuda',
-}).beginDialogAction('pedido', 'informationAccessRequest:/', {
-	matches: 'pedido',
-}).beginDialogAction('missoes', 'informationAccessRequest:/', {
-	matches: 'missoes',
+]).customAction({
+	matches: /^[\w]+/,
+	onSelectAction: (session) => {
+		custom.allIntents(session, intents);
+	},
 });
+// ]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
+// 	matches: 'ajuda',
+// }).beginDialogAction('pedido', 'informationAccessRequest:/', {
+// 	matches: 'pedido',
+// }).beginDialogAction('missoes', 'informationAccessRequest:/', {
+// 	matches: 'missoes',
+// });
 
 bot.dialog('/welcomeBack', [
 	(session) => {
