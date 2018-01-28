@@ -1,9 +1,7 @@
 // A class for attaching custom intents to dialogs
 
-module.exports.allIntents = (message, intents) => {
-	console.log(`Digitado: ${message}`);
-
-	return intents.recognize(message, (iDontGetIt, request) => {
+const allIntents = (message, intents, callback) => {
+	intents.recognize(message, (iDontGetIt, request) => {
 		console.log(`Intent: ${Object.entries(request)}`);
 		let dialog;
 		switch (request.intent) {
@@ -17,10 +15,11 @@ module.exports.allIntents = (message, intents) => {
 			dialog = 'informationAccessRequest:/';
 			break;
 		default: // Default Fallback Intent
-			dialog = 'default';
+			dialog = 'error';
 			break;
 		}
-		console.log(`dialog: ${dialog}`);
-		return dialog;
+		callback(dialog);
 	});
 };
+
+module.exports.allIntents = allIntents;
