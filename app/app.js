@@ -124,11 +124,10 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
-			//	session.send(retryPrompts.choiceIntent);
 			// TODO come back to the prompt dialog or create an error dialog.
 			} else {
-				session.beginDialog(response);
-			}		
+				session.replaceDialog(response);
+			}
 		}));
 	},
 });
@@ -139,6 +138,43 @@ bot.dialog('/promptButtons', [
 // }).beginDialogAction('missoes', 'informationAccessRequest:/', {
 // 	matches: 'missoes',
 // });
+
+bot.dialog('/welcomeBack', [
+	(session) => {
+		session.sendTyping();
+		session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+		builder.Prompts.choice(
+			session,
+			'Em que assunto eu posso te ajudar?',
+			[GastosAbertosInformation, Game, InformationAcessRequest],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choice,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case GastosAbertosInformation:
+				session.beginDialog('gastosAbertosInformation:/');
+				break;
+			case Game:
+				session.beginDialog('/game');
+				break;
+			default: // InformationAcessRequest
+				session.beginDialog('informationAccessRequest:/');
+				break;
+			}
+		}
+	},
+	(session) => {
+		session.replaceDialog('/welcomeBack');
+	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^desisto/i,
+});
 
 bot.dialog('/game', [
 	(session) => {

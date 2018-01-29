@@ -28,7 +28,7 @@ let missionUser;
 
 library.dialog('/', [
 	(session) => {
-		session.sendTyping();
+		session.send(`Vamos começar o processo de missões. ${emoji.get('slightly_smiling_face').repeat(2)}`);
 		session.beginDialog('validators:email', {
 			prompt: 'Qual é o e-mail que você utilizou para se cadastrar como líder?',
 			retryPrompt: retryPrompts.email,
