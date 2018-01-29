@@ -13,8 +13,6 @@ const gameSignUp = 'Inscrever-se';
 const GastosAbertosCicleResults = 'Resultados';
 const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
-const yes = 'Sim, vamos lá!';
-const no = 'Ainda não';
 
 library.dialog('/', [
 	(session) => {
@@ -41,7 +39,7 @@ library.dialog('/', [
 				session.replaceDialog('/gastosAbertosCicles');
 				break;
 			case gameSignUp:
-				session.replaceDialog('/gameSignUpConfirmation');
+				session.beginDialog('gameSignUp:/');
 				break;
 			case GastosAbertosCicleResults:
 				session.replaceDialog('/GastosAbertosCicleResults');
@@ -87,7 +85,7 @@ library.dialog('/promptButtons', [
 				session.replaceDialog('/gastosAbertosCicles');
 				break;
 			case gameSignUp:
-				session.beginDialog('/gameSignUpConfirmation');
+				session.beginDialog('gameSignUp:/');
 				break;
 			case GastosAbertosCicleResults:
 				session.replaceDialog('/GastosAbertosCicleResults');
@@ -129,44 +127,5 @@ library.dialog('/GastosAbertosCicleResults', [
 		session.replaceDialog('/promptButtons');
 	},
 ]);
-
-library.dialog('/gameSignUpConfirmation', [
-	(session) => {
-		session.sendTyping();
-		builder.Prompts.choice(
-			session,
-			'Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
-			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns').repeat(2)}\n\nVamos começar?`,
-			[yes, no],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case yes: // Sign up accepted
-				session.beginDialog('gameSignUp:/');
-				break;
-			default: // no
-				session.send(`OK. Estarei aqui caso mudar de ideia. ${emoji.get('slightly_smiling_face')}` +
-				`${emoji.get('upside_down_face')}${emoji.get('slightly_smiling_face')}`);
-				session.endDialog();
-				break;
-			}
-		}
-	},
-	(session) => {
-		session.replaceDialog('/promptButtons');
-	},
-]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-	onSelectAction: (session) => {
-		session.endDialog();
-	},
-});
 
 module.exports = library;

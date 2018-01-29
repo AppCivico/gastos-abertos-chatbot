@@ -17,11 +17,49 @@ const emoji = require('node-emoji');
 
 const Contact = 'Entrar em contato';
 const Restart = 'Voltar ao início';
+const yes = 'Sim, vamos lá!';
+const no = 'Ainda não';
 let fbId = '';
 
 const library = new builder.Library('gameSignUp');
 
-library.dialog('/', [
+library.dialog('/', [ // former gameSignUpConfirmation
+	(session) => {
+		session.sendTyping();
+		builder.Prompts.choice(
+			session,
+			'Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
+			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns').repeat(2)}\n\nVamos começar?`,
+			[yes, no],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choice,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case yes: // Sign up accepted
+				session.beginDialog('/beginSignUp');
+				break;
+			default: // no
+				session.send(`OK. Estarei aqui caso mudar de ideia. ${emoji.get('slightly_smiling_face')}` +
+				`${emoji.get('upside_down_face')}${emoji.get('slightly_smiling_face')}`);
+				session.endDialog();
+				break;
+			}
+		}
+	},
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
+});
+
+library.dialog('/beginSignUp', [
 	(session) => {
 		session.sendTyping();
 		session.send(`Tenho o maior respeito pela sua privacidade e tomarei todo cuidado com seus dados. ${emoji.get('zipper_mouth_face')} ` +
