@@ -121,24 +121,24 @@ bot.dialog('/promptButtons', [
 	(session) => {
 		session.replaceDialog('/welcomeBack');
 	},
-]).customAction({
-	matches: /^[\w]+/,
-	onSelectAction: (session) => {
-		custom.allIntents(session, intents, ((response) => {
-			if (response === 'error') {
-				// TODO come back to the prompt dialog or create an error dialog.
-			} else {
-				session.replaceDialog(response);
-			}
-		}));
-	},
-});
+]);
 // ]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
 // 	matches: 'ajuda',
 // }).beginDialogAction('pedido', 'informationAccessRequest:/', {
 // 	matches: 'pedido',
 // }).beginDialogAction('missoes', 'game:/', {
 // 	matches: 'missoes',
+// });
+// ]).customAction({
+// 	matches: /^[\w]+/,
+// 	onSelectAction: (session) => {
+// 		custom.allIntents(session, intents, ((response) => {
+// 			if (response === 'error') {
+// 			} else {
+// 				session.replaceDialog(response);
+// 			}
+// 		}));
+// 	},
 // });
 
 bot.dialog('/welcomeBack', [
