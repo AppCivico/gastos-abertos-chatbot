@@ -95,6 +95,7 @@ bot.dialog('/promptButtons', [
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
+				promptAfterAction: false,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -109,13 +110,14 @@ bot.dialog('/promptButtons', [
 			case Game:
 				session.beginDialog('/game');
 				break;
-			default: // InformationAcessRequest
+			case InformationAcessRequest:
 				session.beginDialog('informationAccessRequest:/');
 				break;
+			default:
+				session.replaceDialog('/welcomeBack');
 			}
 		}
 	},
-
 	(session) => {
 		session.replaceDialog('/welcomeBack');
 	},
@@ -124,7 +126,7 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
-			// TODO come back to the prompt dialog or create an error dialog.
+				// TODO come back to the prompt dialog or create an error dialog.
 			} else {
 				session.replaceDialog(response);
 			}
@@ -135,7 +137,7 @@ bot.dialog('/promptButtons', [
 // 	matches: 'ajuda',
 // }).beginDialogAction('pedido', 'informationAccessRequest:/', {
 // 	matches: 'pedido',
-// }).beginDialogAction('missoes', 'informationAccessRequest:/', {
+// }).beginDialogAction('missoes', 'game:/', {
 // 	matches: 'missoes',
 // });
 

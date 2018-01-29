@@ -91,9 +91,11 @@ library.dialog('/', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-]).cancelAction('cancelAction', '', {
+]).customAction({
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
 });
 
 module.exports = library;
