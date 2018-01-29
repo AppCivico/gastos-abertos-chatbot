@@ -20,8 +20,7 @@ const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Sobre o projeto';
 const Contact = 'Entrar em contato';
 const Informacoes = 'Informações';
-const Game = 'Processo de missões';
-const Missions = 'Concluir missões';
+const Missions = 'Processo de missões';
 const InformationAcessRequest = 'Gerar pedido';
 
 const intents = new builder.IntentDialog({
@@ -39,7 +38,7 @@ bot.recognizer(intents);
 intents.matches('ajuda', 'gastosAbertosInformation:/');
 intents.matches('missoes', 'game:/');
 intents.matches('pedido', 'gastosAbertosInformation:/');
-intents.matches('Default Welcome Intent', '/greetings');
+intents.matches('Default Welcome Intent', '/getstarted');
 intents.matches('Default Fallback Intent', '/welcomeBack');
 
 // bot.dialog('/', intents);
@@ -91,7 +90,7 @@ bot.dialog('/promptButtons', [
 		builder.Prompts.choice(
 			session,
 			`Em que assunto eu posso te ajudar? ${emoji.get('hugging_face').repeat(2)}`,
-			[GastosAbertosInformation, Game, InformationAcessRequest],
+			[GastosAbertosInformation, GameSignUp, Missions, InformationAcessRequest],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -107,8 +106,11 @@ bot.dialog('/promptButtons', [
 			case GastosAbertosInformation:
 				session.beginDialog('gastosAbertosInformation:/');
 				break;
-			case Game:
-				session.beginDialog('/game');
+			case GameSignUp:
+				session.beginDialog('gameSignUp:/');
+				break;
+			case Missions:
+				session.beginDialog('game:/');
 				break;
 			case InformationAcessRequest:
 				session.beginDialog('informationAccessRequest:/');
@@ -148,7 +150,7 @@ bot.dialog('/welcomeBack', [
 		builder.Prompts.choice(
 			session,
 			'Em que assunto eu posso te ajudar?',
-			[GastosAbertosInformation, Game, InformationAcessRequest],
+			[GastosAbertosInformation, GameSignUp, Missions, InformationAcessRequest],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
@@ -162,53 +164,24 @@ bot.dialog('/welcomeBack', [
 			case GastosAbertosInformation:
 				session.beginDialog('gastosAbertosInformation:/');
 				break;
-			case Game:
-				session.beginDialog('/game');
+			case GameSignUp:
+				session.beginDialog('gameSignUp:/');
 				break;
-			default: // InformationAcessRequest
+			case Missions:
+				session.beginDialog('game:/');
+				break;
+			case InformationAcessRequest:
 				session.beginDialog('informationAccessRequest:/');
 				break;
+			default:
+				session.replaceDialog('/welcomeBack');
 			}
 		}
 	},
 	(session) => {
 		session.replaceDialog('/welcomeBack');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
-});
-
-bot.dialog('/game', [
-	(session) => {
-		session.sendTyping();
-		builder.Prompts.choice(
-			session,
-			'O que você deseja fazer?',
-			[GameSignUp, Missions],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-
-	(session, result) => {
-		if (result.response) {
-			switch (result.response.entity) {
-			case GameSignUp:
-				session.send('Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
-			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns').repeat(2)}`);
-				session.beginDialog('gameSignUp:/');
-				break;
-			default: // Missions:
-				session.beginDialog('game:/');
-				break;
-			}
-		}
-	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-});
+]);
 
 bot.dialog('/reset', [
 	(session) => {
