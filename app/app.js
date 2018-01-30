@@ -36,15 +36,15 @@ bot.dialog('/greetings', [
 bot.dialog('/getstarted', [
 	(session) => {
 		session.sendTyping();
-        if (!session.userData.firstRun) {
-            session.userData.userid = session.message.sourceEvent.sender.id;
-            session.userData.pageid = session.message.sourceEvent.recipient.id;
+		if (!session.userData.firstRun) {
+			session.userData.userid = session.message.sourceEvent.sender.id;
+			session.userData.pageid = session.message.sourceEvent.recipient.id;
 
-            session.replaceDialog('/welcomeBack');
-        } else {
-            session.replaceDialog('/promptButtons');
-        }
-    }
+			session.replaceDialog('/welcomeBack');
+		} else {
+			session.replaceDialog('/promptButtons');
+		}
+	},
 ]);
 
 bot.dialog('/promptButtons', [
@@ -139,8 +139,8 @@ bot.dialog('/welcomeBack', [
 ]);
 
 bot.dialog('/reset', [
-    (session, activity) => {
-        session.endDialog();
-        session.beginDialog('/');
-    }
+	(session, activity) => {
+		session.endDialog();
+		session.beginDialog('/');
+	},
 ]);
