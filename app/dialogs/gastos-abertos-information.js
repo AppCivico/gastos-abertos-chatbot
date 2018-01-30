@@ -128,7 +128,7 @@ library.dialog('/gastosAbertosCicleResults', [
 	},
 ]);
 
-library.dialog('/aboutUs', [ // TODO melhorar issoa aqui
+library.dialog('/aboutUs', [ // TODO melhorar isso aqui
 	(session) => {
 		session.send('O Gastos Abertos é tal coisa. ' +
 		'Fazemos parte de tal movimento. ' +

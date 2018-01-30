@@ -124,23 +124,26 @@ bot.dialog('/promptButtons', [
 		session.replaceDialog('/welcomeBack');
 	},
 ]);
+// ]).customAction({
+// 	matches: /^[\w]+/,
+// 	onSelectAction: (session) => {
+// 		custom.allIntents(session, intents, ((response) => {
+// 			console.log(`session: ${(session)}`);
+// 			console.log('entrei aqui');
+// 			if (response === 'error') {
+// 				session.send('Não entendi');
+// 			} else {
+// 				session.replaceDialog(response);
+// 			}
+// 		}));
+// 	},
+// });
 // ]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
 // 	matches: 'ajuda',
 // }).beginDialogAction('pedido', 'informationAccessRequest:/', {
 // 	matches: 'pedido',
 // }).beginDialogAction('missoes', 'game:/', {
 // 	matches: 'missoes',
-// });
-// ]).customAction({
-// 	matches: /^[\w]+/,
-// 	onSelectAction: (session) => {
-// 		custom.allIntents(session, intents, ((response) => {
-// 			if (response === 'error') {
-// 			} else {
-// 				session.replaceDialog(response);
-// 			}
-// 		}));
-// 	},
 // });
 
 bot.dialog('/welcomeBack', [
