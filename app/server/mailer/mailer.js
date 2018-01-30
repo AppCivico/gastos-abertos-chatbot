@@ -31,8 +31,8 @@ const mailer = (function () { // eslint-disable-line func-names
 
 	self.invokeOperation = () => {
 		async.each(listofemails, self.SendEmail, () => {
-			console.log(successEmail);
-			console.log(failureEmail);
+			console.log(`Success: ${successEmail}`);
+			console.log(`Failure: ${failureEmail}`);
 		});
 	};
 

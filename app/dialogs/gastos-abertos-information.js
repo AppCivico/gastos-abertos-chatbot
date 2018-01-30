@@ -9,12 +9,10 @@ const emoji = require('node-emoji');
 const library = new builder.Library('gastosAbertosInformation');
 
 const gastosAbertosCicles = 'O que é um ciclo';
-const gameSignUp = 'Inscrever-se';
-const GastosAbertosCicleResults = 'Resultados';
+const gastosAbertosCicleResults = 'Resultados';
+const aboutUs = 'Quem Somos';
 const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
-const yes = 'Sim, vamos lá!';
-const no = 'Ainda não';
 
 library.dialog('/', [
 	(session) => {
@@ -24,11 +22,12 @@ library.dialog('/', [
 			'A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
 			'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.' +
 			'\n\n\nVocê pode escolher um dos itens abaixo para saber mais. O que acha?',
-			[gastosAbertosCicles, GastosAbertosCicleResults,
-				gameSignUp, contact, reset],
+			[aboutUs, gastosAbertosCicleResults,
+				gastosAbertosCicles, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: retryPrompts.about,
+				promptAfterAction: false,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -39,11 +38,11 @@ library.dialog('/', [
 			case gastosAbertosCicles:
 				session.replaceDialog('/gastosAbertosCicles');
 				break;
-			case gameSignUp:
-				session.replaceDialog('/gameSignUpConfirmation');
+			case gastosAbertosCicleResults:
+				session.replaceDialog('/gastosAbertosCicleResults');
 				break;
-			case GastosAbertosCicleResults:
-				session.replaceDialog('/GastosAbertosCicleResults');
+			case aboutUs:
+				session.beginDialog('/aboutUs');
 				break;
 			case contact:
 				session.beginDialog('contact:/');
@@ -57,8 +56,11 @@ library.dialog('/', [
 	(session) => {
 		session.replaceDialog('/promptButtons');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
 });
 
 library.dialog('/promptButtons', [
@@ -67,11 +69,11 @@ library.dialog('/promptButtons', [
 		builder.Prompts.choice(
 			session,
 			'Sobre o que deseja saber mais? ',
-			[gastosAbertosCicles, GastosAbertosCicleResults,
-				gameSignUp, contact, reset],
+			[aboutUs, gastosAbertosCicleResults,
+				gastosAbertosCicles, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: retryPrompts.about,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -82,11 +84,11 @@ library.dialog('/promptButtons', [
 			case gastosAbertosCicles:
 				session.replaceDialog('/gastosAbertosCicles');
 				break;
-			case gameSignUp:
-				session.beginDialog('/gameSignUpConfirmation');
+			case gastosAbertosCicleResults:
+				session.replaceDialog('/gastosAbertosCicleResults');
 				break;
-			case GastosAbertosCicleResults:
-				session.replaceDialog('/GastosAbertosCicleResults');
+			case aboutUs:
+				session.beginDialog('/aboutUs');
 				break;
 			case contact:
 				session.beginDialog('contact:/');
@@ -100,21 +102,24 @@ library.dialog('/promptButtons', [
 	(session) => {
 		session.replaceDialog('/promptButtons');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
 });
 
 library.dialog('/gastosAbertosCicles', [
 	(session) => {
 		session.send('Um ciclo do Gastos Abertos é um período onde pessoas desenvolvem missões (avaliação de portal de transparência da cidade, ' +
 				'formulação de um pedido de acesso a informação e avaliação das respostas obtidas pelas prefeituras) para tornarem-se lideranças regionais.' +
-				'\n\nEssas missões impactarão a transparência no município que o líder representa.' +
+				'Essas missões impactarão a transparência no município que o líder representa.' +
 				'\n\nParticipe!');
 		session.replaceDialog('/promptButtons');
 	},
 ]);
 
-library.dialog('/GastosAbertosCicleResults', [
+library.dialog('/gastosAbertosCicleResults', [
 	(session) => {
 		session.send('O Gastos Abertos (2016-2017), teve 356 lideranças inscritas, 216 municípios atendidos, 165 avaliações de portais ' +
 		'de transparência e 53 pedidos realizados. ' +
@@ -123,40 +128,14 @@ library.dialog('/GastosAbertosCicleResults', [
 	},
 ]);
 
-library.dialog('/gameSignUpConfirmation', [
+library.dialog('/aboutUs', [ // TODO melhorar isso aqui
 	(session) => {
-		session.sendTyping();
-		builder.Prompts.choice(
-			session,
-			'Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
-			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns').repeat(2)}\n\nVamos começar?`,
-			[yes, no],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case yes: // Sign up accepted
-				session.beginDialog('gameSignUp:/');
-				break;
-			default: // no
-				session.send(`OK. Estarei aqui caso mudar de ideia. ${emoji.get('slightly_smiling_face')}` +
-				`${emoji.get('upside_down_face')}${emoji.get('slightly_smiling_face')}`);
-				session.endDialog();
-				break;
-			}
-		}
-	},
-	(session) => {
+		session.send('O Gastos Abertos é tal coisa. ' +
+		'Fazemos parte de tal movimento. ' +
+		'\n\nNosso site oficial: https://gastosabertos.org/' +
+		'\n\nNosso grupo de what\'sapp: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
 		session.replaceDialog('/promptButtons');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
-});
+]);
 
 module.exports = library;

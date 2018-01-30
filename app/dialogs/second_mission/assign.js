@@ -48,7 +48,8 @@ library.dialog('/', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/assign', [
@@ -91,7 +92,8 @@ library.dialog('/assign', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 module.exports = library;

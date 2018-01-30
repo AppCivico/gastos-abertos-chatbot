@@ -64,7 +64,8 @@ library.dialog('/', [
 			});
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/promptButtons', [
@@ -102,7 +103,8 @@ library.dialog('/promptButtons', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/moreDetails', [
@@ -150,7 +152,8 @@ library.dialog('/moreDetails', [
 		session.replaceDialog('/promptButtons');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 module.exports = library;

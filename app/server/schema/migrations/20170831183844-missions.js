@@ -1,6 +1,6 @@
 
 module.exports = {
-	up(queryInterface, Sequelize) {
+	up(queryInterface) {
 		queryInterface.bulkInsert('missions', [
 			{
 				code: 1,

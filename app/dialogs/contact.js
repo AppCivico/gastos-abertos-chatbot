@@ -14,6 +14,7 @@ const library = new builder.Library('contact');
 const SignUpProblems = 'Inscrição';
 const Informations = 'Informações';
 const MissionsInformations = 'Processo de missões';
+const Cancel = 'Voltar';
 let TrelloListId = '';
 let Subject = '';
 
@@ -23,22 +24,16 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session,
 			`Obrigado por seu interesse. ${emoji.get('slightly_smiling_face').repeat(2)} Mas diga, como posso te ajudar?`,
-			[SignUpProblems, Informations, MissionsInformations],
+			[SignUpProblems, Informations, MissionsInformations, Cancel],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
 			} // eslint-disable-line comma-dangle
 		);
 	},
-	(session, result) => {
+	(session, result, next) => {
 		session.sendTyping();
 		if (result.response) {
-			session.beginDialog('validators:email', {
-				prompt: `Deixe seu email, a equipe Gastos Abertos entrará em contato. ${emoji.get('postal_horn')}`,
-				retryPrompt: retryPrompts.email,
-				maxRetries: 10,
-			});
-
 			switch (result.response.entity) {
 			case SignUpProblems:
 				Subject = SignUpProblems;
@@ -46,18 +41,29 @@ library.dialog('/', [
 			case Informations:
 				Subject = Informations;
 				break;
-			default: // MissionsInformations
+			case MissionsInformations:
 				Subject = MissionsInformations;
 				break;
+			default: // Cancel
+				session.endDialog();
+				break;
 			}
+			next();
 		}
 	},
+	(session) => {
+		session.beginDialog('validators:email', {
+			prompt: `Deixe seu email, a equipe Gastos Abertos entrará em contato. ${emoji.get('postal_horn')}`,
+			retryPrompt: retryPrompts.email,
+			maxRetries: 10,
+		});
+	},
 	(session, args) => {
-		session.sendTyping();
+	//	session.sendTyping();
 		if (args.resumed) {
 			session.send('Você tentou inserir um e-mail inválido muitas vezes. Tente novamente mais tarde.');
 			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-		} else {
+		}		else {
 			session.dialogData.email = args.response;
 			builder.Prompts.text(session, 'Qual é a sua mensagem para nós?');
 		}
@@ -91,8 +97,11 @@ library.dialog('/', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
 });
 
 module.exports = library;

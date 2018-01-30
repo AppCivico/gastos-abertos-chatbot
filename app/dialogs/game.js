@@ -28,7 +28,7 @@ let missionUser;
 
 library.dialog('/', [
 	(session) => {
-		session.sendTyping();
+		session.send(`Vamos começar o processo de missões. ${emoji.get('slightly_smiling_face').repeat(2)}`);
 		session.beginDialog('validators:email', {
 			prompt: 'Qual é o e-mail que você utilizou para se cadastrar como líder?',
 			retryPrompt: retryPrompts.email,
@@ -63,7 +63,8 @@ library.dialog('/', [
 			});
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/missionStatus', [
@@ -131,7 +132,8 @@ library.dialog('/missionStatus', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/currentMission', [
@@ -213,7 +215,8 @@ library.dialog('/currentMission', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/sendToInformationAccessRequest', [
@@ -247,7 +250,8 @@ library.dialog('/sendToInformationAccessRequest', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 module.exports = library;
