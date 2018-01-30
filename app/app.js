@@ -14,7 +14,6 @@ bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 
-const DialogFlowReconizer = require('./dialogflow_recognizer');
 
 const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Sobre o projeto';
@@ -23,23 +22,25 @@ const Informacoes = 'Informações';
 const Missions = 'Processo de missões';
 const InformationAcessRequest = 'Gerar pedido';
 
-const intents = new builder.IntentDialog({
-	recognizers: [
-		DialogFlowReconizer,
-	],
-	intentThreshold: 0.2,
-	recognizeOrder: builder.RecognizeOrder.series,
-});
-
-const custom = require('./custom_intents');
-
-bot.recognizer(intents);
-
-intents.matches('ajuda', 'gastosAbertosInformation:/');
-intents.matches('missoes', 'game:/');
-intents.matches('pedido', 'gastosAbertosInformation:/');
-intents.matches('Default Welcome Intent', '/getstarted');
-intents.matches('Default Fallback Intent', '/welcomeBack');
+// const DialogFlowReconizer = require('./dialogflow_recognizer');
+//
+// const intents = new builder.IntentDialog({
+// 	recognizers: [
+// 		DialogFlowReconizer,
+// 	],
+// 	intentThreshold: 0.2,
+// 	recognizeOrder: builder.RecognizeOrder.series,
+// });
+//
+// const custom = require('./custom_intents');
+//
+// bot.recognizer(intents);
+//
+// intents.matches('ajuda', 'gastosAbertosInformation:/');
+// intents.matches('missoes', 'game:/');
+// intents.matches('pedido', 'gastosAbertosInformation:/');
+// intents.matches('Default Welcome Intent', '/getstarted');
+// intents.matches('Default Fallback Intent', '/welcomeBack');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
@@ -124,23 +125,26 @@ bot.dialog('/promptButtons', [
 		session.replaceDialog('/welcomeBack');
 	},
 ]);
+// ]).customAction({
+// 	matches: /^[\w]+/,
+// 	onSelectAction: (session) => {
+// 		custom.allIntents(session, intents, ((response) => {
+// 			console.log(`session: ${(session)}`);
+// 			console.log('entrei aqui');
+// 			if (response === 'error') {
+// 				session.send('Não entendi');
+// 			} else {
+// 				session.replaceDialog(response);
+// 			}
+// 		}));
+// 	},
+// });
 // ]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
 // 	matches: 'ajuda',
 // }).beginDialogAction('pedido', 'informationAccessRequest:/', {
 // 	matches: 'pedido',
 // }).beginDialogAction('missoes', 'game:/', {
 // 	matches: 'missoes',
-// });
-// ]).customAction({
-// 	matches: /^[\w]+/,
-// 	onSelectAction: (session) => {
-// 		custom.allIntents(session, intents, ((response) => {
-// 			if (response === 'error') {
-// 			} else {
-// 				session.replaceDialog(response);
-// 			}
-// 		}));
-// 	},
 // });
 
 bot.dialog('/welcomeBack', [

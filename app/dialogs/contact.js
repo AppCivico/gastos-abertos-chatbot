@@ -48,7 +48,6 @@ library.dialog('/', [
 				session.endDialog();
 				break;
 			}
-			// TODO dialog inherits the intents from the main menu=>messing with whats below(context?)
 			next();
 		}
 	},
@@ -60,11 +59,11 @@ library.dialog('/', [
 		});
 	},
 	(session, args) => {
-		session.sendTyping();
+	//	session.sendTyping();
 		if (args.resumed) {
 			session.send('Você tentou inserir um e-mail inválido muitas vezes. Tente novamente mais tarde.');
 			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-		} else {
+		}		else {
 			session.dialogData.email = args.response;
 			builder.Prompts.text(session, 'Qual é a sua mensagem para nós?');
 		}

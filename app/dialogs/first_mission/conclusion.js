@@ -102,7 +102,6 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 

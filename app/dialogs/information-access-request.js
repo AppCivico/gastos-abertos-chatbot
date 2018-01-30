@@ -14,11 +14,14 @@ const UserMission = require('../server/schema/models').user_mission;
 
 const library = new builder.Library('informationAccessRequest');
 
-const Yes = 'Gerar Pedido';
-const No = 'Ainda não';
+const Generate = 'Gerar Pedido';
+const Denial = 'Ainda não';
+const Yes = 'Sim';
+const No = 'Não';
 const HappyYes = 'Vamos lá!';
 const Confirm = 'Beleza!';
 const Contact = 'Contato';
+let currentQuestion = '';
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
@@ -59,7 +62,7 @@ library.dialog('/', [
 			session.send('Esse é um processo bem extenso e tem bastante conteúdo. ' +
 				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
-			session.send("Além disso, você pode a qualquer momento digitar 'cancelar' e eu te levo para o início");
+			session.send('Além disso, você pode a qualquer momento digitar \'cancelar\' e eu te levo para o início');
 		} else {
 			session.send('Você está gerando um pedido de acesso à informação, que poderá ser encaminhado a prefeitura de seu ' +
 			'município quando estão faltando informações nos portais de transparência.');
@@ -105,7 +108,7 @@ library.dialog('/looseRequest', [
 		builder.Prompts.choice(
 			session,
 			'Vamos lá?',
-			[Yes, No],
+			[Generate, Denial],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
@@ -114,21 +117,22 @@ library.dialog('/looseRequest', [
 	},
 
 	(session, args) => {
+		console.log(`Session: ${session}`);
 		switch (args.response.entity) {
-		case Yes:
+		case Generate:
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
+			currentQuestion = 'Seu município identifica de onde vêm os recursos que ele recebe? ' +
+			'\n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.';
 			builder.Prompts.choice(
-				session,
-				'Seu município identifica de onde vêm os recursos que ele recebe? ' +
-				'\n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.',
+				session, currentQuestion,
 				[Yes, No],
 				{
 					listStyle: builder.ListStyle.button,
-					retryPrompt: retryPrompts.choice,
+					retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 				} // eslint-disable-line comma-dangle
 			);
 			break;
-		default: // No
+		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
 			session.endDialog();
 			break;
@@ -145,13 +149,13 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência disponibiliza dados referentes a remuneração de cada um dos agentes públicos, individualizada?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência disponibiliza dados referentes a remuneração de cada um dos agentes públicos, individualizada?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -166,13 +170,13 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência disponibiliza: a relação de pagamentos de diárias, a aquisição de passagens aéreas e adiantamento de despesas?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência disponibiliza: a relação de pagamentos de diárias, a aquisição de passagens aéreas e adiantamento de despesas?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -187,13 +191,13 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência disponibiliza as despesas realizadas com cartões corporativos em nome da prefeitura?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência disponibiliza as despesas realizadas com cartões corporativos em nome da prefeitura?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -207,13 +211,13 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion =	'O portal de transparência disponibiliza os valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência disponibiliza os valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -227,14 +231,14 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, com indicação das ' +
+		'licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, com indicação das licitações abertas,' +
-			' em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -249,14 +253,14 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e ' +
+		'inexigibilidade de licitações, com respectivas fundamentações?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, ' +
-			'com respectivas fundamentações?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -271,41 +275,17 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência realiza a disponibilização do controle de estoque da prefeitura, ' +
+		'com lista de entradas e saídas de bens patrimoniais, além da relação de cessões, permutas e doação de bens?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência realiza a disponibilização do controle de estoque da prefeitura, ' +
-			'com lista de entradas e saídas de bens patrimoniais, além da relação de cessões, permutas e doação de bens?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
-
-	/* Pergunta repetida
-	(session, args) => {
-		switch (args.response.entity) {
-		case Yes:
-			break;
-		default: // No
-			itens.push('<p>-Disponibilização do controle de estoque da prefeitura, com lista de entradas'+
-			' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
-			break;
-		}
-
-		builder.Prompts.choice(
-			session,
-		'O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas que '+
-		'deram origem a pagamentos?',
-			[Yes, No],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-*/
 
 	(session, args) => {
 		switch (args.response.entity) {
@@ -317,13 +297,13 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -337,13 +317,13 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência realiza a disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência realiza a disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -357,17 +337,18 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência realiza a disponibilização dos relatórios Resumido de Execução Orçamentária; ' +
+					'Relatórios de Gestão Fiscal; Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões: ' +
+					' 		\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
+					'			\n\nii) Demonstrativo de Aplicação na Área de Saúde;' +
+					'			\n\niii) Demonstrativo de Aplicação na Área Social?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência realiza a disponibilização dos relatórios Resumido de Execução Orçamentária; Relatórios de Gestão Fiscal; ' +
-			' Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões: ' +
-			' 		\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
-			'			\n\nii) Demonstrativo de Aplicação na Área de Saúde;' +
-			'			\n\niii) Demonstrativo de Aplicação na Área Social?',
+			session, currentQuestion,
+
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -385,13 +366,13 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência realiza a disponibilização dos extratos de conta única?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência realiza a disponibilização dos extratos de conta única?',
+			session, currentQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -405,14 +386,15 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
+		currentQuestion = 'O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato ' +
+		'legível por máquina incluindo as colunas: função, subfunção, programa, ação, valor liquidado e valor empenhado?';
 		builder.Prompts.choice(
-			session,
-			'O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato legível por máquina incluindo as colunas:' +
-			' função, subfunção, programa, ação, valor liquidado e valor empenhado?',
+			session, currentQuestion,
+
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: `${retryPrompts.request}\n\n${currentQuestion}`,
 			} // eslint-disable-line comma-dangle
 		);
 	},
