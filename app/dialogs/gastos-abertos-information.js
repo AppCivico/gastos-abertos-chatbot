@@ -68,7 +68,7 @@ library.dialog('/promptButtons', [
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
-			'Sobre o que deseja saber mais? ',
+			`Sobre o que deseja saber mais? ${emoji.get('slightly_smiling_face').repeat(2)}`,
 			[aboutUs, gastosAbertosCicleResults,
 				gastosAbertosCicles, contact, reset],
 			{
@@ -128,10 +128,9 @@ library.dialog('/gastosAbertosCicleResults', [
 	},
 ]);
 
-library.dialog('/aboutUs', [ // TODO melhorar isso aqui
+library.dialog('/aboutUs', [
 	(session) => {
-		session.send('O Gastos Abertos é tal coisa. ' +
-		'Fazemos parte de tal movimento. ' +
+		session.send('O Gastos Abertos tem como objetivo conscientizar e capacitar o cidadão em relação á Lei de Acesso á Informação.' +
 		'\n\nNosso site oficial: https://gastosabertos.org/' +
 		'\n\nNosso grupo de what\'sapp: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
 		session.replaceDialog('/promptButtons');

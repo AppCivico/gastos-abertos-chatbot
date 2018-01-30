@@ -37,7 +37,6 @@ library.dialog('/', [
 		[user] = [args.user];
 		//		missionUser = args.user_mission;
 
-
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -69,7 +68,6 @@ library.dialog('/', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/conclusionPromptAfterMoreDetails', [
@@ -102,9 +100,7 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
-
 
 library.dialog('/transparencyPortalExists', [
 	(session) => {
@@ -195,7 +191,6 @@ library.dialog('/transparencyPortalExists', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalURL', [
@@ -241,7 +236,6 @@ library.dialog('/transparencyPortalHasFinancialData', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
@@ -278,16 +272,15 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session) => {
 		session.sendTyping();
-		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
+		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.' +
+	`\n\n Se não souber, basta digitar 'Não sei'. ${emoji.get('slightly_smiling_face')}`);
 	},
-
 	(session, args) => {
 		answers.transparencyPortalFinancialDataFormats = args.response;
 		session.replaceDialog('/transparencyPortalHasContractsData');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalHasContractsData', [
@@ -317,7 +310,6 @@ library.dialog('/transparencyPortalHasContractsData', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalHasBiddingsData', [
@@ -347,7 +339,6 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
@@ -377,7 +368,6 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/userUpdate', [
@@ -480,7 +470,6 @@ library.dialog('/userUpdate', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 module.exports = library;
