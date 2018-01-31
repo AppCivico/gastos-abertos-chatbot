@@ -19,6 +19,29 @@ const GastosAbertosInformation = 'Sobre o projeto';
 const Missions = 'Processo de missões';
 const InformationAcessRequest = 'Gerar pedido';
 
+// const DialogFlowReconizer = require('./dialogflow_recognizer');
+
+// const intents = new builder.IntentDialog({
+// 	recognizers: [
+// 		DialogFlowReconizer,
+// 	],
+// 	intentThreshold: 0.2,
+// 	recognizeOrder: builder.RecognizeOrder.series,
+// });
+//
+// const custom = require('./custom_intents');
+//
+// bot.recognizer(intents);
+//
+// intents.matches('ajuda', 'gastosAbertosInformation:/');
+// intents.matches('missoes', 'game:/');
+// intents.matches('pedido', 'gastosAbertosInformation:/');
+// intents.matches('Default Welcome Intent', '/getstarted');
+// intents.matches('Default Fallback Intent', '/welcomeBack');
+
+// bot.dialog('/', intents);
+// console.log(`intents: ${Object.entries(intents.actions)}`);
+
 bot.dialog('/', [
 	(session) => {
 		session.userData.firstRun = undefined;
@@ -93,3 +116,16 @@ bot.dialog('/promptButtons', [
 		session.replaceDialog('/getStarted');
 	},
 ]);
+// ]).customAction({
+// 	matches: /^[\w]+/,
+// 	onSelectAction: (session) => {
+// 		custom.allIntents(session, intents, ((response) => {
+// 			console.log(`session: ${(session)}`);
+// 			if (response === 'error') {
+// 				session.send('Não entendi');
+// 			} else {
+// 				session.replaceDialog(response);
+// 			}
+// 		}));
+// 	},
+// });

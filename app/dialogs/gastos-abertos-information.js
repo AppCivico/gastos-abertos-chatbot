@@ -17,55 +17,14 @@ const reset = 'Voltar ao início';
 library.dialog('/', [
 	(session) => {
 		session.sendTyping();
-		builder.Prompts.choice(
-			session,
-			'A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
-			'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.' +
-			'\n\n\nVocê pode escolher um dos itens abaixo para saber mais. O que acha?',
-			[aboutUs, gastosAbertosCicleResults,
-				gastosAbertosCicles, contact, reset],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.about,
-				promptAfterAction: false,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case gastosAbertosCicles:
-				session.replaceDialog('/gastosAbertosCicles');
-				break;
-			case gastosAbertosCicleResults:
-				session.replaceDialog('/gastosAbertosCicleResults');
-				break;
-			case aboutUs:
-				session.beginDialog('/aboutUs');
-				break;
-			case contact:
-				session.beginDialog('contact:/');
-				break;
-			default: // reset
-				session.endDialog();
-				break;
-			}
-		}
-	},
-	(session) => {
+		session.send('A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
+		'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.');
 		session.replaceDialog('/promptButtons');
 	},
-]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-	onSelectAction: (session) => {
-		session.endDialog();
-	},
-});
+]);
 
 library.dialog('/promptButtons', [
 	(session) => {
-		session.sendTyping();
 		builder.Prompts.choice(
 			session,
 			`Sobre o que deseja saber mais? ${emoji.get('slightly_smiling_face').repeat(2)}`,
@@ -77,6 +36,7 @@ library.dialog('/promptButtons', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
+
 	(session, result) => {
 		session.sendTyping();
 		if (result.response) {
