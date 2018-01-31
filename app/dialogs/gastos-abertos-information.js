@@ -69,6 +69,7 @@ library.dialog('/promptButtons', [
 	},
 });
 
+
 library.dialog('/gastosAbertosCicles', [
 	(session) => {
 		session.send('Um ciclo do Gastos Abertos é um período onde pessoas desenvolvem missões (avaliação de portal de transparência da cidade, ' +
