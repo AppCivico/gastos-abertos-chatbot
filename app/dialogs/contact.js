@@ -48,7 +48,6 @@ library.dialog('/', [
 				session.endDialog();
 				break;
 			}
-			// TODO dialog inherits the intents from the main menu=>messing with whats below(context?)
 			next();
 		}
 	},
