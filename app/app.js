@@ -99,7 +99,7 @@ bot.dialog('/promptButtons', [
 		);
 	},
 
-	(session, result) => {
+	(session, result, next) => {
 		session.sendTyping();
 		if (result.response) {
 			switch (result.response.entity) {
@@ -113,12 +113,13 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/');
 				break;
 			case InformationAcessRequest:
-				session.beginDialog('informationAccessRequest:/');
+				session.replaceDialog('informationAccessRequest:/');
 				break;
 			default:
 				session.replaceDialog('/welcomeBack');
 			}
 		}
+		next();
 	},
 	(session) => {
 		session.replaceDialog('/welcomeBack');
@@ -129,7 +130,6 @@ bot.dialog('/promptButtons', [
 // 	onSelectAction: (session) => {
 // 		custom.allIntents(session, intents, ((response) => {
 // 			console.log(`session: ${(session)}`);
-// 			console.log('entrei aqui');
 // 			if (response === 'error') {
 // 				session.send('Não entendi');
 // 			} else {
@@ -160,7 +160,7 @@ bot.dialog('/welcomeBack', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-	(session, result) => {
+	(session, result, next) => {
 		session.sendTyping();
 		if (result.response) {
 			switch (result.response.entity) {
@@ -180,6 +180,7 @@ bot.dialog('/welcomeBack', [
 				session.replaceDialog('/welcomeBack');
 			}
 		}
+		next();
 	},
 	(session) => {
 		session.replaceDialog('/welcomeBack');
@@ -192,3 +193,17 @@ bot.dialog('/reset', [
 		session.beginDialog('/');
 	},
 ]);
+
+// bot.customAction({
+// 	matches: /^[\w]+/,
+// 	onSelectAction: (session) => {
+// 		custom.allIntents(session, intents, ((response) => {
+// 			console.log(`session: ${(session)}`);
+// 			if (response === 'error') {
+// 				session.send('Não entendi');
+// 			} else {
+// 				session.replaceDialog(response);
+// 			}
+// 		}));
+// 	},
+// });
