@@ -23,7 +23,7 @@ const HappyYes = 'Vamos lá!';
 const Confirm = 'Beleza!';
 const Contact = 'Contato';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
-let questionNumber = 1; // shows the question number in each question(disabled no-plusplus for this)
+let questionNumber; // shows the question number in each question(disabled no-plusplus for this)
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
@@ -101,6 +101,7 @@ library.dialog('/', [
 
 library.dialog('/looseRequest', [
 	(session) => {
+		questionNumber = 1; // restarting value
 		session.sendTyping();
 		session.send('Irei te perguntar se o site permite que você identifique todos os seguintes itens:' +
 						'\n\n\n - Qual o número do processo que deu origem aquele gasto;' +
@@ -415,7 +416,7 @@ library.dialog('/looseRequest', [
 			' função, subfunção, programa, ação, valor liquidado e valor empenhado\n\n</p>');
 			break;
 		}
-
+		questionNumber = 1;
 		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
 
@@ -461,7 +462,6 @@ library.dialog('/looseRequest', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/generateRequest', [
@@ -484,8 +484,11 @@ library.dialog('/generateRequest', [
 
 		function callback(error, response, body) {
 			// TODO teste
+			// if (error) {
+			// 	const obj = 'testeteste';
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
+
 				// console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({

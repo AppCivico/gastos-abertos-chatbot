@@ -7,7 +7,7 @@ module.exports = {
 				allowNull: false,
 				defaultValue: false,
 				type: Sequelize.BOOLEAN,
-			},
+			} // eslint-disable-line comma-dangle
 		);
 	},
 
