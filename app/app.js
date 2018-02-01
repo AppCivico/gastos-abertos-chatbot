@@ -44,6 +44,7 @@ const InformationAcessRequest = 'Gerar pedido';
 
 bot.dialog('/', [
 	(session) => {
+		session.userData = {}; // for testing purposes
 		session.userData.firstRun = undefined;
 		session.replaceDialog('/getStarted');
 	},
