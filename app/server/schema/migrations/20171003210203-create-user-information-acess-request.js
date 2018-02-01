@@ -33,6 +33,6 @@ module.exports = {
 		});
 	},
 	down(queryInterface) {
-		return queryInterface.dropTable('user_information_acess_request');
+		return queryInterface.dropTable('user_information_access_request');
 	},
 };
