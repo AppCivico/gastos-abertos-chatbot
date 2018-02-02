@@ -20,7 +20,6 @@ const Missions = 'Processo de missões';
 const InformationAcessRequest = 'Gerar pedido';
 
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
-
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
 // 		DialogFlowReconizer,
@@ -44,6 +43,7 @@ const InformationAcessRequest = 'Gerar pedido';
 
 bot.dialog('/', [
 	(session) => {
+		session.userData = {}; // for testing purposes
 		session.userData.firstRun = undefined;
 		session.replaceDialog('/getStarted');
 	},

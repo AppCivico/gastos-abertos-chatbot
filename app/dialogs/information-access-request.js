@@ -12,6 +12,7 @@ const emoji = require('node-emoji');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 // const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
+const infoRequest = require('../server/schema/models').user_information_access_request;
 
 const library = new builder.Library('informationAccessRequest');
 
@@ -21,14 +22,33 @@ const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos lá!';
 const Confirm = 'Beleza!';
-const Contact = 'Contato';
+const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
-let questionNumber = 1; // shows the question number in each question(disabled no-plusplus for this)
+let questionNumber; // shows the question number in each question(disabled no-plusplus for this)
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let missionUser;
-let name;
+
+// 0 means the item isn't included in the request
+const answers = {
+	requesterName: '',
+	resourceLocation: '0',
+	individualRemuneration: '0',
+	dailyPayments: '0',
+	expensesCityHall: '0',
+	expensesCards: '0',
+	refundableValue: '0',
+	biddingEdicts: '0',
+	biddingEditals: '0',
+	expenseProcedures: '0',
+	stockControl: '0',
+	eletronicInvoice: '0',
+	multiannualPlan: '0',
+	abridgedReports: '0',
+	singleExtract: '0',
+	expensesFile: '0',
+};
 
 const itens = [];
 /*
@@ -61,6 +81,8 @@ library.dialog('/', [
 		if (args && args.user && args.user_mission) {
 			user = args.user; // eslint-disable-line prefer-destructuring
 			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
+			answers.requesterName = user.name;
+
 			session.send('Esse é um processo bem extenso e tem bastante conteúdo.' +
 				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
@@ -101,13 +123,13 @@ library.dialog('/', [
 
 library.dialog('/looseRequest', [
 	(session) => {
+		questionNumber = 1; // reseting value
 		session.sendTyping();
 		session.send('Irei te perguntar se o site permite que você identifique todos os seguintes itens:' +
 						'\n\n\n - Qual o número do processo que deu origem aquele gasto;' +
 						'\n\n\n - O bem fornecido ou o serviço prestado ao seu município;' +
 						'\n\n\n - Pessoa física ou jurídica beneficiária do pagamento;' +
-						'\n\n\n - E, quando for o caso, o procedimento licitatório realizado.' +
-						'\n\n\n');
+						'\n\n\n - E, quando for o caso, o procedimento licitatório realizado.');
 		builder.Prompts.choice(
 			session,
 			'Serão 13 perguntas no total. Vamos lá?',
@@ -120,7 +142,6 @@ library.dialog('/looseRequest', [
 	},
 
 	(session, args) => {
-		console.log(`Session: ${session}`);
 		switch (args.response.entity) {
 		case Generate:
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
@@ -147,6 +168,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.resourceLocation = 1;
 			itens.push('<p> - Disponibilização sobre receitas, despesas e endividamento público, nos termos da Lei Complementar 131, ' +
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
@@ -169,6 +191,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.individualRemuneration = 1;
 			itens.push('<p> - Disponibilização sobre remuneração de cada um dos agentes públicos, ' +
 			'individualizada – o modelo do Portal da Transparência do Governo Federal é um exemplo;</p>');
 			break;
@@ -185,12 +208,12 @@ library.dialog('/looseRequest', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
 			break;
 		default: // No
+			answers.dailyPayments = 1;
 			itens.push('<p> - Disponibilização da relação de pagamentos de diárias, aquisição de passagens aéreas (destino e motivo da viagem) ' +
 			'e adiantamento de despesas</p>');
 			break;
@@ -212,6 +235,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.expensesCityHall = 1;
 			itens.push('<p> - Disponibilização das despesas realizadas com cartões corporativos em nome da prefeitura</p>');
 			break;
 		}
@@ -233,6 +257,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.refundableValue = 1;
 			itens.push('<p> - Disponibilização dos valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza</p>');
 			break;
 		}
@@ -254,6 +279,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.biddingEdicts = 1;
 			itens.push('<p> - Disponibilização dos editais de licitação, dos procedimentos licitatórios, com indicação das licitações abertas,' +
 			' em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados</p>');
 			break;
@@ -276,6 +302,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.expenseProcedures = 1;
 			itens.push('<p> - Disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, ' +
 			'com respectivas fundamentações</p>');
 			break;
@@ -298,6 +325,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.stockControl = 1;
 			itens.push('<p>-Disponibilização do controle de estoque da prefeitura, com lista de entradas' +
 		' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
 			break;
@@ -319,6 +347,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.eletronicInvoice = 1;
 			itens.push('<p> - Disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos</p>');
 			break;
 		}
@@ -340,6 +369,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.multiannualPlan = 1;
 			itens.push('<p> - Disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária</p>');
 			break;
 		}
@@ -365,6 +395,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.abridgedReports = 1;
 			itens.push('<p> - Disponibilização dos relatórios Resumido de Execução Orçamentária; Relatórios de Gestão Fiscal; ' +
 			' Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões:' +
 			'	\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
@@ -389,6 +420,7 @@ library.dialog('/looseRequest', [
 		case Yes:
 			break;
 		default: // No
+			answers.singleExtract = 1;
 			itens.push('<p> - Disponibilização dos extratos de conta única</p>');
 			break;
 		}
@@ -406,23 +438,29 @@ library.dialog('/looseRequest', [
 		);
 	},
 
-	(session, args) => {
+	(session, args, next) => {
 		switch (args.response.entity) {
 		case Yes:
 			break;
 		default: // No
+			answers.expensesFile = 1;
 			itens.push('<p> - Disponibilização das despesas em um único arquivo em formato legível por máquina incluindo as colunas:' +
 			' função, subfunção, programa, ação, valor liquidado e valor empenhado\n\n</p>');
 			break;
 		}
-
-		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
+		questionNumber = 1;
+		if (!user) {
+			builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
+		}
+		next();
 	},
 
 	(session, args) => {
-		name = args.response;
+		if (!user) {
+			answers.requesterName = args.response;
+		}
 
-		const html = `<p style="font-size:7pt">Eu, ${name}, com fundamento na Lei 12.527, de 18 de novembro de 2011, e na Lei Complementar 131,` +
+		const html = `<p style="font-size:7pt">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011, e na Lei Complementar 131,` +
 			' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
 			' que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em página oficial na internet desde o momento ' +
 			`em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="font-size:7pt"">${itens.join('')}` +
@@ -432,7 +470,7 @@ library.dialog('/looseRequest', [
 			' e que acompanhe a resposta a esta solicitação.</p></div>';
 
 		pdf.create(html).toStream((err, stream) => {
-			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${name}LAI.pdf`));
+			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${answers.requesterName}LAI.pdf`));
 			file = pdfFile.path;
 
 			builder.Prompts.choice(
@@ -461,7 +499,6 @@ library.dialog('/looseRequest', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/generateRequest', [
@@ -469,7 +506,7 @@ library.dialog('/generateRequest', [
 		let data = generatedRequest.loadSync(path, file.slice(5));
 		data = JSON.stringify(data);
 		// Uploading the generated PDF to MailChimp
-		const dataString = `{"name":"${name}LAI.pdf" , "file_data":${data}}`;
+		const dataString = `{"name":"${answers.requesterName}LAI.pdf" , "file_data":${data}}`;
 
 		const options = {
 			url: apiUri,
@@ -484,8 +521,11 @@ library.dialog('/generateRequest', [
 
 		function callback(error, response, body) {
 			// TODO teste
+			// if (error) {
+			// 	const obj = 'testeteste';
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
+
 				// console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
@@ -496,7 +536,7 @@ library.dialog('/generateRequest', [
 								template_type: 'generic',
 								elements: [
 									{
-										title: `Pedido de acesso à informação gerado pelo Guaxi para ${name}`,
+										title: `Pedido de acesso à informação gerado pelo Guaxi para ${answers.requesterName}`,
 										buttons: [{
 											type: 'web_url',
 											url: obj.full_size_url,
@@ -509,6 +549,7 @@ library.dialog('/generateRequest', [
 					},
 				});
 				session.send(msg);
+
 				if (user && missionUser) {
 					UserMission.update(
 						{ metadata: { request_generated: 1 } },
@@ -522,7 +563,17 @@ library.dialog('/generateRequest', [
 						} // eslint-disable-line comma-dangle
 					)
 						.then((result) => {
-							console.log(`${result} Mission updated sucessfuly`);
+							// saves request in user_information_acess_request
+							infoRequest.create({
+								user_id: user.id,
+								metadata: answers,
+							}).then(() => {
+								console.log('Request saved successfully! :)');
+							}).catch((err) => {
+								console.log(`Couldn't save request :( -> ${err})`);
+							});
+
+							console.log(`${result} Mission updated successfully`);
 							session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
 							session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
 							'ou levar esse pedido em formato físico e protocola-lo.');
@@ -531,7 +582,7 @@ library.dialog('/generateRequest', [
 							builder.Prompts.choice(
 								session,
 								`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-								[Confirm, Contact],
+								[Confirm, goBack],
 								{
 									listStyle: builder.ListStyle.button,
 									retryPrompt: retryPrompts.choice,
@@ -549,7 +600,7 @@ library.dialog('/generateRequest', [
 						session,
 						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura,' +
 						' ou levar esse pedido em formato físico e protocolizá-lo.',
-						[Confirm, Contact],
+						[Confirm, goBack],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
