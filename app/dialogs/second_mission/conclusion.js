@@ -3,11 +3,11 @@
 const library = new builder.Library('secondMissionConclusion');
 const emoji = require('node-emoji');
 
-const answers = {
-	userProtocoledRequest: '',
-	govAnswered: '',
-	answerWasSatisfactory: '',
-};
+const answers = [
+	'userProtocoledRequest',
+	'govAnswered',
+	'answerWasSatisfactory',
+];
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 

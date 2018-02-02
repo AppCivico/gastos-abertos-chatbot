@@ -1,7 +1,7 @@
 const User = require('../models').user;
 
 module.exports = {
-	// Create a new user using model.create()
+	// Create a new author using model.create()
 	create_user(session) {
 	// console.log(session.dialogData.fullName);
 		User.create({
@@ -16,7 +16,7 @@ module.exports = {
 		// console.log(tx);
 	},
 
-	// Edit an existing user details using model.update()
+	// Edit an existing author details using model.update()
 	update(req, res) {
 		User.update(req.body, {
 			where: {

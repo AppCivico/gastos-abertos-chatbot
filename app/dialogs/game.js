@@ -64,6 +64,7 @@ library.dialog('/', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/missionStatus', [
@@ -132,6 +133,7 @@ library.dialog('/missionStatus', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/currentMission', [
@@ -165,6 +167,7 @@ library.dialog('/currentMission', [
 					}
 					break;
 				default: // 2
+
 					if (missionUser.completed) {
 						session.send(`Parabéns! Você concluiu o processo de missões do Gastos Abertos! ${emoji.get('tada').repeat(3)}`);
 						session.send('Junte-se a nós no Grupo de Lideranças do Gastos Abertos no WhatsApp do Gastos Abertos.' +
@@ -213,6 +216,7 @@ library.dialog('/currentMission', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 library.dialog('/sendToInformationAccessRequest', [
@@ -247,6 +251,7 @@ library.dialog('/sendToInformationAccessRequest', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+
 });
 
 module.exports = library;

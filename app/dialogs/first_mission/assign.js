@@ -28,6 +28,8 @@ library.dialog('/', [
 	(session, args) => {
 		[user] = [args.user];
 		missionUser = args.user_mission;
+		console.log('imprimindo');
+		console.log(missionUser);
 		if (session.message.address.channelId === 'facebook') {
 			User.update({
 				fb_id: session.message.sourceEvent.sender.id,
@@ -54,7 +56,7 @@ library.dialog('/', [
 				session.beginDialog('/moreDetails');
 			})
 			.catch((err) => {
-				console.log(`Error creating user mission: ${err}`);
+				console.log(`Error creating user mission${err}`);
 				session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde ou entre em contato conosco.' +
 				` ${emoji.get('dizzy_face').repeat(3)}`);
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
