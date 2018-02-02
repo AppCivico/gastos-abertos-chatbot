@@ -14,21 +14,12 @@ bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 
-<<<<<<< HEAD
-
-=======
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Sobre o projeto';
 const Missions = 'Processo de missões';
 const InformationAcessRequest = 'Gerar pedido';
 
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
-<<<<<<< HEAD
-//
-=======
-
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
 // 		DialogFlowReconizer,
@@ -130,10 +121,6 @@ bot.dialog('/promptButtons', [
 // 	onSelectAction: (session) => {
 // 		custom.allIntents(session, intents, ((response) => {
 // 			console.log(`session: ${(session)}`);
-<<<<<<< HEAD
-// 			console.log('entrei aqui');
-=======
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 // 			if (response === 'error') {
 // 				session.send('Não entendi');
 // 			} else {
@@ -142,60 +129,3 @@ bot.dialog('/promptButtons', [
 // 		}));
 // 	},
 // });
-<<<<<<< HEAD
-// ]).beginDialogAction('ajuda', 'gastosAbertosInformation:/', {
-// 	matches: 'ajuda',
-// }).beginDialogAction('pedido', 'informationAccessRequest:/', {
-// 	matches: 'pedido',
-// }).beginDialogAction('missoes', 'game:/', {
-// 	matches: 'missoes',
-// });
-
-bot.dialog('/welcomeBack', [
-	(session) => {
-		session.sendTyping();
-		session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
-		builder.Prompts.choice(
-			session,
-			'Em que assunto eu posso te ajudar?',
-			[GastosAbertosInformation, GameSignUp, Missions, InformationAcessRequest],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case GastosAbertosInformation:
-				session.beginDialog('gastosAbertosInformation:/');
-				break;
-			case GameSignUp:
-				session.beginDialog('gameSignUp:/');
-				break;
-			case Missions:
-				session.beginDialog('game:/');
-				break;
-			case InformationAcessRequest:
-				session.beginDialog('informationAccessRequest:/');
-				break;
-			default:
-				session.replaceDialog('/welcomeBack');
-			}
-		}
-	},
-	(session) => {
-		session.replaceDialog('/welcomeBack');
-	},
-]);
-
-bot.dialog('/reset', [
-	(session) => {
-		session.endDialog();
-		session.beginDialog('/');
-	},
-]);
-=======
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b

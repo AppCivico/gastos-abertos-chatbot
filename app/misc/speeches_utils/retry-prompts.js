@@ -18,11 +18,6 @@ module.exports = {
 					`Desculpe-me ${emoji.get('dizzy_face').repeat(2)}, não entendi o que você digitou. Por favor, utilize ` +
 					'os botões \'Sim\' e \'Não\', para responder: ',
 				],
-	request:
-				[
-					`Desculpe-me ${emoji.get('dizzy_face').repeat(2)}, não entendi o que você digitou. Por favor, utilize ` +
-					'os botões \'Sim\' e \'Não\', para responder: ',
-				],
 	email:
 				[
 					`${emoji.get('thinking_face').repeat(3)} Hummm. Não entendi o e-mail que você digitou. O e-mail deve ter o seguinte formato: exemplo@exemplo.com.`,

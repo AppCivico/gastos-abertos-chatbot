@@ -22,14 +22,9 @@ const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos lá!';
 const Confirm = 'Beleza!';
-<<<<<<< HEAD
-const Contact = 'Contato';
-let currentQuestion = '';
-=======
 const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
 let questionNumber; // shows the question number in each question(disabled no-plusplus for this)
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
@@ -137,11 +132,7 @@ library.dialog('/looseRequest', [
 						'\n\n\n - E, quando for o caso, o procedimento licitatório realizado.');
 		builder.Prompts.choice(
 			session,
-<<<<<<< HEAD
-			'Vamos lá?',
-=======
 			'Serão 13 perguntas no total. Vamos lá?',
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 			[Generate, Denial],
 			{
 				listStyle: builder.ListStyle.button,
@@ -151,15 +142,10 @@ library.dialog('/looseRequest', [
 	},
 
 	(session, args) => {
-		console.log(`Session: ${session}`);
 		switch (args.response.entity) {
 		case Generate:
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
-<<<<<<< HEAD
-			currentQuestion = 'Seu município identifica de onde vêm os recursos que ele recebe? ' +
-=======
 			currentQuestion = `${questionNumber++} - Seu município identifica de onde vêm os recursos que ele recebe? ` +
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 			'\n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.';
 			builder.Prompts.choice(
 				session, currentQuestion,
@@ -188,12 +174,8 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência disponibiliza dados referentes a remuneração de cada um dos agentes públicos, individualizada?';
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência disponibiliza dados referentes a remuneração de ` +
 		'cada um dos agentes públicos, individualizada?';
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -215,12 +197,8 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência disponibiliza: a relação de pagamentos de diárias, a aquisição de passagens aéreas e adiantamento de despesas?';
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência disponibiliza: a relação de pagamentos de diárias, ` +
 		'a aquisição de passagens aéreas e adiantamento de despesas?';
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -241,11 +219,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência disponibiliza as despesas realizadas com cartões corporativos em nome da prefeitura?';
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência disponibiliza as despesas realizadas com cartões corporativos em nome da prefeitura?`;
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -266,12 +240,8 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion =	'O portal de transparência disponibiliza os valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza?';
-=======
 		currentQuestion =	`${questionNumber++} - O portal de transparência disponibiliza os valores referentes às verbas de representação,` +
 		'de gabinete e reembolsáveis de qualquer natureza?';
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -292,11 +262,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, com indicação das ' +
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, com indicação das ` +
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		'licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -319,11 +285,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e ' +
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e ` +
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		'inexigibilidade de licitações, com respectivas fundamentações?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -345,13 +307,8 @@ library.dialog('/looseRequest', [
 			'com respectivas fundamentações</p>');
 			break;
 		}
-<<<<<<< HEAD
-
-		currentQuestion = 'O portal de transparência realiza a disponibilização do controle de estoque da prefeitura, ' +
-=======
 		session.send(`Ufa! Não desanime, parceiro. Faltam apenas ${14 - questionNumber} perguntas para finalizar seu pedido. ${emoji.get('wink')}`);
 		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização do controle de estoque da prefeitura, ` +
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		'com lista de entradas e saídas de bens patrimoniais, além da relação de cessões, permutas e doação de bens?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -373,13 +330,8 @@ library.dialog('/looseRequest', [
 		' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
 			break;
 		}
-<<<<<<< HEAD
-
-		currentQuestion = 'O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos?';
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas ` +
 		'que deram origem a pagamentos?';
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -400,12 +352,8 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência realiza a disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária?';
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização do plano plurianual; ` +
 		'da lei de diretrizes orçamentárias; da lei orçamentária?';
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -426,11 +374,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência realiza a disponibilização dos relatórios Resumido de Execução Orçamentária; ' +
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização dos relatórios Resumido de Execução Orçamentária; ` +
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 					'Relatórios de Gestão Fiscal; Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões: ' +
 					' 		\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
 					'			\n\nii) Demonstrativo de Aplicação na Área de Saúde;' +
@@ -460,11 +404,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência realiza a disponibilização dos extratos de conta única?';
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização dos extratos de conta única?`;
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -485,11 +425,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-<<<<<<< HEAD
-		currentQuestion = 'O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato ' +
-=======
 		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato ` +
->>>>>>> a661615a68345d3a06095ca8ec751be35705409b
 		'legível por máquina incluindo as colunas: função, subfunção, programa, ação, valor liquidado e valor empenhado?';
 		builder.Prompts.choice(
 			session, currentQuestion,
