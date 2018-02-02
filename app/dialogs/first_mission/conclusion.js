@@ -4,16 +4,16 @@
 
 const library = new builder.Library('firstMissionConclusion');
 
-const answers = [
-	'transparencyPortalExists',
-	'transparencyPortalURL',
-	'transparencyPortalHasFinancialData',
-	'transparencyPortalAllowsFinancialDataDownload',
-	'transparencyPortalFinancialDataFormats',
-	'transparencyPortalHasContractsData',
-	'transparencyPortalHasBiddingsData',
-	'transparencyPortalHasBiddingProcessData',
-];
+const answers = {
+	transparencyPortalExists: '',
+	transparencyPortalURL: '',
+	transparencyPortalHasFinancialData: '',
+	transparencyPortalAllowsFinancialDataDownload: '',
+	transparencyPortalFinancialDataFormats: '',
+	transparencyPortalHasContractsData: '',
+	transparencyPortalHasBiddingsData: '',
+	transparencyPortalHasBiddingProcessData: '',
+};
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
@@ -35,7 +35,7 @@ let user;
 library.dialog('/', [
 	(session, args) => {
 		[user] = [args.user];
-		//		missionUser = args.user_mission;
+		// const missionUser = args.user_mission;
 
 
 		session.sendTyping();
@@ -139,7 +139,7 @@ library.dialog('/transparencyPortalExists', [
 	},
 
 	(session, args) => {
-		session.dialogData.transparencyPortalURL = args.response;
+		session.dialogData.transparencyPortalURL = args.response; // ?
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -199,6 +199,7 @@ library.dialog('/transparencyPortalExists', [
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
+		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
 	},
@@ -245,6 +246,7 @@ library.dialog('/transparencyPortalHasFinancialData', [
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session) => {
+		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -271,7 +273,6 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
@@ -433,7 +434,7 @@ library.dialog('/userUpdate', [
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw e;
 			});
-
+		console.log(`as respostas: ${JSON.stringify(answers, undefined, 2)}`);
 		UserMission.update({
 			completed: true,
 			metadata: answers,
