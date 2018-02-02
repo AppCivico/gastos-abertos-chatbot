@@ -9,7 +9,14 @@ module.exports = {
 	choiceIntent:
 				[
 					`Desculpe-me ${emoji.get('dizzy_face').repeat(2)}, não entendi o que você digitou, pois, por enquanto, ` +
-					'eu não conheço muitas palavras, tente termos como \'ajuda\', \'inscrição\' e \'missão\' ou selecione uma das opções abaixo:',
+					'eu não conheço muitas palavras, você pode digitar \'cancelar\' para voltar ou selecionar uma das opções abaixo:',
+					// `Desculpe-me ${emoji.get('dizzy_face').repeat(2)}, não entendi o que você digitou, pois, por enquanto, ` +
+					// 'eu não conheço muitas palavras, tente termos como \'ajuda\', \'inscrição\' e \'missão\' ou selecione uma das opções abaixo:',
+				],
+	request:
+				[
+					`Desculpe-me ${emoji.get('dizzy_face').repeat(2)}, não entendi o que você digitou. Por favor, utilize ` +
+					'os botões \'Sim\' e \'Não\', para responder: ',
 				],
 	request:
 				[

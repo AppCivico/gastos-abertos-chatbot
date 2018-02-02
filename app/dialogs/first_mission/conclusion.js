@@ -4,16 +4,16 @@
 
 const library = new builder.Library('firstMissionConclusion');
 
-const answers = [
-	'transparencyPortalExists',
-	'transparencyPortalURL',
-	'transparencyPortalHasFinancialData',
-	'transparencyPortalAllowsFinancialDataDownload',
-	'transparencyPortalFinancialDataFormats',
-	'transparencyPortalHasContractsData',
-	'transparencyPortalHasBiddingsData',
-	'transparencyPortalHasBiddingProcessData',
-];
+const answers = {
+	transparencyPortalExists: '',
+	transparencyPortalURL: '',
+	transparencyPortalHasFinancialData: '',
+	transparencyPortalAllowsFinancialDataDownload: '',
+	transparencyPortalFinancialDataFormats: '',
+	transparencyPortalHasContractsData: '',
+	transparencyPortalHasBiddingsData: '',
+	transparencyPortalHasBiddingProcessData: '',
+};
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
@@ -35,8 +35,7 @@ let user;
 library.dialog('/', [
 	(session, args) => {
 		[user] = [args.user];
-		//		missionUser = args.user_mission;
-
+		// const missionUser = args.user_mission;
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -69,7 +68,6 @@ library.dialog('/', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/conclusionPromptAfterMoreDetails', [
@@ -103,7 +101,6 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
 });
-
 
 library.dialog('/transparencyPortalExists', [
 	(session) => {
@@ -139,7 +136,7 @@ library.dialog('/transparencyPortalExists', [
 	},
 
 	(session, args) => {
-		session.dialogData.transparencyPortalURL = args.response;
+		session.dialogData.transparencyPortalURL = args.response; // ?
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -194,11 +191,11 @@ library.dialog('/transparencyPortalExists', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
+		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
 	},
@@ -240,11 +237,11 @@ library.dialog('/transparencyPortalHasFinancialData', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session) => {
+		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -271,22 +268,20 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session) => {
 		session.sendTyping();
-		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
+		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.' +
+	`\n\n Se não souber, basta digitar 'Não sei'. ${emoji.get('slightly_smiling_face')}`);
 	},
-
 	(session, args) => {
 		answers.transparencyPortalFinancialDataFormats = args.response;
 		session.replaceDialog('/transparencyPortalHasContractsData');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalHasContractsData', [
@@ -316,7 +311,6 @@ library.dialog('/transparencyPortalHasContractsData', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalHasBiddingsData', [
@@ -346,7 +340,6 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
@@ -376,7 +369,6 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/userUpdate', [
@@ -433,7 +425,7 @@ library.dialog('/userUpdate', [
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw e;
 			});
-
+		console.log(`as respostas: ${JSON.stringify(answers, undefined, 2)}`);
 		UserMission.update({
 			completed: true,
 			metadata: answers,
@@ -479,7 +471,6 @@ library.dialog('/userUpdate', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 module.exports = library;

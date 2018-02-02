@@ -5,7 +5,7 @@ module.exports = {
 			'fb_id',
 			{
 				type: Sequelize.STRING,
-			},
+			} // eslint-disable-line comma-dangle
 		);
 	},
 

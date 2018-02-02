@@ -6,7 +6,7 @@ module.exports = {
 			{
 				type: Sequelize.STRING,
 				allowNull: false,
-			},
+			} // eslint-disable-line comma-dangle
 		);
 	},
 };
