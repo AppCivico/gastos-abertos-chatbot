@@ -56,42 +56,41 @@ bot.beginDialogAction('getStarted', '/getStarted');
 // bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
 
 bot.dialog('/getStarted', [
-	(session) => {
+	(session, results, next) => {
 		session.sendTyping();
-		if (!session.userData.firstRun) {
+		if (!session.userData.firstRun) { // first run
+			session.userData.firstRun = true;
+
 			// TODO teste sem ID
 			// session.userData.userid = session.message.sourceEvent.sender.id;
 			// session.userData.pageid = session.message.sourceEvent.recipient.id;
+
 			// hardcoded ids for testing purposes
 			session.userData.userid = userID;
 			session.userData.pageid = pageToken;
 
-			custom.userFacebook(userID, pageToken, ((result) => {
-				User.findOrCreate({
-					where: { fb_id: session.userData.userid },
-					defaults: {
-						name: `${result.first_name} ${result.last_name}`,
-						occupation: 'undefined',
-						email: 'undefined',
-						birth_date: 'undefined',
-						state: 'undefined',
-						city: 'undefined',
-						cellphone_number: 'undefined',
-						active: true,
-						approved: true,
-						fb_id: result.id,
-					},
-				})
-					.spread((user, created) => {
-						console.log(user.get({
-							plain: true,
-						}));
-						console.log(`Was created? => ${created}`);
-					});
-			}));
+			custom.userFacebook(userID, pageToken, (result => User.findOrCreate({
+				where: { fb_id: session.userData.userid },
+				defaults: {
+					name: `${result.first_name} ${result.last_name}`,
+					occupation: 'undefined',
+					email: 'undefined',
+					birth_date: 'undefined',
+					state: 'undefined',
+					city: 'undefined',
+					cellphone_number: 'undefined',
+					active: true,
+					approved: true,
+					fb_id: result.id,
+				},
+			})
+				.spread((user, created) => {
+					console.log(user.get({
+						plain: true,
+					}));
+					console.log(`Was created? => ${created}`);
+				})));
 
-
-			session.userData.firstRun = true;
 
 			session.send({
 				attachments: [
@@ -104,10 +103,18 @@ bot.dialog('/getStarted', [
 			session.send('Olá, eu sou o Guaxi, o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
 			session.send(`\n\nVocê pode utilizar o menu abaixo para interagir comigo. ${emoji.get('hugging_face').repeat(2)}` +
 			`\n\nPara retornar á este menu durante algum processo, basta digitar 'cancelar'. ${emoji.get('slightly_smiling_face').repeat(2)}`);
-		} else {
-			session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+			session.replaceDialog('/promptButtons');
+		} else { // welcome back
+			User.findOne({
+				where: { fb_id: session.userData.userid },
+			}).then((user) => {
+				session.send(`Olá, ${user.get('name').substr(0, user.get('name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+				session.replaceDialog('/promptButtons');
+			}).catch(() => {
+				session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+				session.replaceDialog('/promptButtons');
+			});
 		}
-		session.replaceDialog('/promptButtons');
 	},
 ]);
 
