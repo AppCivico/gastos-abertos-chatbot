@@ -14,11 +14,12 @@ bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 
+const User = require('./server/schema/models').user;
+
 const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Sobre o projeto';
 const Missions = 'Processo de missões';
 const InformationAcessRequest = 'Gerar pedido';
-
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -28,7 +29,7 @@ const InformationAcessRequest = 'Gerar pedido';
 // 	recognizeOrder: builder.RecognizeOrder.series,
 // });
 //
-// const custom = require('./custom_intents');
+const custom = require('./custom_intents');
 //
 // bot.recognizer(intents);
 //
@@ -41,10 +42,12 @@ const InformationAcessRequest = 'Gerar pedido';
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
+const { userID } = process.env;
+const { pageToken } = process.env;
+
 bot.dialog('/', [
 	(session) => {
 		session.userData = {}; // for testing purposes
-		session.userData.firstRun = undefined;
 		session.replaceDialog('/getStarted');
 	},
 ]);
@@ -59,6 +62,35 @@ bot.dialog('/getStarted', [
 			// TODO teste sem ID
 			// session.userData.userid = session.message.sourceEvent.sender.id;
 			// session.userData.pageid = session.message.sourceEvent.recipient.id;
+			// hardcoded ids for testing purposes
+			session.userData.userid = userID;
+			session.userData.pageid = pageToken;
+
+			custom.userFacebook(userID, pageToken, ((result) => {
+				User.findOrCreate({
+					where: { fb_id: session.userData.userid },
+					defaults: {
+						name: `${result.first_name} ${result.last_name}`,
+						occupation: 'undefined',
+						email: 'undefined',
+						birth_date: 'undefined',
+						state: 'undefined',
+						city: 'undefined',
+						cellphone_number: 'undefined',
+						active: true,
+						approved: true,
+						fb_id: result.id,
+					},
+				})
+					.spread((user, created) => {
+						console.log(user.get({
+							plain: true,
+						}));
+						console.log(`Was created? => ${created}`);
+					});
+			}));
+
+
 			session.userData.firstRun = true;
 
 			session.send({
