@@ -12,10 +12,13 @@ const gastosAbertosCicles = 'O que é um ciclo';
 const gastosAbertosCicleResults = 'Resultados';
 const aboutUs = 'Quem Somos';
 const contact = 'Entrar em contato';
+const signEmail = 'Cadastrar e-mail';
 const reset = 'Voltar ao início';
+let User;
 
 library.dialog('/', [
-	(session) => {
+	(session, args) => {
+		[User] = [args.User];
 		session.sendTyping();
 		session.send('A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
 		'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.');
@@ -28,7 +31,7 @@ library.dialog('/promptButtons', [
 		builder.Prompts.choice(
 			session,
 			`Sobre o que deseja saber mais? ${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[aboutUs, gastosAbertosCicleResults,
+			[aboutUs, gastosAbertosCicleResults, signEmail,
 				gastosAbertosCicles, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
@@ -52,6 +55,9 @@ library.dialog('/promptButtons', [
 				break;
 			case contact:
 				session.beginDialog('contact:/');
+				break;
+			case signEmail:
+				session.beginDialog('/signEmail');
 				break;
 			default: // reset
 				session.endDialog();
@@ -97,5 +103,44 @@ library.dialog('/aboutUs', [
 		session.replaceDialog('/promptButtons');
 	},
 ]);
+
+library.dialog('/signEmail', [
+	(session) => {
+		session.send('Aqui você poderá vincular o seu e-mail ao projeto para ficar por dentro de todas as novidades do projeto ' +
+		`${emoji.get('slightly_smiling_face').repeat(2)}`);
+		User.findOne({
+			where: { fb_id: session.userData.userid },
+		}).then((user) => {
+			if (user.get('email') === 'undefined') {
+				session.beginDialog('/askEmail');
+			} else {
+				session.send(`O e-mail '${user.get('email')}' já está cadastrado`);
+				session.replaceDialog('/promptButtons');
+			}
+		}).catch(() => {
+			session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)} Tive um problema técnico, tente novamente mais tarde.`);
+			session.replaceDialog('/promptButtons');
+		});
+	},
+]);
+
+library.dialog('/askEmail', [
+	(session) => {
+		session.beginDialog('validators:date', {
+			prompt: `Basta digitar seu e-mail ou entrar com 'cancelar' para voltar ${emoji.get('email')}`,
+			retryPrompt: retryPrompts.date,
+			maxRetries: 10,
+		});
+	},
+	// TODO cadastrar e-mail
+	// (session) => {
+	// 	User.update
+	// },
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
+});
 
 module.exports = library;

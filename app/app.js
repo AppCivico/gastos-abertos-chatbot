@@ -56,7 +56,7 @@ bot.beginDialogAction('getStarted', '/getStarted');
 // bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
 
 bot.dialog('/getStarted', [
-	(session, results, next) => {
+	(session) => {
 		session.sendTyping();
 		if (!session.userData.firstRun) { // first run
 			session.userData.firstRun = true;
@@ -69,6 +69,7 @@ bot.dialog('/getStarted', [
 			session.userData.userid = userID;
 			session.userData.pageid = pageToken;
 
+			// default value: undefined. Yes, it's only a string.
 			custom.userFacebook(userID, pageToken, (result => User.findOrCreate({
 				where: { fb_id: session.userData.userid },
 				defaults: {
@@ -137,7 +138,7 @@ bot.dialog('/promptButtons', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case GastosAbertosInformation:
-				session.beginDialog('gastosAbertosInformation:/');
+				session.beginDialog('gastosAbertosInformation:/', {	User });
 				break;
 			case GameSignUp:
 				session.beginDialog('gameSignUp:/');
