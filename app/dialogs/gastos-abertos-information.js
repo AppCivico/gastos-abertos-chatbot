@@ -14,6 +14,8 @@ const aboutUs = 'Quem Somos';
 const contact = 'Entrar em contato';
 const signEmail = 'Cadastrar e-mail';
 const reset = 'Voltar ao início';
+const changeEmail = 'Trocar e-mail';
+const keepEmail = 'Manter o mesmo';
 let User;
 
 library.dialog('/', [
@@ -57,7 +59,7 @@ library.dialog('/promptButtons', [
 				session.beginDialog('contact:/');
 				break;
 			case signEmail:
-				session.beginDialog('/signEmail');
+				session.replaceDialog('/signEmail');
 				break;
 			default: // reset
 				session.endDialog();
@@ -106,18 +108,19 @@ library.dialog('/aboutUs', [
 
 library.dialog('/signEmail', [
 	(session) => {
-		session.send('Aqui você poderá vincular o seu e-mail ao projeto para ficar por dentro de todas as novidades do projeto ' +
+		session.send('Aqui você poderá vincular o seu e-mail ao projeto para ficar por dentro de todas as novidades! ' +
 		`${emoji.get('slightly_smiling_face').repeat(2)}`);
 		User.findOne({
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
-			if (user.get('email') === 'undefined') {
-				session.beginDialog('/askEmail');
+			if (user.get('email') === 'undefined') { // in case there's no e-mail
+				session.replaceDialog('/askEmail');
 			} else {
 				session.send(`O e-mail '${user.get('email')}' já está cadastrado`);
-				session.replaceDialog('/promptButtons');
+				session.replaceDialog('/changeEmail');
 			}
-		}).catch(() => {
+		}).catch((err) => {
+			console.log(err);
 			session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)} Tive um problema técnico, tente novamente mais tarde.`);
 			session.replaceDialog('/promptButtons');
 		});
@@ -126,16 +129,66 @@ library.dialog('/signEmail', [
 
 library.dialog('/askEmail', [
 	(session) => {
-		session.beginDialog('validators:date', {
-			prompt: `Basta digitar seu e-mail ou entrar com 'cancelar' para voltar ${emoji.get('email')}`,
-			retryPrompt: retryPrompts.date,
-			maxRetries: 10,
+		session.beginDialog('validators:email', {
+			prompt: `Digite seu e-mail ou entre com 'cancelar' para voltar ${emoji.get('email')}`,
+			retryPrompt: retryPrompts.email,
+			maxRetries: 5,
 		});
 	},
-	// TODO cadastrar e-mail
-	// (session) => {
-	// 	User.update
-	// },
+	(session, args) => {
+		if (args.resumed) {
+			session.send(`Você tentou inserir um e-mail inválido muitas vezes. ${emoji.get('dizzy_face').repeat(2)}` +
+			'Tente novamente mais tarde.');
+		} else if (args.response === true) {
+			session.replaceDialog('/promptButtons');
+		} else {
+			User.findOne({
+				where: { fb_id: session.userData.userid },
+			}).then((user) => {
+				user.updateAttributes({
+					email: args.response,
+				});
+				session.send(`E-mail cadastrado com sucesso! ${emoji.get('sunglasses').repeat(2)}`);
+				session.replaceDialog('/promptButtons');
+			}).catch((err) => {
+				console.log(err);
+				session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)} Tive um problema técnico, tente novamente mais tarde.`);
+			});
+		}
+	},
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
+});
+
+library.dialog('/changeEmail', [
+	(session) => {
+		builder.Prompts.choice(
+			session,
+			'Você pode trocar o e-mail cadastrado por outro ou manter o mesmo.',
+			[changeEmail, keepEmail],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choiceIntent,
+				promptAfterAction: false,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case changeEmail:
+				session.replaceDialog('/askEmail');
+				break;
+			default: // keepEmail
+				session.replaceDialog('/promptButtons');
+				break;
+			}
+		}
+	},
 ]).customAction({
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
 	onSelectAction: (session) => {

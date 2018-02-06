@@ -45,15 +45,38 @@ const custom = require('./custom_intents');
 const { userID } = process.env;
 const { pageToken } = process.env;
 
+bot.beginDialogAction('getStarted', '/getStarted');
+// bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
+
 bot.dialog('/', [
 	(session) => {
 		session.userData = {}; // for testing purposes
+
+		// default value: undefined. Yes, it's only a string.
+		custom.userFacebook(userID, pageToken, (result => User.findOrCreate({
+			where: { fb_id: session.userData.userid },
+			defaults: {
+				name: `${result.first_name} ${result.last_name}`,
+				occupation: 'undefined',
+				email: 'undefined',
+				birth_date: 'undefined',
+				state: 'undefined',
+				city: 'undefined',
+				cellphone_number: 'undefined',
+				active: true,
+				approved: true,
+				fb_id: result.id,
+			},
+		})
+			.spread((user, created) => {
+				console.log(user.get({
+					plain: true,
+				}));
+				console.log(`Was created? => ${created}`);
+			})));
 		session.replaceDialog('/getStarted');
 	},
 ]);
-
-bot.beginDialogAction('getStarted', '/getStarted');
-// bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
 
 bot.dialog('/getStarted', [
 	(session) => {
@@ -68,29 +91,6 @@ bot.dialog('/getStarted', [
 			// hardcoded ids for testing purposes
 			session.userData.userid = userID;
 			session.userData.pageid = pageToken;
-
-			// default value: undefined. Yes, it's only a string.
-			custom.userFacebook(userID, pageToken, (result => User.findOrCreate({
-				where: { fb_id: session.userData.userid },
-				defaults: {
-					name: `${result.first_name} ${result.last_name}`,
-					occupation: 'undefined',
-					email: 'undefined',
-					birth_date: 'undefined',
-					state: 'undefined',
-					city: 'undefined',
-					cellphone_number: 'undefined',
-					active: true,
-					approved: true,
-					fb_id: result.id,
-				},
-			})
-				.spread((user, created) => {
-					console.log(user.get({
-						plain: true,
-					}));
-					console.log(`Was created? => ${created}`);
-				})));
 
 
 			session.send({
