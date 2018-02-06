@@ -51,8 +51,8 @@ const answers = {
 };
 
 const itens = [];
-/*
-const options = {
+
+let options = {
 	border: {
 		top: '5em',
 		right: '3.5em',
@@ -62,7 +62,6 @@ const options = {
 
 	'font-size': '10px',
 };
-*/
 
 const generatedRequest = new Base64File();
 const path = '/tmp/';
@@ -118,7 +117,6 @@ library.dialog('/', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/looseRequest', [
@@ -508,7 +506,7 @@ library.dialog('/generateRequest', [
 		// Uploading the generated PDF to MailChimp
 		const dataString = `{"name":"${answers.requesterName}LAI.pdf" , "file_data":${data}}`;
 
-		const options = {
+		options = {
 			url: apiUri,
 			method: 'POST',
 			headers,
@@ -627,7 +625,6 @@ library.dialog('/generateRequest', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 

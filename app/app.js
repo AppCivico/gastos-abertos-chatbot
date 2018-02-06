@@ -13,12 +13,14 @@ bot.library(require('./dialogs/game-sign-up'));
 bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
+bot.library(require('./dialogs/game2'));
+
+const User = require('./server/schema/models').user;
 
 const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Sobre o projeto';
 const Missions = 'Processo de missões';
 const InformationAcessRequest = 'Gerar pedido';
-
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -28,7 +30,7 @@ const InformationAcessRequest = 'Gerar pedido';
 // 	recognizeOrder: builder.RecognizeOrder.series,
 // });
 //
-// const custom = require('./custom_intents');
+const custom = require('./custom_intents');
 //
 // bot.recognizer(intents);
 //
@@ -41,25 +43,56 @@ const InformationAcessRequest = 'Gerar pedido';
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
-bot.dialog('/', [
-	(session) => {
-		session.userData = {}; // for testing purposes
-		session.userData.firstRun = undefined;
-		session.replaceDialog('/getStarted');
-	},
-]);
+const { userID } = process.env;
+const { pageToken } = process.env;
 
 bot.beginDialogAction('getStarted', '/getStarted');
 // bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
 
+bot.dialog('/', [
+	(session) => {
+		session.userData = {}; // for testing purposes
+
+		// default value: undefined. Yes, it's only a string.
+		custom.userFacebook(userID, pageToken, (result => User.findOrCreate({
+			where: { fb_id: session.userData.userid },
+			defaults: {
+				name: `${result.first_name} ${result.last_name}`,
+				occupation: 'undefined',
+				email: 'undefined',
+				birth_date: 'undefined',
+				state: 'undefined',
+				city: 'undefined',
+				cellphone_number: 'undefined',
+				active: true,
+				approved: true,
+				fb_id: result.id,
+			},
+		})
+			.spread((user, created) => {
+				console.log(user.get({
+					plain: true,
+				}));
+				console.log(`Was created? => ${created}`);
+			})));
+		session.replaceDialog('/getStarted');
+	},
+]);
+
 bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
-		if (!session.userData.firstRun) {
+		if (!session.userData.firstRun) { // first run
+			session.userData.firstRun = true;
+
 			// TODO teste sem ID
 			// session.userData.userid = session.message.sourceEvent.sender.id;
 			// session.userData.pageid = session.message.sourceEvent.recipient.id;
-			session.userData.firstRun = true;
+
+			// hardcoded ids for testing purposes
+			session.userData.userid = userID;
+			session.userData.pageid = pageToken;
+
 
 			session.send({
 				attachments: [
@@ -72,10 +105,18 @@ bot.dialog('/getStarted', [
 			session.send('Olá, eu sou o Guaxi, o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
 			session.send(`\n\nVocê pode utilizar o menu abaixo para interagir comigo. ${emoji.get('hugging_face').repeat(2)}` +
 			`\n\nPara retornar á este menu durante algum processo, basta digitar 'cancelar'. ${emoji.get('slightly_smiling_face').repeat(2)}`);
-		} else {
-			session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+			session.replaceDialog('/promptButtons');
+		} else { // welcome back
+			User.findOne({
+				where: { fb_id: session.userData.userid },
+			}).then((user) => {
+				session.send(`Olá, ${user.get('name').substr(0, user.get('name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+				session.replaceDialog('/promptButtons');
+			}).catch(() => {
+				session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+				session.replaceDialog('/promptButtons');
+			});
 		}
-		session.replaceDialog('/promptButtons');
 	},
 ]);
 
@@ -98,13 +139,13 @@ bot.dialog('/promptButtons', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case GastosAbertosInformation:
-				session.beginDialog('gastosAbertosInformation:/');
+				session.beginDialog('gastosAbertosInformation:/', {	User });
 				break;
 			case GameSignUp:
 				session.beginDialog('gameSignUp:/');
 				break;
 			case Missions:
-				session.beginDialog('game:/');
+				session.beginDialog('game2:/', { User });
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');

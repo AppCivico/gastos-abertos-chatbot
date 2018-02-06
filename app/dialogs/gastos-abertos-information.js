@@ -12,10 +12,15 @@ const gastosAbertosCicles = 'O que é um ciclo';
 const gastosAbertosCicleResults = 'Resultados';
 const aboutUs = 'Quem Somos';
 const contact = 'Entrar em contato';
+const signEmail = 'Cadastrar e-mail';
 const reset = 'Voltar ao início';
+const changeEmail = 'Trocar e-mail';
+const keepEmail = 'Manter o mesmo';
+let User;
 
 library.dialog('/', [
-	(session) => {
+	(session, args) => {
+		[User] = [args.User];
 		session.sendTyping();
 		session.send('A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
 		'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.');
@@ -28,7 +33,7 @@ library.dialog('/promptButtons', [
 		builder.Prompts.choice(
 			session,
 			`Sobre o que deseja saber mais? ${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[aboutUs, gastosAbertosCicleResults,
+			[aboutUs, gastosAbertosCicleResults, signEmail,
 				gastosAbertosCicles, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
@@ -52,6 +57,9 @@ library.dialog('/promptButtons', [
 				break;
 			case contact:
 				session.beginDialog('contact:/');
+				break;
+			case signEmail:
+				session.replaceDialog('/signEmail');
 				break;
 			default: // reset
 				session.endDialog();
@@ -101,5 +109,95 @@ library.dialog('/aboutUs', [
 		session.replaceDialog('/promptButtons');
 	},
 ]);
+
+library.dialog('/signEmail', [
+	(session) => {
+		session.send('Aqui você poderá vincular o seu e-mail ao projeto para ficar por dentro de todas as novidades! ' +
+		`${emoji.get('slightly_smiling_face').repeat(2)}`);
+		User.findOne({
+			where: { fb_id: session.userData.userid },
+		}).then((user) => {
+			if (user.get('email') === 'undefined') { // in case there's no e-mail
+				session.replaceDialog('/askEmail');
+			} else {
+				session.send(`O e-mail '${user.get('email')}' já está cadastrado`);
+				session.replaceDialog('/changeEmail');
+			}
+		}).catch((err) => {
+			console.log(err);
+			session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)} Tive um problema técnico, tente novamente mais tarde.`);
+			session.replaceDialog('/promptButtons');
+		});
+	},
+]);
+
+library.dialog('/askEmail', [
+	(session) => {
+		session.beginDialog('validators:email', {
+			prompt: `Digite seu e-mail ou entre com 'cancelar' para voltar ${emoji.get('email')}`,
+			retryPrompt: retryPrompts.email,
+			maxRetries: 5,
+		});
+	},
+	(session, args) => {
+		if (args.resumed) {
+			session.send(`Você tentou inserir um e-mail inválido muitas vezes. ${emoji.get('dizzy_face').repeat(2)}` +
+			'Tente novamente mais tarde.');
+		} else if (args.response === true) {
+			session.replaceDialog('/promptButtons');
+		} else {
+			User.findOne({
+				where: { fb_id: session.userData.userid },
+			}).then((user) => {
+				user.updateAttributes({
+					email: args.response,
+				});
+				session.send(`E-mail cadastrado com sucesso! ${emoji.get('sunglasses').repeat(2)}`);
+				session.replaceDialog('/promptButtons');
+			}).catch((err) => {
+				console.log(err);
+				session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)} Tive um problema técnico, tente novamente mais tarde.`);
+			});
+		}
+	},
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
+});
+
+library.dialog('/changeEmail', [
+	(session) => {
+		builder.Prompts.choice(
+			session,
+			'Você pode trocar o e-mail cadastrado por outro ou manter o mesmo.',
+			[changeEmail, keepEmail],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choiceIntent,
+				promptAfterAction: false,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case changeEmail:
+				session.replaceDialog('/askEmail');
+				break;
+			default: // keepEmail
+				session.replaceDialog('/promptButtons');
+				break;
+			}
+		}
+	},
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
+});
 
 module.exports = library;
