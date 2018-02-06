@@ -110,9 +110,7 @@ library.dialog('/missionStatus', [
 			}).then((UserData) => {
 				user = UserData.dataValues;
 				UserMission.count({
-					where: {
-						user_id: user.id,
-					},
+					where: { user_id: user.id },
 				})
 					.then((count) => {
 						if (count === 0 && !user.active && user.approved) {
