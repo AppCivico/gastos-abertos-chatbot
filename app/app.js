@@ -13,6 +13,7 @@ bot.library(require('./dialogs/game-sign-up'));
 bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
+bot.library(require('./dialogs/game2'));
 
 const User = require('./server/schema/models').user;
 
@@ -144,7 +145,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('gameSignUp:/');
 				break;
 			case Missions:
-				session.beginDialog('game:/');
+				session.beginDialog('game2:/', { User });
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
