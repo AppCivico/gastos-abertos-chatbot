@@ -86,8 +86,8 @@ bot.dialog('/getStarted', [
 			session.userData.firstRun = true;
 
 			// TODO teste sem ID
-			// session.userData.userid = session.message.sourceEvent.sender.id;
-			// session.userData.pageid = session.message.sourceEvent.recipient.id;
+			 session.userData.userid = session.message.sourceEvent.sender.id;
+			 session.userData.pageid = session.message.sourceEvent.recipient.id;
 
 			// hardcoded ids for testing purposes
 			// session.userData.userid = userID;
