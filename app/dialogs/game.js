@@ -14,7 +14,7 @@ const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
 
 const library = new builder.Library('game');
-
+// Esse é o velho
 const Yes = 'Sim';
 const No = 'Não';
 const Contact = 'Entrar em contato';

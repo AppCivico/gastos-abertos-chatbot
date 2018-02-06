@@ -20,7 +20,7 @@ const No = 'Não';
 const Contact = 'Entrar em contato';
 const Restart = 'Voltar para o início';
 const Confirm = 'Por hoje, chega';
-
+// Esse é o novo!
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let missionUser;

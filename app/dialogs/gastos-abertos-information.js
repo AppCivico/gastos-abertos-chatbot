@@ -22,55 +22,14 @@ library.dialog('/', [
 	(session, args) => {
 		[User] = [args.User];
 		session.sendTyping();
-		builder.Prompts.choice(
-			session,
 		session.send('A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
 		'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.');
-			'\n\n\nVocê pode escolher um dos itens abaixo para saber mais. O que acha?',
-			[aboutUs, gastosAbertosCicleResults,
-				gastosAbertosCicles, contact, reset],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.about,
-				promptAfterAction: false,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case gastosAbertosCicles:
-				session.replaceDialog('/gastosAbertosCicles');
-				break;
-			case gastosAbertosCicleResults:
-				session.replaceDialog('/gastosAbertosCicleResults');
-				break;
-			case aboutUs:
-				session.beginDialog('/aboutUs');
-				break;
-			case contact:
-				session.beginDialog('contact:/');
-				break;
-			default: // reset
-				session.endDialog();
-				break;
-			}
-		}
-	},
-	(session) => {
 		session.replaceDialog('/promptButtons');
 	},
 ]);
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-	onSelectAction: (session) => {
-		session.endDialog();
-	},
-});
 
 library.dialog('/promptButtons', [
 	(session) => {
-		session.sendTyping();
 		builder.Prompts.choice(
 			session,
 			`Sobre o que deseja saber mais? ${emoji.get('slightly_smiling_face').repeat(2)}`,
@@ -118,6 +77,7 @@ library.dialog('/promptButtons', [
 	},
 });
 
+
 library.dialog('/gastosAbertosCicles', [
 	(session) => {
 		session.send('Um ciclo do Gastos Abertos é um período onde pessoas desenvolvem missões (avaliação de portal de transparência da cidade, ' +
@@ -140,7 +100,6 @@ library.dialog('/gastosAbertosCicleResults', [
 library.dialog('/aboutUs', [
 	(session) => {
 		session.send('O Gastos Abertos tem como objetivo conscientizar e capacitar o cidadão em relação á Lei de Acesso á Informação.' +
-		'Fazemos parte de tal movimento. ' +
 		'\n\nNosso site oficial: https://gastosabertos.org/' +
 		'\n\nNosso grupo de what\'sapp: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
 		session.replaceDialog('/promptButtons');
