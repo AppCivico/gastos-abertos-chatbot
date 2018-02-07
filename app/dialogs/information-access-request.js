@@ -21,7 +21,7 @@ const Denial = 'Ainda não';
 const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos lá!';
-const Confirm = 'Beleza!';
+const Contact = 'Entrar em contato';
 const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
 let questionNumber; // shows the question number in each question(disabled no-plusplus for this)
@@ -81,7 +81,6 @@ library.dialog('/', [
 			user = args.user; // eslint-disable-line prefer-destructuring
 			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
 			answers.requesterName = user.name;
-
 			session.send('Esse é um processo bem extenso e tem bastante conteúdo.' +
 				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
@@ -525,7 +524,7 @@ library.dialog('/generateRequest', [
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
 
-				// console.log(obj.full_size_url);
+				console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
 					facebook: {
@@ -581,7 +580,7 @@ library.dialog('/generateRequest', [
 							builder.Prompts.choice(
 								session,
 								`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-								[Confirm, goBack],
+								[Contact, goBack],
 								{
 									listStyle: builder.ListStyle.button,
 									retryPrompt: retryPrompts.choice,
@@ -597,9 +596,10 @@ library.dialog('/generateRequest', [
 				} else {
 					builder.Prompts.choice(
 						session,
-						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura,' +
-						' ou levar esse pedido em formato físico e protocolizá-lo.',
-						[Confirm, goBack],
+						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
+						'ou levar esse pedido em formato físico e protocolizá-lo. Você pode também nos contatar para tirar alguma dúvida ou ' +
+						'relatar suas ações.',
+						[Contact, goBack],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
@@ -614,11 +614,8 @@ library.dialog('/generateRequest', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Confirm:
-			session.send('No momento, pararemos por aqui. ' +
-		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
-			session.endConversation();
+		case Contact:
+			session.replaceDialog('contact:/');
 			break;
 		default: // Contact
 			session.endDialog();

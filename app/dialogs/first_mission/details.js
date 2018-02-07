@@ -29,7 +29,7 @@ library.dialog('/', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Contact:
-			session.beginDialog('contact:/');
+			session.replaceDialog('contact:/');
 			break;
 		case Restart:
 			session.endDialog();

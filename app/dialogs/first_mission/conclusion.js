@@ -1,8 +1,9 @@
-/* global builder:true */
+/* global bot:true builder:true */
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor":
 ["session"] }] */
 
 const library = new builder.Library('firstMissionConclusion');
+bot.library(require('../second_mission/assign'));
 
 const answers = {
 	transparencyPortalExists: '',
@@ -25,17 +26,17 @@ const UserMission = require('../../server/schema/models').user_mission;
 const Yes = 'Sim';
 const No = 'Não';
 const MoreInformations = 'Detalhes da missão';
-const Confirm = 'Beleza!';
-const WelcomeBack = 'Voltar para o início';
+const nextMission = 'Ir para a próxima missão';
+const WelcomeBack = 'Beleza!';
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-// let missionUser;
+let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
 		[user] = [args.user];
-		// const missionUser = args.user_mission;
+		missionUser = args.user_mission;
 
 
 		session.sendTyping();
@@ -434,7 +435,6 @@ library.dialog('/userUpdate', [
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw e;
 			});
-		console.log(`as respostas: ${JSON.stringify(answers, undefined, 2)}`);
 		UserMission.update({
 			completed: true,
 			metadata: answers,
@@ -450,8 +450,8 @@ library.dialog('/userUpdate', [
 				console.log(`${result}Mission updated sucessfuly`);
 				builder.Prompts.choice(
 					session,
-					`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a segunda missão, okay? ${emoji.get('grinning')}`,
-					[Confirm, WelcomeBack],
+					`Se quiser, você já pode começar a segunda missão.Ou fazer uma pausa e continuar mais tarde ${emoji.get('grinning').repeat(2)}`,
+					[nextMission, WelcomeBack],
 					{
 						listStyle: builder.ListStyle.button,
 						retryPrompt: retryPrompts.choice,
@@ -468,11 +468,14 @@ library.dialog('/userUpdate', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Confirm:
-			session.send('No momento, pararemos por aqui. ' +
-					'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
-			session.endConversation();
+		case nextMission:
+			session.replaceDialog(
+				'secondMissionAssign:/assign',
+				{
+					user,
+					user_mission: missionUser,
+				} // eslint-disable-line comma-dangle
+			);
 			break;
 		default: // WelcomeBack
 			session.endDialog();

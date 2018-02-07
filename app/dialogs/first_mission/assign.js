@@ -29,23 +29,23 @@ library.dialog('/', [
 		[user] = [args.user];
 		console.log(`args.User : ${args.UserData}`);
 		missionUser = args.user_mission;
-		// if (session.message.address.channelId === 'facebook') {
-		// 	User.update({
-		// 		fb_id: session.message.sourceEvent.sender.id,
-		// 	}, {
-		// 		where: {
-		// 			id: User.id,
-		// 		},
-		// 		returning: true,
-		// 	})
-		// 		.then(() => {
-		// 			console.log('User updated sucessfuly');
-		// 		})
-		// 		.catch((err) => {
-		// 			console.log(err);
-		// 			throw err;
-		// 		});
-		// }
+		if (session.message.address.channelId === 'facebook') {
+			User.update({
+				fb_id: session.message.sourceEvent.sender.id,
+			}, {
+				where: {
+					id: User.id,
+				},
+				returning: true,
+			})
+				.then(() => {
+					console.log('User updated sucessfuly');
+				})
+				.catch((err) => {
+					console.log(err);
+					throw err;
+				});
+		}
 		UserMission.create({
 			user_id: user.id,
 			mission_id: 1,

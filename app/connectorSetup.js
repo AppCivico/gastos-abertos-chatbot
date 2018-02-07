@@ -1,15 +1,17 @@
 module.exports = function () {
 
-    var restify    = require('restify');
-    global.builder = require('botbuilder');
+/* global  bot:true builder:true */
+const restify = require('restify');
+global.builder = require('botbuilder');
 
-
-    //If testing via the emulator, no need for appId and appPassword. If publishing, enter appId and appPassword here 
-    var connector = new builder.ChatConnector({
-    appId: process.env.MICROSOFT_APP_ID ? process.env.MICROSOFT_APP_ID : '',
-    appPassword: process.env.MICROSOFT_APP_PASSWORD ? process.env.MICROSOFT_APP_PASSWORD : '',
-        gzipData: true
-    });
+module.exports = () => {
+	// If testing via the emulator, no need for appId and appPassword.
+	// If publishing, enter appId and appPassword here
+	const connector = new builder.ChatConnector({
+		appId: process.env.MICROSOFT_APP_ID ? process.env.MICROSOFT_APP_ID : '',
+		appPassword: process.env.MICROSOFT_APP_PASSWORD ? process.env.MICROSOFT_APP_PASSWORD : '',
+		gzipData: true,
+	});
 
     global.bot = new builder.UniversalBot(connector);
 

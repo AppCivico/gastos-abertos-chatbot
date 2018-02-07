@@ -1,4 +1,6 @@
-/* global builder:true */
+/* global bot: true builder:true */
+
+bot.library(require('../contact'));
 
 const library = new builder.Library('secondMissionConclusion');
 const emoji = require('node-emoji');
@@ -17,7 +19,7 @@ const UserMission = require('../../server/schema/models').user_mission;
 const HappyYes = 'Vamos lá!';
 const Yes = 'Sim';
 const No = 'Não';
-const Confirm = 'Beleza!';
+const Contact = 'Contato';
 const WelcomeBack = 'Voltar para o início';
 
 let user;
@@ -99,7 +101,6 @@ library.dialog('/secondMissionQuestions', [
 			default: // No
 				session.send(`Que pena! ${emoji.get('cold_sweat').repeat(2)} No entanto, recomendamos que você o protocolize mesmo assim ` +
 				'pois é muito importante que a sociedade civil demande dados.');
-				session.send('Agora vou te levar para o início.');
 				session.endDialog();
 				break;
 			}
@@ -195,9 +196,9 @@ library.dialog('/congratulations', [
 
 		builder.Prompts.choice(
 			session,
-			'Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a terceira missão, okay? ' +
-			`${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[Confirm, WelcomeBack],
+			'Você pode também nos contatar para tirar alguma dúvida ou relatar suas ações.' +
+			` ${emoji.get('slightly_smiling_face').repeat(2)}`,
+			[Contact, WelcomeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
@@ -207,12 +208,8 @@ library.dialog('/congratulations', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Confirm:
-		// TODO melhorar isso aqui e ali em cima com a terceira missão
-			session.send('No momento, pararemos por aqui. ' +
-		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
-			session.endConversation();
+		case Contact:
+			session.replaceDialog('contact:/');
 			break;
 		default: // WelcomeBack
 			session.endDialog();

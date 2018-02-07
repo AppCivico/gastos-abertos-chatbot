@@ -21,10 +21,7 @@ let user;
 let MissionUser;
 
 library.dialog('/', [
-	(session, args) => {
-		[user] = [args.user];
-		MissionUser = args.user_mission;
-
+	(session) => {
 		builder.Prompts.choice(
 			session,
 			'Agora, vamos ver nossa segunda missão?',
@@ -53,7 +50,9 @@ library.dialog('/', [
 });
 
 library.dialog('/assign', [
-	(session) => {
+	(session, args) => {
+		[user] = [args.user];
+		MissionUser = args.user_mission;
 		UserMission.create({
 			user_id: user.id,
 			mission_id: 2,
