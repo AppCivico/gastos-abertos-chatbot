@@ -43,8 +43,8 @@ const custom = require('./custom_intents');
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
-const { userID } = process.env;
-const { pageToken } = process.env;
+// const { userID } = process.env;
+// const { pageToken } = process.env;
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
