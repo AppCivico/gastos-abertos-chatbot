@@ -180,7 +180,6 @@ library.dialog('/conclusion', [
 	} // eslint-disable-line comma-dangle
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
 });
 
 library.dialog('/congratulations', [
