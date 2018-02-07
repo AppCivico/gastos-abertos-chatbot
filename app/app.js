@@ -47,34 +47,46 @@ const { userID } = process.env;
 const { pageToken } = process.env;
 
 bot.beginDialogAction('getStarted', '/getStarted');
-// bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
+bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
 
 bot.dialog('/', [
 	(session) => {
 		session.userData = {}; // for testing purposes
+		// TODO teste sem ID
+		session.userData.userid = session.message.sourceEvent.sender.id;
+		// session.userData.pageid = session.message.sourceEvent.recipient.id;
+		// session.userData.pageToken = pageToken;
+
+		// hardcoded ids for testing purposes
+		// session.userData.userid = userID;
+		session.userData.pageToken = 'EAAWZAUU5VsL4BAHhKpSZCWFHACyXuXGyihZCLuaFKZC7fvp43WxCafDXxAPW1Nhjh6LKyRnhMpEqnPbOS7Dn1VTLOll77hhmKMiXcXmvz3wEcaQtvgbTWq9KN96vBX9iAO1Er89UBZBIBwtFnKSACOdVTIRuAk7JljwEHCvNf5AZDZD';
 
 		// default value: undefined. Yes, it's only a string.
-		custom.userFacebook(userID, pageToken, (result => User.findOrCreate({
-			where: { fb_id: session.userData.userid },
-			defaults: {
-				name: `${result.first_name} ${result.last_name}`,
-				occupation: 'undefined',
-				email: 'undefined',
-				birth_date: 'undefined',
-				state: 'undefined',
-				city: 'undefined',
-				cellphone_number: 'undefined',
-				active: true,
-				approved: true,
-				fb_id: result.id,
-			},
-		})
-			.spread((user, created) => {
-				console.log(user.get({
-					plain: true,
-				}));
-				console.log(`Was created? => ${created}`);
-			})));
+		custom.userFacebook(
+			session.message.sourceEvent.sender.id, session.userData.pageToken,
+			(result => User.findOrCreate({
+				where: { fb_id: session.userData.userid },
+				defaults: {
+					name: `${result.first_name} ${result.last_name}`,
+					occupation: 'undefined',
+					email: 'undefined',
+					birth_date: 'undefined',
+					state: 'undefined',
+					city: 'undefined',
+					cellphone_number: 'undefined',
+					active: true,
+					approved: true,
+					fb_id: result.id,
+				},
+			})
+				.spread((user, created) => {
+					console.log(user.get({
+						plain: true,
+					}));
+					console.log(`Was created? => ${created}`);
+				})) // eslint-disable-line comma-dangle
+		);
+
 		session.replaceDialog('/getStarted');
 	},
 ]);
@@ -82,16 +94,11 @@ bot.dialog('/', [
 bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
+		console.log('sdfsdfdsf');
+		console.log(`session.message.sourceEvent.sender.id: ${Object.entries(session.message.sourceEvent.sender.id)}`);
 		if (!session.userData.firstRun) { // first run
 			session.userData.firstRun = true;
-
-			// TODO teste sem ID
-			// session.userData.userid = session.message.sourceEvent.sender.id;
-			// session.userData.pageid = session.message.sourceEvent.recipient.id;
-
-			// hardcoded ids for testing purposes
-			session.userData.userid = userID;
-			session.userData.pageid = pageToken;
+			session.sendTyping();
 
 
 			session.send({
@@ -108,6 +115,7 @@ bot.dialog('/getStarted', [
 			session.replaceDialog('/promptButtons');
 		} else { // welcome back
 			User.findOne({
+				attributes: ['name'],
 				where: { fb_id: session.userData.userid },
 			}).then((user) => {
 				session.send(`Olá, ${user.get('name').substr(0, user.get('name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
