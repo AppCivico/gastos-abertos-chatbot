@@ -13,7 +13,6 @@ bot.library(require('./dialogs/game-sign-up'));
 bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
-bot.library(require('./dialogs/game2'));
 
 const User = require('./server/schema/models').user;
 
@@ -43,7 +42,6 @@ const custom = require('./custom_intents');
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
-// const { userID } = process.env;
 // const { pageToken } = process.env;
 
 bot.beginDialogAction('getStarted', '/getStarted');
@@ -53,17 +51,17 @@ bot.dialog('/', [
 	(session) => {
 		session.userData = {}; // for testing purposes
 		// TODO teste sem ID
-		session.userData.userid = session.message.sourceEvent.sender.id;
+		// session.userData.userid = session.message.sourceEvent.sender.id;
 		// session.userData.pageid = session.message.sourceEvent.recipient.id;
 		// session.userData.pageToken = pageToken;
 
 		// hardcoded ids for testing purposes
-		// session.userData.userid = userID;
+		session.userData.userid = '100004770631443';
 		session.userData.pageToken = 'EAAWZAUU5VsL4BAHhKpSZCWFHACyXuXGyihZCLuaFKZC7fvp43WxCafDXxAPW1Nhjh6LKyRnhMpEqnPbOS7Dn1VTLOll77hhmKMiXcXmvz3wEcaQtvgbTWq9KN96vBX9iAO1Er89UBZBIBwtFnKSACOdVTIRuAk7JljwEHCvNf5AZDZD';
 
 		// default value: undefined. Yes, it's only a string.
 		custom.userFacebook(
-			session.message.sourceEvent.sender.id, session.userData.pageToken,
+			session.userData.userid, session.userData.pageToken,
 			(result => User.findOrCreate({
 				where: { fb_id: session.userData.userid },
 				defaults: {
@@ -94,12 +92,9 @@ bot.dialog('/', [
 bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
-		console.log('sdfsdfdsf');
-		console.log(`session.message.sourceEvent.sender.id: ${Object.entries(session.message.sourceEvent.sender.id)}`);
 		if (!session.userData.firstRun) { // first run
 			session.userData.firstRun = true;
 			session.sendTyping();
-
 
 			session.send({
 				attachments: [
@@ -132,7 +127,7 @@ bot.dialog('/promptButtons', [
 	(session) => {
 		builder.Prompts.choice(
 			session,
-			`Em que assunto eu posso te ajudar? ${emoji.get('hugging_face').repeat(2)}`,
+			`Em que assunto eu posso te ajudar? ${emoji.get('slightly_smiling_face').repeat(2)}`,
 			[GastosAbertosInformation, GameSignUp, Missions, InformationAcessRequest],
 			{
 				listStyle: builder.ListStyle.button,
@@ -153,7 +148,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('gameSignUp:/');
 				break;
 			case Missions:
-				session.beginDialog('game2:/', { User });
+				session.beginDialog('game:/', { user: User });
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
