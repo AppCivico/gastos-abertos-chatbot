@@ -51,12 +51,12 @@ bot.dialog('/', [
 	(session) => {
 		session.userData = {}; // for testing purposes
 		// TODO teste sem ID
-		// session.userData.userid = session.message.sourceEvent.sender.id;
+		session.userData.userid = session.message.sourceEvent.sender.id;
 		// session.userData.pageid = session.message.sourceEvent.recipient.id;
 		// session.userData.pageToken = pageToken;
 
 		// hardcoded ids for testing purposes
-		session.userData.userid = '100004770631443';
+		// session.userData.userid = '100004770631443';
 		session.userData.pageToken = 'EAAWZAUU5VsL4BAHhKpSZCWFHACyXuXGyihZCLuaFKZC7fvp43WxCafDXxAPW1Nhjh6LKyRnhMpEqnPbOS7Dn1VTLOll77hhmKMiXcXmvz3wEcaQtvgbTWq9KN96vBX9iAO1Er89UBZBIBwtFnKSACOdVTIRuAk7JljwEHCvNf5AZDZD';
 
 		// default value: undefined. Yes, it's only a string.
