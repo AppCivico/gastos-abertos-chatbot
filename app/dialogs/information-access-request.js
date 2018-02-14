@@ -29,7 +29,6 @@ let questionNumber; // shows the question number in each question(disabled no-pl
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let missionUser;
-let userValues;
 
 // 0 means the item isn't included in the request
 const answers = {
@@ -159,7 +158,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 	},
-	/*
+
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
@@ -434,8 +433,8 @@ library.dialog('/looseRequest', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-*/
-	(session, args, next) => {
+
+	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
 			break;
@@ -527,10 +526,10 @@ library.dialog('/generateRequest', [
 
 		function callback(error, response, body) {
 			// TODO teste
-			if (error) {
-				const obj = 'testeteste';
-				// if (!error || response.statusCode === 200) {
-				// 	const obj = JSON.parse(body);
+			// if (error) {
+			// const obj = 'testeteste';
+			if (!error || response.statusCode === 200) {
+				const obj = JSON.parse(body);
 
 				console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
