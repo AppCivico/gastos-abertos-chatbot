@@ -18,8 +18,11 @@ const User = require('./server/schema/models').user;
 const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
 const InformationAcessRequest = 'Gerar um pedido';
+const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos informações ou notícias sobre dados abertos e transparência orçamentária?';
+const Yes = 'Sim!';
+const No = 'Não';
+
 let menuMessage;
-let savedAddress;
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -58,8 +61,7 @@ bot.dialog('/', [
 		// hardcoded ids for testing purposes
 		session.userData.userid = '100004770631443';
 		session.userData.pageToken = 'EAAWZAUU5VsL4BAHhKpSZCWFHACyXuXGyihZCLuaFKZC7fvp43WxCafDXxAPW1Nhjh6LKyRnhMpEqnPbOS7Dn1VTLOll77hhmKMiXcXmvz3wEcaQtvgbTWq9KN96vBX9iAO1Er89UBZBIBwtFnKSACOdVTIRuAk7JljwEHCvNf5AZDZD';
-		savedAddress = session.message.address;
-		console.log(`sdfnsdjkfasdfasdfasfasldkfmasldkfmasldfmasldfk:${typeof (savedAddress)}`);
+
 		// default value: undefined. Yes, it's only a string.
 		custom.userFacebook(
 			session.userData.userid, session.userData.pageToken,
@@ -77,7 +79,6 @@ bot.dialog('/', [
 					approved: true,
 					fb_id: result.id,
 					fb_name: `${result.first_name} ${result.last_name}`,
-					address: savedAddress,
 				},
 			})
 				.spread((user, created) => {
@@ -120,13 +121,8 @@ bot.dialog('/getStarted', [
 			session.send(`\n\nPara facilitar, há um menu com algumas opções sobre como podemos seguir essa parceria. ${emoji.get('smile')}`);
 			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
 
-			// TODO add perguntar se tudo bem enviar mensagens diretas
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
-			// no => tranquilo
-			// yes => Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre
-			// dados abertos e transparência orçamentária na sua cidade ou em seu circulo de amizades!
-
-			session.replaceDialog('/promptButtons');
+			session.replaceDialog('/askPermission');
 		} else { // welcome back
 			menuMessage = 'Como posso te ajudar?';
 			User.findOne({
@@ -189,3 +185,48 @@ bot.dialog('/promptButtons', [
 // 		}));
 // 	},
 // });
+
+bot.dialog('/askPermission', [
+	(session) => {
+		builder.Prompts.choice(
+			session, permissionQuestion,
+			[Yes, No],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choiceIntent,
+				promptAfterAction: false,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case Yes:
+				session.send('Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre' +
+				'dados abertos e transparência orçamentária na sua cidade ou em seu circulo de amizades!');
+				User.update({
+					address: session.message.address,
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+					},
+					returning: true,
+				})
+					.then(() => {
+						console.log('User name updated sucessfuly');
+					})
+					.catch((err) => {
+						console.log(err);
+						throw err;
+					});
+				break;
+			default: // No
+				session.send('Tranquilo!');
+				break;
+			}
+			session.replaceDialog('/promptButtons');
+		}
+	},
+]);
