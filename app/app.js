@@ -17,10 +17,10 @@ bot.library(require('./dialogs/game'));
 const User = require('./server/schema/models').user;
 
 const GameSignUp = 'Inscrever-se';
-const GastosAbertosInformation = 'Sobre o projeto';
-const Missions = 'Processo de missões';
-const InformationAcessRequest = 'Gerar pedido';
-let userValues;
+const GastosAbertosInformation = 'Quero aprender mais';
+const Missions = 'Minha cidade?';
+const InformationAcessRequest = 'Gerar um pedido';
+let menuMessage;
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -95,6 +95,7 @@ bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
 		if (!session.userData.firstRun) { // first run
+			menuMessage = 'Vamos lá, como posso te ajudar?';
 			session.userData.firstRun = true;
 			session.sendTyping();
 
@@ -106,11 +107,17 @@ bot.dialog('/getStarted', [
 					},
 				],
 			});
-			session.send('Olá, eu sou o Guaxi, o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
-			session.send(`\n\nVocê pode utilizar o menu abaixo para interagir comigo. ${emoji.get('hugging_face').repeat(2)}` +
-			`\n\nPara retornar a este menu durante algum processo, basta digitar 'cancelar'. ${emoji.get('slightly_smiling_face').repeat(2)}`);
+			session.send('Olá, eu sou o Guaxi, o assistente virtual do Gastos Abertos e seu parceiro sobre dados abertos e transparência em orçamento público.');
+			session.send(`\n\nPara facilitar, há um menu com algumas opções sobre como podemos seguir essa parceria. ${emoji.get('smile')}`);
+			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
+
+			// add perguntar se tudo bem enviar mensagens diretas
+			// no => tranquilo
+			// yes => Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre dados abertos e transparência orçamentária na sua cidade ou em seu circulo de amizades!
+
 			session.replaceDialog('/promptButtons');
 		} else { // welcome back
+			menuMessage = 'Como posso te ajudar?';
 			User.findOne({
 				attributes: ['fb_name'],
 				where: { fb_id: session.userData.userid },
@@ -128,8 +135,7 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session) => {
 		builder.Prompts.choice(
-			session,
-			`Em que assunto eu posso te ajudar? ${emoji.get('slightly_smiling_face').repeat(2)}`,
+			session, menuMessage,
 			[GastosAbertosInformation, GameSignUp, Missions, InformationAcessRequest],
 			{
 				listStyle: builder.ListStyle.button,

@@ -71,7 +71,7 @@ library.dialog('/promptButtons', [
 		session.replaceDialog('/promptButtons');
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},
@@ -157,7 +157,7 @@ library.dialog('/askEmail', [
 		}
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},
@@ -190,7 +190,7 @@ library.dialog('/changeEmail', [
 		}
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},

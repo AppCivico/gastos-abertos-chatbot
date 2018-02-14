@@ -53,7 +53,7 @@ library.dialog('/', [ // former gameSignUpConfirmation
 		}
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},
@@ -242,7 +242,7 @@ library.dialog('/beginSignUp', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 
 });
 
