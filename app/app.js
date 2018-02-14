@@ -19,6 +19,7 @@ const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
 const InformationAcessRequest = 'Gerar um pedido';
 let menuMessage;
+let savedAddress;
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -57,7 +58,8 @@ bot.dialog('/', [
 		// hardcoded ids for testing purposes
 		session.userData.userid = '100004770631443';
 		session.userData.pageToken = 'EAAWZAUU5VsL4BAHhKpSZCWFHACyXuXGyihZCLuaFKZC7fvp43WxCafDXxAPW1Nhjh6LKyRnhMpEqnPbOS7Dn1VTLOll77hhmKMiXcXmvz3wEcaQtvgbTWq9KN96vBX9iAO1Er89UBZBIBwtFnKSACOdVTIRuAk7JljwEHCvNf5AZDZD';
-
+		savedAddress = session.message.address;
+		console.log(`sdfnsdjkfasdfasdfasfasldkfmasldkfmasldfmasldfk:${typeof (savedAddress)}`);
 		// default value: undefined. Yes, it's only a string.
 		custom.userFacebook(
 			session.userData.userid, session.userData.pageToken,
@@ -75,6 +77,7 @@ bot.dialog('/', [
 					approved: true,
 					fb_id: result.id,
 					fb_name: `${result.first_name} ${result.last_name}`,
+					address: savedAddress,
 				},
 			})
 				.spread((user, created) => {
@@ -84,14 +87,22 @@ bot.dialog('/', [
 					console.log(`Was created? => ${created}`);
 				})) // eslint-disable-line comma-dangle
 		);
-
 		session.replaceDialog('/getStarted');
 	},
 ]);
 
+function sendProactiveMessage(address) {
+	const msg = new builder.Message().address(address);
+	msg.text('Hello, this is a notification');
+	msg.textLocale('pt-BR');
+	bot.send(msg);
+}
+
 bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
+
+
 		if (!session.userData.firstRun) { // first run
 			menuMessage = 'Vamos lá, como posso te ajudar?';
 			session.userData.firstRun = true;
@@ -109,9 +120,11 @@ bot.dialog('/getStarted', [
 			session.send(`\n\nPara facilitar, há um menu com algumas opções sobre como podemos seguir essa parceria. ${emoji.get('smile')}`);
 			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
 
-			// add perguntar se tudo bem enviar mensagens diretas
+			// TODO add perguntar se tudo bem enviar mensagens diretas
+			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
 			// no => tranquilo
-			// yes => Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre dados abertos e transparência orçamentária na sua cidade ou em seu circulo de amizades!
+			// yes => Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre
+			// dados abertos e transparência orçamentária na sua cidade ou em seu circulo de amizades!
 
 			session.replaceDialog('/promptButtons');
 		} else { // welcome back

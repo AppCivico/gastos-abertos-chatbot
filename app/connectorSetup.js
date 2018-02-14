@@ -19,5 +19,5 @@ module.exports = () => {
 		console.log('%s listening to %s', server.name, server.url);
 	});
 	server.post('/api/messages', connector.listen());
-	bot.use(builder.Middleware.dialogVersion({ version: 0.2, resetCommand: /^reset/i }));
+	bot.use(builder.Middleware.dialogVersion({ version: 0.3, resetCommand: /^reset/i }));
 };
