@@ -9,14 +9,12 @@ const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 
 bot.library(require('./validators'));
-bot.library(require('./dialogs/game-sign-up'));
 bot.library(require('./dialogs/contact'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 
 const User = require('./server/schema/models').user;
 
-const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
 const InformationAcessRequest = 'Gerar um pedido';
@@ -136,7 +134,7 @@ bot.dialog('/promptButtons', [
 	(session) => {
 		builder.Prompts.choice(
 			session, menuMessage,
-			[GastosAbertosInformation, GameSignUp, Missions, InformationAcessRequest],
+			[GastosAbertosInformation, Missions, InformationAcessRequest],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -151,9 +149,6 @@ bot.dialog('/promptButtons', [
 			switch (result.response.entity) {
 			case GastosAbertosInformation:
 				session.beginDialog('gastosAbertosInformation:/', {	User });
-				break;
-			case GameSignUp:
-				session.beginDialog('gameSignUp:/');
 				break;
 			case Missions:
 				session.beginDialog('game:/', { user: User });

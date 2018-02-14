@@ -1,5 +1,5 @@
 // A class for attaching custom intents to dialogs
-const request2 = require('request');
+const request = require('request');
 
 const allIntents = (message, intents, callback) => {
 	intents.recognize(message, (iDontGetIt, request) => {
@@ -27,7 +27,7 @@ module.exports.allIntents = allIntents;
 
 // request
 const userFacebook = (userID, pageToken, callback) => {
-	request2(`https://graph.facebook.com/v2.12/${userID}?fields=first_name,last_name,email,birthday&access_token=${pageToken}`, (error, response, body) => {
+	request(`https://graph.facebook.com/v2.12/${userID}?fields=first_name,last_name,email,birthday&access_token=${pageToken}`, (error, response, body) => {
 		console.log('error:', error); // Print the error if one occurred
 		console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
 		console.log('body:', body); // Print the HTML for the Google homepage.

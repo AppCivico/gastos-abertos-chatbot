@@ -1,6 +1,5 @@
 /* global  bot:true builder:true */
 
-bot.library(require('./game-sign-up'));
 bot.library(require('./contact'));
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
