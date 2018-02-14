@@ -20,6 +20,7 @@ const GameSignUp = 'Inscrever-se';
 const GastosAbertosInformation = 'Sobre o projeto';
 const Missions = 'Processo de missões';
 const InformationAcessRequest = 'Gerar pedido';
+let userValues;
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -65,7 +66,7 @@ bot.dialog('/', [
 			(result => User.findOrCreate({
 				where: { fb_id: session.userData.userid },
 				defaults: {
-					name: `${result.first_name} ${result.last_name}`,
+					name: 'undefined',
 					occupation: 'undefined',
 					email: 'undefined',
 					birth_date: 'undefined',
@@ -75,6 +76,7 @@ bot.dialog('/', [
 					active: true,
 					approved: true,
 					fb_id: result.id,
+					fb_name: `${result.first_name} ${result.last_name}`,
 				},
 			})
 				.spread((user, created) => {
@@ -110,10 +112,10 @@ bot.dialog('/getStarted', [
 			session.replaceDialog('/promptButtons');
 		} else { // welcome back
 			User.findOne({
-				attributes: ['name'],
+				attributes: ['fb_name'],
 				where: { fb_id: session.userData.userid },
 			}).then((user) => {
-				session.send(`Olá, ${user.get('name').substr(0, user.get('name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+				session.send(`Olá, ${user.get('fb_name').substr(0, user.get('fb_name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
 				session.replaceDialog('/promptButtons');
 			}).catch(() => {
 				session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);

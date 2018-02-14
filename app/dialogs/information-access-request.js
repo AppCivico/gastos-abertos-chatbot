@@ -10,7 +10,7 @@ const Base64File = require('js-base64-file');
 const emoji = require('node-emoji');
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
-// const User = require('../server/schema/models').user;
+const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
 const infoRequest = require('../server/schema/models').user_information_access_request;
 
@@ -29,6 +29,7 @@ let questionNumber; // shows the question number in each question(disabled no-pl
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let missionUser;
+let userValues;
 
 // 0 means the item isn't included in the request
 const answers = {
@@ -78,9 +79,8 @@ const headers = {
 library.dialog('/', [
 	(session, args) => {
 		if (args && args.user && args.user_mission) {
-			user = args.user; // eslint-disable-line prefer-destructuring
+			[user] = [args.user];
 			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
-			answers.requesterName = user.name;
 			session.send('Esse é um processo bem extenso e tem bastante conteúdo.' +
 				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
@@ -159,7 +159,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 	},
-
+	/*
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
@@ -434,7 +434,7 @@ library.dialog('/looseRequest', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-
+*/
 	(session, args, next) => {
 		switch (args.response.entity) {
 		case Yes:
@@ -446,16 +446,25 @@ library.dialog('/looseRequest', [
 			break;
 		}
 		questionNumber = 1;
-		if (!user) {
-			builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
-		}
-		next();
+		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
 
 	(session, args) => {
-		if (!user) {
-			answers.requesterName = args.response;
-		}
+		User.update({
+			name: args.response,
+		}, {
+			where: {
+				fb_id: session.userData.userid,
+			},
+			returning: true,
+		})
+			.then(() => {
+				console.log('User name updated sucessfuly');
+			})
+			.catch((err) => {
+				console.log(err);
+				throw err;
+			});
 
 		const html = `<p style="font-size:7pt">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011, e na Lei Complementar 131,` +
 			' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
@@ -518,10 +527,10 @@ library.dialog('/generateRequest', [
 
 		function callback(error, response, body) {
 			// TODO teste
-			// if (error) {
-			// 	const obj = 'testeteste';
-			if (!error || response.statusCode === 200) {
-				const obj = JSON.parse(body);
+			if (error) {
+				const obj = 'testeteste';
+				// if (!error || response.statusCode === 200) {
+				// 	const obj = JSON.parse(body);
 
 				console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
