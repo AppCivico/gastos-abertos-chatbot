@@ -46,7 +46,7 @@ const custom = require('./custom_intents');
 // const { pageToken } = process.env;
 
 bot.beginDialogAction('getStarted', '/getStarted');
-bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
+bot.beginDialogAction('reset', '/reset');
 
 bot.dialog('/', [
 	(session) => {
