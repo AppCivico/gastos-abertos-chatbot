@@ -92,9 +92,9 @@ bot.dialog('/', [
 	},
 ]);
 
-function sendProactiveMessage(address) {
+function sendProactiveMessage(address, customMessage) {
 	const msg = new builder.Message().address(address);
-	msg.text('Hello, this is a notification');
+	msg.text(customMessage);
 	msg.textLocale('pt-BR');
 	bot.send(msg);
 }
@@ -216,6 +216,7 @@ bot.dialog('/askPermission', [
 				})
 					.then(() => {
 						console.log('User name updated sucessfuly');
+						sendProactiveMessage(session.message.address, 'Mensagem proativa');
 					})
 					.catch((err) => {
 						console.log(err);
