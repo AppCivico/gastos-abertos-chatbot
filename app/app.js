@@ -8,10 +8,11 @@ require('./connectorSetup.js')();
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 
-bot.library(require('./validators'));
-bot.library(require('./dialogs/contact'));
+bot.library(require('./dialogs/send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
+bot.library(require('./validators'));
+
 
 const User = require('./server/schema/models').user;
 
@@ -19,10 +20,12 @@ const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
 const InformationAcessRequest = 'Gerar um pedido';
 const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos informações ou notícias sobre dados abertos e transparência orçamentária?';
+const sendMessage = 'Mandar Mensagem';
 const Yes = 'Sim!';
 const No = 'Não';
 
 let menuMessage;
+let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -53,6 +56,7 @@ bot.beginDialogAction('reset', '/reset');
 bot.dialog('/', [
 	(session) => {
 		session.userData = {}; // for testing purposes
+		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		// TODO teste sem ID
 		// session.userData.userid = session.message.sourceEvent.sender.id;
 		// session.userData.pageid = session.message.sourceEvent.recipient.id;
@@ -60,7 +64,7 @@ bot.dialog('/', [
 
 		// hardcoded ids for testing purposes
 		session.userData.userid = '100004770631443';
-		session.userData.pageToken = 'EAAWZAUU5VsL4BAHhKpSZCWFHACyXuXGyihZCLuaFKZC7fvp43WxCafDXxAPW1Nhjh6LKyRnhMpEqnPbOS7Dn1VTLOll77hhmKMiXcXmvz3wEcaQtvgbTWq9KN96vBX9iAO1Er89UBZBIBwtFnKSACOdVTIRuAk7JljwEHCvNf5AZDZD';
+		session.userData.pageToken = process.env.pageToken;
 
 		// default value: undefined. Yes, it's only a string.
 		custom.userFacebook(
@@ -85,19 +89,15 @@ bot.dialog('/', [
 					console.log(user.get({
 						plain: true,
 					}));
+					if (user.get('fb_id') === '1691041710957813') {
+						menuOptions.push(sendMessage);
+					}
 					console.log(`Was created? => ${created}`);
 				})) // eslint-disable-line comma-dangle
 		);
 		session.replaceDialog('/getStarted');
 	},
 ]);
-
-function sendProactiveMessage(address, customMessage) {
-	const msg = new builder.Message().address(address);
-	msg.text(customMessage);
-	msg.textLocale('pt-BR');
-	bot.send(msg);
-}
 
 bot.dialog('/getStarted', [
 	(session) => {
@@ -142,8 +142,7 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session) => {
 		builder.Prompts.choice(
-			session, menuMessage,
-			[GastosAbertosInformation, Missions, InformationAcessRequest],
+			session, menuMessage,	menuOptions,
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -161,6 +160,9 @@ bot.dialog('/promptButtons', [
 				break;
 			case Missions:
 				session.beginDialog('game:/', { user: User });
+				break;
+			case sendMessage:
+				session.replaceDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -204,7 +206,7 @@ bot.dialog('/askPermission', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case Yes:
-				session.send('Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre' +
+				session.send('Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre ' +
 				'dados abertos e transparência orçamentária na sua cidade ou em seu circulo de amizades!');
 				User.update({
 					address: session.message.address,
@@ -215,8 +217,7 @@ bot.dialog('/askPermission', [
 					returning: true,
 				})
 					.then(() => {
-						console.log('User name updated sucessfuly');
-						sendProactiveMessage(session.message.address, 'Mensagem proativa');
+						console.log('User address updated sucessfuly');
 					})
 					.catch((err) => {
 						console.log(err);
