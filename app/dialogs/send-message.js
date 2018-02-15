@@ -212,8 +212,8 @@ library.dialog('/sendingImage', [ // sends image and text message
 			console.log(`Erro ao enviar mensagem: ${err}`);
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
+			next();
 		});
-		next();
 	},
 	(session) => {
 		session.replaceDialog('/');
