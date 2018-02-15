@@ -226,6 +226,21 @@ bot.dialog('/askPermission', [
 				break;
 			default: // No
 				session.send('Tranquilo!');
+				User.update({
+					address: null,
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+					},
+					returning: true,
+				})
+					.then(() => {
+						console.log('User address updated sucessfuly');
+					})
+					.catch((err) => {
+						console.log(err);
+						throw err;
+					});
 				break;
 			}
 			session.replaceDialog('/promptButtons');

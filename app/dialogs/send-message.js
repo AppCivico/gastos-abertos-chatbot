@@ -15,7 +15,6 @@ let messageText; // custom message text
 let imageUrl; // desired image url
 let msgCount; // counts the number of messages sent
 
-
 function sendProactiveMessage(address, customMessage) {
 	const msg = new builder.Message().address(address);
 	msg.textLocale('pt-BR');
