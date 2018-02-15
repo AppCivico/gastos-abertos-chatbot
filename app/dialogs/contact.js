@@ -98,7 +98,7 @@ library.dialog('/', [
 		);
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},

@@ -1,6 +1,5 @@
 /* global  bot:true builder:true */
 
-bot.library(require('./game-sign-up'));
 bot.library(require('./contact'));
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
@@ -8,19 +7,17 @@ const emoji = require('node-emoji');
 
 const library = new builder.Library('gastosAbertosInformation');
 
-const gastosAbertosCicles = 'O que é um ciclo';
-const gastosAbertosCicleResults = 'Resultados';
-const aboutUs = 'Quem Somos';
+const accessLaw = 'Dados abertos?';
 const contact = 'Entrar em contato';
-const signEmail = 'Cadastrar e-mail';
 const reset = 'Voltar ao início';
-const changeEmail = 'Trocar e-mail';
-const keepEmail = 'Manter o mesmo';
-let User;
+// const signEmail = 'Cadastrar e-mail';
+// const changeEmail = 'Trocar e-mail';
+// const keepEmail = 'Manter o mesmo';
+// let User;
 
 library.dialog('/', [
-	(session, args) => {
-		[User] = [args.User];
+	(session) => {
+		// [User] = [args.User];
 		session.sendTyping();
 		session.send('A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
 		'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.');
@@ -32,9 +29,8 @@ library.dialog('/promptButtons', [
 	(session) => {
 		builder.Prompts.choice(
 			session,
-			`Sobre o que deseja saber mais? ${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[aboutUs, gastosAbertosCicleResults, signEmail,
-				gastosAbertosCicles, contact, reset],
+			`Como posso te ajudar? ${emoji.get('slightly_smiling_face').repeat(2)}`,
+			[accessLaw, contact, reset],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.about,
@@ -46,20 +42,11 @@ library.dialog('/promptButtons', [
 		session.sendTyping();
 		if (result.response) {
 			switch (result.response.entity) {
-			case gastosAbertosCicles:
-				session.replaceDialog('/gastosAbertosCicles');
-				break;
-			case gastosAbertosCicleResults:
-				session.replaceDialog('/gastosAbertosCicleResults');
-				break;
-			case aboutUs:
-				session.beginDialog('/aboutUs');
+			case accessLaw:
+				session.beginDialog('/accessLaw');
 				break;
 			case contact:
 				session.beginDialog('contact:/');
-				break;
-			case signEmail:
-				session.replaceDialog('/signEmail');
 				break;
 			default: // reset
 				session.endDialog();
@@ -71,44 +58,28 @@ library.dialog('/promptButtons', [
 		session.replaceDialog('/promptButtons');
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},
 });
 
 
-library.dialog('/gastosAbertosCicles', [
+library.dialog('/accessLaw', [
 	(session) => {
-		session.send('Um ciclo do Gastos Abertos é um período onde pessoas desenvolvem missões (avaliação de portal de transparência da cidade, ' +
-				'formulação de um pedido de acesso a informação e avaliação das respostas obtidas pelas prefeituras) para tornarem-se lideranças regionais.' +
-				'Essas missões impactarão a transparência no município que o líder representa.' +
-				'\n\nParticipe!');
+		session.send('A LAI (Lei de Acesso à Informação, lei N.12.527) entrou em vigor no dia 16 de maio de 2012 e ' +
+		'criou mecanismos que possibilitam, a qualquer pessoa, física ou jurídica, sem necessidade de apresentar motivo, ' +
+		'o recebimento de informações públicas dos órgãos e entidades.');
+		session.send('A Lei vale para os três Poderes da União, Estados, Distrito Federal e Municípios, inclusive aos Tribunais de Conta e Ministério Público.');
+		session.send('Para conheçer mais sobre a LAI, consulte o Guia Prático da Lei de Acesso à Informação disponibilizado pelo ARTIGO 19: ' +
+		'http://artigo19.org/wp-content/blogs.dir/24/files/2016/10/Guia-Pr%C3%A1tico-da-Lei-de-Acesso-%C3%A0-Informa%C3%A7%C3%A3o.pdf');
 		session.replaceDialog('/promptButtons');
 	},
 ]);
-
-library.dialog('/gastosAbertosCicleResults', [
-	(session) => {
-		session.send('O Gastos Abertos (2016-2017), teve 356 lideranças inscritas, 216 municípios atendidos, 165 avaliações de portais ' +
-		'de transparência e 53 pedidos realizados. ' +
-		'\n\nContamos com você para atingir novas metas!');
-		session.replaceDialog('/promptButtons');
-	},
-]);
-
-library.dialog('/aboutUs', [
-	(session) => {
-		session.send('O Gastos Abertos tem como objetivo conscientizar e capacitar o cidadão em relação á Lei de Acesso á Informação.' +
-		'\n\nNosso site oficial: https://gastosabertos.org/' +
-		'\n\nNosso grupo de what\'sapp: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
-		session.replaceDialog('/promptButtons');
-	},
-]);
-
+/*
 library.dialog('/signEmail', [
 	(session) => {
-		session.send('Aqui você poderá vincular o seu e-mail ao projeto para ficar por dentro de todas as novidades! ' +
+		session.send('Aqui você poderá vincular o seu e-mail ao projeto! ' +
 		`${emoji.get('slightly_smiling_face').repeat(2)}`);
 		User.findOne({
 			where: { fb_id: session.userData.userid },
@@ -121,7 +92,7 @@ library.dialog('/signEmail', [
 			}
 		}).catch((err) => {
 			console.log(err);
-			session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)} Tive um problema técnico, tente novamente mais tarde.`);
+			session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)}.`);
 			session.replaceDialog('/promptButtons');
 		});
 	},
@@ -137,8 +108,8 @@ library.dialog('/askEmail', [
 	},
 	(session, args) => {
 		if (args.resumed) {
-			session.send(`Você tentou inserir um e-mail inválido muitas vezes. ${emoji.get('dizzy_face').repeat(2)}` +
-			'Tente novamente mais tarde.');
+			session.send(`Você tentou inserir um e-mail inválido muitas vezes.` +
+			' ${emoji.get('dizzy_face').repeat(2)} Tente novamente mais tarde.');
 		} else if (args.response === true) {
 			session.replaceDialog('/promptButtons');
 		} else {
@@ -152,12 +123,12 @@ library.dialog('/askEmail', [
 				session.replaceDialog('/promptButtons');
 			}).catch((err) => {
 				console.log(err);
-				session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)} Tive um problema técnico, tente novamente mais tarde.`);
+				session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)}`);
 			});
 		}
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},
@@ -190,10 +161,11 @@ library.dialog('/changeEmail', [
 		}
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},
 });
+*/
 
 module.exports = library;

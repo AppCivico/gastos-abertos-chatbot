@@ -51,8 +51,7 @@ library.dialog('/', [
 		});
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/currentMission', [
@@ -132,8 +131,7 @@ library.dialog('/currentMission', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/sendToInformationAccessRequest', [
@@ -167,7 +165,6 @@ library.dialog('/sendToInformationAccessRequest', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 module.exports = library;

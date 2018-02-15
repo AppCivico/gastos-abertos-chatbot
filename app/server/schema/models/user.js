@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
 			active: DataTypes.BOOLEAN,
 			fb_id: DataTypes.STRING,
 			fb_name: DataTypes.STRING,
+			address: DataTypes.JSON,
 		},
 		{
 			classMethods: {
