@@ -20,7 +20,7 @@ const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
 const InformationAcessRequest = 'Gerar um pedido';
 const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos informações ou notícias sobre dados abertos e transparência orçamentária?';
-const sendMessage = 'Mandar Mensagem';
+const sendMessage = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
 
@@ -89,7 +89,7 @@ bot.dialog('/', [
 					console.log(user.get({
 						plain: true,
 					}));
-					if (user.get('fb_id') === '1691041710957813') {
+					if (user.get('fb_id') === '100004770631443') { // shows hidden admin menu
 						menuOptions.push(sendMessage);
 					}
 					console.log(`Was created? => ${created}`);
@@ -162,7 +162,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/', { user: User });
 				break;
 			case sendMessage:
-				session.replaceDialog('sendMessage:/');
+				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
