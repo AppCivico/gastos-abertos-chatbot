@@ -63,7 +63,7 @@ bot.dialog('/', [
 		// session.userData.pageToken = pageToken;
 
 		// hardcoded ids for testing purposes
-		session.userData.userid = '100004770631443';
+		// session.userData.userid = '100004770631443';
 		session.userData.pageToken = pageToken;
 
 		// default value: 'undefined'. Yes, it's only a string.
