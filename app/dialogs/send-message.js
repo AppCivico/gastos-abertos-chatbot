@@ -132,7 +132,7 @@ library.dialog('/sendingMessage', [ // sends text message
 			session.send('Ocorreu um erro ao enviar mensagem');
 			console.log(`Erro ao enviar mensagem: ${err}`);
 		}).finally(() => {
-			session.send(`${msgCount} mensagens enviadas com sucesso!`);
+			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 			next();
 		});
 	},
@@ -150,7 +150,9 @@ library.dialog('/askImage', [ // asks user for text and image URL
 		messageText = args.response;
 		builder.Prompts.text(session, 'Digite a URL da imagem desejada.' +
 		'\n\nLembre-se: ela deve estar online e acessível a todos. Cuidado com o tamanho.' +
-		'\n\nExemplo: https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png');
+		'\n\nExemplo: https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png' +
+		'\n\nExemplo: https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif' +
+		'\n\nExemplo: /home/jordan-eokoe/Downloads/Screenshot at 2018-01-03 11-58-02.png');
 	},
 
 	(session, args) => {
@@ -211,7 +213,7 @@ library.dialog('/sendingImage', [ // sends image and text message
 			session.send('Ocorreu um erro ao enviar mensagem');
 			console.log(`Erro ao enviar mensagem: ${err}`);
 		}).finally(() => {
-			session.send(`${msgCount} mensagens enviadas com sucesso!`);
+			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 			next();
 		});
 	},
