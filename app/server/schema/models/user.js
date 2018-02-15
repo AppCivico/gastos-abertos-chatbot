@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
 			fb_id: DataTypes.STRING,
 			fb_name: DataTypes.STRING,
 			address: DataTypes.JSON,
+			admin: DataTypes.BOOLEAN,
 		},
 		{
 			classMethods: {

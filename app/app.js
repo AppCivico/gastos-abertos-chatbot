@@ -20,7 +20,7 @@ const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
 const InformationAcessRequest = 'Gerar um pedido';
 const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos informações ou notícias sobre dados abertos e transparência orçamentária?';
-const sendMessage = 'Mandar Mensagem';
+const sendMessage = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
 
@@ -48,7 +48,7 @@ const custom = require('./custom_intents');
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
-// const { pageToken } = process.env;
+const { pageToken } = process.env;
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
@@ -64,9 +64,9 @@ bot.dialog('/', [
 
 		// hardcoded ids for testing purposes
 		session.userData.userid = '100004770631443';
-		session.userData.pageToken = process.env.pageToken;
+		session.userData.pageToken = pageToken;
 
-		// default value: undefined. Yes, it's only a string.
+		// default value: 'undefined'. Yes, it's only a string.
 		custom.userFacebook(
 			session.userData.userid, session.userData.pageToken,
 			(result => User.findOrCreate({
@@ -89,7 +89,7 @@ bot.dialog('/', [
 					console.log(user.get({
 						plain: true,
 					}));
-					if (user.get('fb_id') === '1691041710957813') {
+					if (user.get('admin') === true) { // shows hidden admin menu
 						menuOptions.push(sendMessage);
 					}
 					console.log(`Was created? => ${created}`);
@@ -162,7 +162,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/', { user: User });
 				break;
 			case sendMessage:
-				session.replaceDialog('sendMessage:/');
+				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -207,7 +207,7 @@ bot.dialog('/askPermission', [
 			switch (result.response.entity) {
 			case Yes:
 				session.send('Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre ' +
-				'dados abertos e transparência orçamentária na sua cidade ou em seu circulo de amizades!');
+				'dados abertos e transparência orçamentária na sua cidade ou em seu círculo de amizades!');
 				User.update({
 					address: session.message.address,
 				}, {
