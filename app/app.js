@@ -225,7 +225,22 @@ bot.dialog('/askPermission', [
 					});
 				break;
 			default: // No
-				session.send('Tranquilo!');
+				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
+				User.update({
+					address: null,
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+					},
+					returning: true,
+				})
+					.then(() => {
+						console.log('User address erased sucessfuly');
+					})
+					.catch((err) => {
+						console.log(err);
+						throw err;
+					});
 				break;
 			}
 			session.replaceDialog('/promptButtons');
