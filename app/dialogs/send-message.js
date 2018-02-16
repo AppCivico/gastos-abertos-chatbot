@@ -15,8 +15,7 @@ const stopMessage = 'Parar';
 
 let messageText; // custom message text
 let imageUrl; // desired image url
-let msgCount; // counts the number of messages sent
-
+let msgCount; // counts number of messages sent
 
 // function sendProactiveMessage(address, customMessage) {
 // 	const msg = new builder.Message().address(address);
@@ -25,31 +24,50 @@ let msgCount; // counts the number of messages sent
 // 	bot.send(msg);
 // }
 
-function sendProactiveImage(address, customMessage, customImage) {
-	const text = new builder.Message().address(address);
-	text.text(customMessage);
-	text.textLocale('pt-BR');
-	const image = new builder.Message().address(address);
-	image.addAttachment({
-		contentType: 'image/jpeg',
-		contentUrl: customImage,
-	});
-	bot.send(image);
-	bot.send(text);
+// function sendProactiveImage(address, customMessage, customImage) {
+// 	const textMessage = new builder.Message().address(address);
+// 	textMessage.text(customMessage);
+// 	textMessage.textLocale('pt-BR');
+// 	const image = new builder.Message().address(address);
+// 	image.addAttachment({
+// 		contentType: 'image/jpeg',
+// 		contentUrl: customImage,
+// 	});
+// 	bot.send(image);
+// 	bot.send(textMessage);
+// }
+
+function startProactiveImage(address, customMessage, customImage) {
+	try {
+		const textMessage = new builder.Message().address(address);
+		textMessage.text(customMessage);
+		textMessage.textLocale('pt-BR');
+		const image = new builder.Message().address(address);
+		image.addAttachment({
+			contentType: 'image/jpeg',
+			contentUrl: customImage,
+		});
+		bot.send(image);
+		bot.send(textMessage);
+		bot.beginDialog(address, '*:/askingPermission');
+	} catch (err) {
+		console.log(`Erro ao enviar mensagem: ${err}`);
+	}
 }
 
 function startProactiveDialog(address, customMessage) {
-	msgCount += 1;
-	bot.beginDialog(address, '*:/messageDialog', { customMessage });
+	try {
+		msgCount = +1;
+		const textMessage = new builder.Message().address(address);
+		textMessage.text(customMessage);
+		textMessage.textLocale('pt-BR');
+		bot.send(textMessage);
+		bot.beginDialog(address, '*:/askingPermission');
+	} catch (err) {
+		console.log(`Erro ao enviar mensagem: ${err}`);
+	}
 }
 
-bot.dialog('/messageDialog', [
-	(session, args) => {
-		const { customMessage } = args;
-		session.send(customMessage);
-		session.replaceDialog('/askingPermission');
-	},
-]);
 
 bot.dialog('/askingPermission', [
 	(session) => {
@@ -63,7 +81,7 @@ bot.dialog('/askingPermission', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-	(session, result) => {
+	(session, result, next) => {
 		if (result.response) {
 			switch (result.response.entity) {
 			case stopMessage:
@@ -91,6 +109,7 @@ bot.dialog('/askingPermission', [
 				session.send('Legal! Agradecemos seu interesse!');
 				break;
 			}
+			next();
 		}
 	},
 	(session) => {
@@ -196,20 +215,21 @@ library.dialog('/sendingImage', [ // sends image and text message
 				address: {
 					$ne: null,
 				},
+				fb_id: {
+					$ne: session.userData.userid + 1,
+				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				sendProactiveImage(element.dataValues.address, messageText, imageUrl);
-				msgCount += 1;
+				startProactiveImage(element.dataValues.address, messageText);
 			});
+			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');
 			console.log(`Erro ao enviar mensagem: ${err}`);
-		}).finally(() => {
-			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
-			next();
 		});
+		next();
 	},
 	(session) => {
 		session.replaceDialog('/');
@@ -270,15 +290,14 @@ library.dialog('/sendingMessage', [ // sends text message
 		}).then((user) => {
 			user.forEach((element) => {
 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				startProactiveDialog(element.dataValues.address, `${messageText}`);
+				startProactiveDialog(element.dataValues.address, messageText);
 			});
+			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');
 			console.log(`Erro ao enviar mensagem: ${err}`);
-		}).finally(() => {
-			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
-			next();
 		});
+		next();
 	},
 	(session) => {
 		session.replaceDialog('/');
