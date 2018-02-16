@@ -1,11 +1,12 @@
+const User = require('../server/schema/models').user;
 // A class for attaching custom intents to dialogs
 const request = require('request');
 
 const allIntents = (message, intents, callback) => {
-	intents.recognize(message, (iDontGetIt, request) => {
-		console.log(`Intent: ${Object.entries(request)}`);
+	intents.recognize(message, (iDontGetIt, request2) => {
+		console.log(`Intent: ${Object.entries(request2)}`);
 		let dialog;
-		switch (request.intent) {
+		switch (request2.intent) {
 		case 'ajuda':
 			dialog = 'gastosAbertosInformation:/';
 			break;
@@ -36,3 +37,24 @@ const userFacebook = (userID, pageToken, callback) => {
 };
 
 module.exports.userFacebook = userFacebook;
+
+// update user session
+const updateSession = (fbId, session) => {
+	User.update({
+		session: session.dialogStack()[session.dialogStack().length - 1].id,
+	}, {
+		where: {
+			fb_id: fbId,
+		},
+		returning: true,
+	})
+		.then(() => {
+			console.log('User session updated sucessfuly');
+		})
+		.catch((err) => {
+			console.log(`Couldn't update  session updated sucessfuly: ${err}`);
+			throw err;
+		});
+};
+
+module.exports.updateSession = updateSession;

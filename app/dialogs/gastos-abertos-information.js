@@ -2,6 +2,7 @@
 
 bot.library(require('./contact'));
 
+const custom = require('../misc/custom_intents');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 
@@ -27,6 +28,7 @@ library.dialog('/', [
 
 library.dialog('/promptButtons', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
 			`Como posso te ajudar? ${emoji.get('slightly_smiling_face').repeat(2)}`,

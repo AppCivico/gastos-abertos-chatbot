@@ -35,7 +35,7 @@ let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 // 	recognizeOrder: builder.RecognizeOrder.series,
 // });
 //
-const custom = require('./custom_intents');
+const custom = require('./misc/custom_intents');
 //
 // bot.recognizer(intents);
 //
@@ -83,6 +83,7 @@ bot.dialog('/', [
 					approved: true,
 					fb_id: result.id,
 					fb_name: `${result.first_name} ${result.last_name}`,
+					session: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
 			})
 				.spread((user, created) => {
@@ -95,6 +96,7 @@ bot.dialog('/', [
 					console.log(`Was created? => ${created}`);
 				})) // eslint-disable-line comma-dangle
 		);
+		console.log(`asdjfasdfasdjfjasdfjasdjfjasd:${Object.entries(session.dialogStack())}`);
 		session.replaceDialog('/getStarted');
 	},
 ]);
@@ -141,12 +143,12 @@ bot.dialog('/getStarted', [
 
 bot.dialog('/promptButtons', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session, menuMessage, menuOptions,
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
-				promptAfterAction: false,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -190,13 +192,13 @@ bot.dialog('/promptButtons', [
 
 bot.dialog('/askPermission', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session, permissionQuestion,
 			[Yes, No],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
-				promptAfterAction: false,
 			} // eslint-disable-line comma-dangle
 		);
 	},
