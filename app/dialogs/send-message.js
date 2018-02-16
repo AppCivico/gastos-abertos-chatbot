@@ -39,6 +39,7 @@ let msgCount; // counts number of messages sent
 
 function startProactiveImage(address, customMessage, customImage) {
 	try {
+		msgCount = +1;
 		const textMessage = new builder.Message().address(address);
 		textMessage.text(customMessage);
 		textMessage.textLocale('pt-BR');
@@ -49,10 +50,10 @@ function startProactiveImage(address, customMessage, customImage) {
 		});
 		bot.send(image);
 		bot.send(textMessage);
-		bot.beginDialog(address, '*:/askingPermission');
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
+	bot.beginDialog(address, '*:/askingPermission');
 }
 
 function startProactiveDialog(address, customMessage) {
@@ -62,22 +63,21 @@ function startProactiveDialog(address, customMessage) {
 		textMessage.text(customMessage);
 		textMessage.textLocale('pt-BR');
 		bot.send(textMessage);
-		bot.beginDialog(address, '*:/askingPermission');
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
+	bot.beginDialog(address, '*:/askingPermission');
 }
-
 
 bot.dialog('/askingPermission', [
 	(session) => {
+		// console.log(`asdjfasdfasdjfjasdfjasdjfjasd:${Object.entries(session.dialogStack()[session.dialogStack().length - 1])}`);
 		builder.Prompts.choice(
 			session, 'Se você não desejar mais ver essas mensagens, escolha \'Parar\' abaixo',
 			[keepMessage, stopMessage],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: 'Se você não desejar mais ver essas mensagens, escolha \'Parar\' abaixo',
-				promptAfterAction: true,
+				retryPrompt: 'Escolha uma das opções abaixo. Escolha \'Parar\' para não receber novas mensagens.',
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -96,7 +96,7 @@ bot.dialog('/askingPermission', [
 					.then(() => {
 						session.send('Pronto! Você não receberá mais as mensagens.' +
 						'\n\nSe desejar se vincular novamente, vá para o menu de Informações.');
-						console.log('User address updated sucessfuly');
+						console.log('User address erased sucessfuly');
 					})
 					.catch((err) => {
 						session.send('Epa! Tive um problema técnico e não consegui te desvincular!' +
@@ -109,11 +109,11 @@ bot.dialog('/askingPermission', [
 				session.send('Legal! Agradecemos seu interesse!');
 				break;
 			}
+			session.send('Vamos voltar pro fluxo normal...');
 			next();
 		}
 	},
 	(session) => {
-		session.send('Vamos voltar pro fluxo normal...');
 		session.endDialog();
 	},
 ]);
@@ -122,7 +122,7 @@ library.dialog('/', [
 	(session) => {
 		msgCount = 0;
 		builder.Prompts.choice(
-			session, 'Este é o menu para mandarmos mensagens aos usuários!\n\nO que você deseja fazer?',
+			session, 'Este é o menu para mandarmos mensagens aos usuários!\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem e confirme. Você não receberá a mensagem.',
 			[writeMsg, imageMsg, testMessage, goBack],
 			{
 				listStyle: builder.ListStyle.button,
@@ -206,7 +206,7 @@ library.dialog('/askImage', [ // asks user for text and image URL
 ]);
 
 library.dialog('/sendingImage', [ // sends image and text message
-	(session, args, next) => {
+	(session, args) => {
 		[messageText] = [args.messageText];
 		[imageUrl] = [args.imageUrl];
 		User.findAll({
@@ -216,23 +216,21 @@ library.dialog('/sendingImage', [ // sends image and text message
 					$ne: null,
 				},
 				fb_id: {
-					$ne: session.userData.userid + 1,
+					$ne: session.userData.userid,
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				startProactiveImage(element.dataValues.address, messageText);
+				startProactiveImage(element.dataValues.address, messageText, imageUrl);
 			});
-			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');
 			console.log(`Erro ao enviar mensagem: ${err}`);
+		}).finally(() => {
+			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
+			session.replaceDialog('/');
 		});
-		next();
-	},
-	(session) => {
-		session.replaceDialog('/');
 	},
 ]);
 
@@ -271,7 +269,8 @@ library.dialog('/askText', [ // asks user for text message
 ]);
 
 library.dialog('/sendingMessage', [ // sends text message
-	(session, args, next) => {
+	(session, args) => {
+		console.log(`asdjfasdfasdjfjasdfjasdjfjasd:${Object.entries(session.dialogStack()[session.dialogStack().length - 1])}`);
 		if (!args) {
 			messageText = '<<Mensagem proativa de teste>>';
 		} else {
@@ -284,23 +283,21 @@ library.dialog('/sendingMessage', [ // sends text message
 					$ne: null,
 				},
 				fb_id: {
-					$ne: session.userData.userid + 1,
+					$ne: session.userData.userid,
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				startProactiveDialog(element.dataValues.address, messageText);
+				startProactiveDialog(element.dataValues.address, messageText, session);
 			});
-			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');
 			console.log(`Erro ao enviar mensagem: ${err}`);
+		}).finally(() => {
+			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
+			session.replaceDialog('/');
 		});
-		next();
-	},
-	(session) => {
-		session.replaceDialog('/');
 	},
 ]);
 

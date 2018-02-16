@@ -146,7 +146,6 @@ bot.dialog('/promptButtons', [
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
-				promptAfterAction: false,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -196,7 +195,6 @@ bot.dialog('/askPermission', [
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
-				promptAfterAction: false,
 			} // eslint-disable-line comma-dangle
 		);
 	},
