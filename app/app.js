@@ -107,7 +107,7 @@ bot.dialog('/getStarted', [
 		if (!session.userData.firstRun) { // first run
 			menuMessage = 'Vamos lá, como posso te ajudar?';
 			session.userData.firstRun = true;
-
+			session.sendTyping();
 
 			session.send({
 				attachments: [
@@ -225,7 +225,7 @@ bot.dialog('/askPermission', [
 					});
 				break;
 			default: // No
-				session.send('Tranquilo!');
+				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
 				User.update({
 					address: null,
 				}, {
@@ -235,7 +235,7 @@ bot.dialog('/askPermission', [
 					returning: true,
 				})
 					.then(() => {
-						console.log('User address updated sucessfuly');
+						console.log('User address erased sucessfuly');
 					})
 					.catch((err) => {
 						console.log(err);
