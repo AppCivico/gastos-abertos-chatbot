@@ -16,6 +16,7 @@ const stopMessage = 'Parar';
 let messageText; // custom message text
 let imageUrl; // desired image url
 let msgCount; // counts number of messages sent
+let userDialog; // user's last active dialog
 
 // function sendProactiveMessage(address, customMessage) {
 // 	const msg = new builder.Message().address(address);
@@ -56,22 +57,22 @@ function startProactiveImage(address, customMessage, customImage) {
 	bot.beginDialog(address, '*:/askingPermission');
 }
 
-function startProactiveDialog(address, customMessage) {
+function startProactiveDialog(user, customMessage) {
 	try {
 		msgCount = +1;
-		const textMessage = new builder.Message().address(address);
+		const textMessage = new builder.Message().address(user.address);
 		textMessage.text(customMessage);
 		textMessage.textLocale('pt-BR');
 		bot.send(textMessage);
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
-	bot.beginDialog(address, '*:/askingPermission');
+	bot.beginDialog(user.address, '*:/askingPermission', { userDialog: user.session });
 }
 
 bot.dialog('/askingPermission', [
-	(session) => {
-		// console.log(`asdjfasdfasdjfjasdfjasdjfjasd:${Object.entries(session.dialogStack()[session.dialogStack().length - 1])}`);
+	(session, args) => {
+		[userDialog] = [args.userDialog];
 		builder.Prompts.choice(
 			session, 'Se você não desejar mais ver essas mensagens, escolha \'Parar\' abaixo',
 			[keepMessage, stopMessage],
@@ -114,7 +115,9 @@ bot.dialog('/askingPermission', [
 		}
 	},
 	(session) => {
-		session.endDialog();
+		console.log(`Estariamos indo para => ${userDialog}`);
+		session.replaceDialog(userDialog);
+		// session.endDialog();
 	},
 ]);
 
@@ -277,7 +280,7 @@ library.dialog('/sendingMessage', [ // sends text message
 			[messageText] = [args.messageText];
 		}
 		User.findAll({
-			attributes: ['fb_name', 'address'],
+			attributes: ['fb_name', 'address', 'session'],
 			where: {
 				address: {
 					$ne: null,
@@ -289,7 +292,7 @@ library.dialog('/sendingMessage', [ // sends text message
 		}).then((user) => {
 			user.forEach((element) => {
 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				startProactiveDialog(element.dataValues.address, messageText, session);
+				startProactiveDialog(element.dataValues, messageText);
 			});
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');

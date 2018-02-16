@@ -22,4 +22,5 @@ module.exports = () => {
 	});
 	server.post('/api/messages', connector.listen());
 	bot.use(builder.Middleware.dialogVersion({ version: 0.3, resetCommand: /^reset/i }));
+	bot.set('persistConversationData', false);
 };
