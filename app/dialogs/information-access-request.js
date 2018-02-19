@@ -88,29 +88,6 @@ library.dialog('/', [
 			session.send('Você está gerando um pedido de acesso à informação, que poderá ser encaminhado a prefeitura de seu ' +
 			'município quando estão faltando informações nos portais de transparência.');
 		}
-		// else if (session.message.address.channelId == 'facebook' && !args) {
-		// 		var fbId = session.message.sourceEvent.sender.id;
-
-		// 		User.findOne({
-		// 				where: {
-		// 						email: email,
-		// 						fb_id: fbId
-		// 				}
-		// 		}).then(User => {
-		// 				user = User.dataValues;
-
-		// 				builder.Prompts.choice(session,
-		// 						user.name + "você está gerando um ",
-		// 						[Yes, No],
-		// 						{
-		// 								listStyle: builder.ListStyle.button,
-		// 								retryPrompt: retryPrompts.choice
-		// 						} // eslint-disable-line comma-dangle
-		// 				);
-
-		// 		});
-		// }
-
 		session.beginDialog('/looseRequest');
 	},
 ]).cancelAction('cancelAction', '', {
