@@ -10,7 +10,7 @@ const Base64File = require('js-base64-file');
 const emoji = require('node-emoji');
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
-// const User = require('../server/schema/models').user;
+const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
 const infoRequest = require('../server/schema/models').user_information_access_request;
 
@@ -21,7 +21,7 @@ const Denial = 'Ainda não';
 const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos lá!';
-const Confirm = 'Beleza!';
+const Contact = 'Entrar em contato';
 const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
 let questionNumber; // shows the question number in each question(disabled no-plusplus for this)
@@ -78,10 +78,8 @@ const headers = {
 library.dialog('/', [
 	(session, args) => {
 		if (args && args.user && args.user_mission) {
-			user = args.user; // eslint-disable-line prefer-destructuring
+			[user] = [args.user];
 			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
-			answers.requesterName = user.name;
-
 			session.send('Esse é um processo bem extenso e tem bastante conteúdo.' +
 				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
@@ -90,33 +88,10 @@ library.dialog('/', [
 			session.send('Você está gerando um pedido de acesso à informação, que poderá ser encaminhado a prefeitura de seu ' +
 			'município quando estão faltando informações nos portais de transparência.');
 		}
-		// else if (session.message.address.channelId == 'facebook' && !args) {
-		// 		var fbId = session.message.sourceEvent.sender.id;
-
-		// 		User.findOne({
-		// 				where: {
-		// 						email: email,
-		// 						fb_id: fbId
-		// 				}
-		// 		}).then(User => {
-		// 				user = User.dataValues;
-
-		// 				builder.Prompts.choice(session,
-		// 						user.name + "você está gerando um ",
-		// 						[Yes, No],
-		// 						{
-		// 								listStyle: builder.ListStyle.button,
-		// 								retryPrompt: retryPrompts.choice
-		// 						} // eslint-disable-line comma-dangle
-		// 				);
-
-		// 		});
-		// }
-
 		session.beginDialog('/looseRequest');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/looseRequest', [
@@ -436,7 +411,7 @@ library.dialog('/looseRequest', [
 		);
 	},
 
-	(session, args, next) => {
+	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
 			break;
@@ -447,16 +422,25 @@ library.dialog('/looseRequest', [
 			break;
 		}
 		questionNumber = 1;
-		if (!user) {
-			builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
-		}
-		next();
+		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
 
 	(session, args) => {
-		if (!user) {
-			answers.requesterName = args.response;
-		}
+		User.update({
+			name: args.response,
+		}, {
+			where: {
+				fb_id: session.userData.userid,
+			},
+			returning: true,
+		})
+			.then(() => {
+				console.log('User name updated sucessfuly');
+			})
+			.catch((err) => {
+				console.log(err);
+				throw err;
+			});
 
 		const html = `<p style="font-size:7pt">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011, e na Lei Complementar 131,` +
 			' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
@@ -496,7 +480,7 @@ library.dialog('/looseRequest', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/generateRequest', [
@@ -520,11 +504,11 @@ library.dialog('/generateRequest', [
 		function callback(error, response, body) {
 			// TODO teste
 			// if (error) {
-			// 	const obj = 'testeteste';
+			// const obj = 'testeteste';
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
 
-				// console.log(obj.full_size_url);
+				console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
 					facebook: {
@@ -580,7 +564,7 @@ library.dialog('/generateRequest', [
 							builder.Prompts.choice(
 								session,
 								`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-								[Confirm, goBack],
+								[Contact, goBack],
 								{
 									listStyle: builder.ListStyle.button,
 									retryPrompt: retryPrompts.choice,
@@ -596,9 +580,10 @@ library.dialog('/generateRequest', [
 				} else {
 					builder.Prompts.choice(
 						session,
-						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura,' +
-						' ou levar esse pedido em formato físico e protocolizá-lo.',
-						[Confirm, goBack],
+						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
+						'ou levar esse pedido em formato físico e protocolizá-lo. Você pode também nos contatar para tirar alguma dúvida ou ' +
+						'relatar suas ações.',
+						[Contact, goBack],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
@@ -613,18 +598,15 @@ library.dialog('/generateRequest', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Confirm:
-			session.send('No momento, pararemos por aqui. ' +
-		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
-			session.endConversation();
+		case Contact:
+			session.replaceDialog('contact:/');
 			break;
 		default: // Contact
 			session.endDialog();
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 

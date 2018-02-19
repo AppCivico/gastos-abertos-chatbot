@@ -7,20 +7,26 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
+const Timer = require('./misc/timer');
 
-bot.library(require('./validators'));
-bot.library(require('./dialogs/game-sign-up'));
-bot.library(require('./dialogs/contact'));
+bot.library(require('./dialogs/send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
-bot.library(require('./dialogs/game2'));
+bot.library(require('./validators'));
 
 const User = require('./server/schema/models').user;
 
-const GameSignUp = 'Inscrever-se';
-const GastosAbertosInformation = 'Sobre o projeto';
-const Missions = 'Processo de missões';
-const InformationAcessRequest = 'Gerar pedido';
+const GastosAbertosInformation = 'Quero aprender mais';
+const Missions = 'Minha cidade?';
+const InformationAcessRequest = 'Gerar um pedido';
+const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos informações ou notícias sobre dados abertos e transparência orçamentária?';
+const sendMessage = 'Painel Administrativo';
+const Yes = 'Sim!';
+const No = 'Não';
+
+let menuMessage;
+let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
+
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -30,7 +36,7 @@ const InformationAcessRequest = 'Gerar pedido';
 // 	recognizeOrder: builder.RecognizeOrder.series,
 // });
 //
-const custom = require('./custom_intents');
+const custom = require('./misc/custom_intents');
 //
 // bot.recognizer(intents);
 //
@@ -43,31 +49,31 @@ const custom = require('./custom_intents');
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
-// const { userID } = process.env;
-// const { pageToken } = process.env;
+const { pageToken } = process.env;
 
 bot.beginDialogAction('getStarted', '/getStarted');
-bot.beginDialogAction('reset', '/reset'); // TODO check behavior on messenger
+bot.beginDialogAction('reset', '/reset');
 
 bot.dialog('/', [
 	(session) => {
-		session.userData = {}; // for testing purposes
+		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		// TODO teste sem ID
-		session.userData.userid = session.message.sourceEvent.sender.id;
+		session.userData = {}; // for testing purposes
+		// session.userData.userid = session.message.sourceEvent.sender.id;
 		// session.userData.pageid = session.message.sourceEvent.recipient.id;
 		// session.userData.pageToken = pageToken;
 
 		// hardcoded ids for testing purposes
-		// session.userData.userid = userID;
-		session.userData.pageToken = 'EAAWZAUU5VsL4BAHhKpSZCWFHACyXuXGyihZCLuaFKZC7fvp43WxCafDXxAPW1Nhjh6LKyRnhMpEqnPbOS7Dn1VTLOll77hhmKMiXcXmvz3wEcaQtvgbTWq9KN96vBX9iAO1Er89UBZBIBwtFnKSACOdVTIRuAk7JljwEHCvNf5AZDZD';
+		session.userData.userid = '100004770631443';
+		session.userData.pageToken = pageToken;
 
-		// default value: undefined. Yes, it's only a string.
+		// default value: 'undefined'. Yes, it's only a string.
 		custom.userFacebook(
-			session.message.sourceEvent.sender.id, session.userData.pageToken,
+			session.userData.userid, session.userData.pageToken,
 			(result => User.findOrCreate({
 				where: { fb_id: session.userData.userid },
 				defaults: {
-					name: `${result.first_name} ${result.last_name}`,
+					name: 'undefined',
 					occupation: 'undefined',
 					email: 'undefined',
 					birth_date: 'undefined',
@@ -77,30 +83,31 @@ bot.dialog('/', [
 					active: true,
 					approved: true,
 					fb_id: result.id,
+					fb_name: `${result.first_name} ${result.last_name}`,
+					session: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
 			})
 				.spread((user, created) => {
 					console.log(user.get({
 						plain: true,
 					}));
+					if (user.get('admin') === true) { // shows hidden admin menu
+						menuOptions.push(sendMessage);
+					}
 					console.log(`Was created? => ${created}`);
 				})) // eslint-disable-line comma-dangle
 		);
-
 		session.replaceDialog('/getStarted');
 	},
 ]);
 
 bot.dialog('/getStarted', [
 	(session) => {
+		Timer.timer(55);
 		session.sendTyping();
-		console.log('sdfsdfdsf');
-		console.log(`session.message.sourceEvent.sender.id: ${Object.entries(session.message.sourceEvent.sender.id)}`);
 		if (!session.userData.firstRun) { // first run
+			menuMessage = 'Vamos lá, como posso te ajudar?';
 			session.userData.firstRun = true;
-			session.sendTyping();
-
-
 			session.send({
 				attachments: [
 					{
@@ -109,16 +116,19 @@ bot.dialog('/getStarted', [
 					},
 				],
 			});
-			session.send('Olá, eu sou o Guaxi, o agente virtual do Gastos Abertos e seu parceiro em buscas e pesquisas.');
-			session.send(`\n\nVocê pode utilizar o menu abaixo para interagir comigo. ${emoji.get('hugging_face').repeat(2)}` +
-			`\n\nPara retornar á este menu durante algum processo, basta digitar 'cancelar'. ${emoji.get('slightly_smiling_face').repeat(2)}`);
-			session.replaceDialog('/promptButtons');
+			session.send('Olá, eu sou o Guaxi, o assistente virtual do Gastos Abertos e seu parceiro sobre dados abertos e transparência em orçamento público.');
+			session.send(`\n\nPara facilitar, há um menu com algumas opções sobre como podemos seguir essa parceria. ${emoji.get('smile')}`);
+			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
+
+			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
+			session.replaceDialog('/askPermission');
 		} else { // welcome back
+			menuMessage = 'Como posso te ajudar?';
 			User.findOne({
-				attributes: ['name'],
+				attributes: ['fb_name'],
 				where: { fb_id: session.userData.userid },
 			}).then((user) => {
-				session.send(`Olá, ${user.get('name').substr(0, user.get('name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+				session.send(`Olá, ${user.get('fb_name').substr(0, user.get('fb_name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
 				session.replaceDialog('/promptButtons');
 			}).catch(() => {
 				session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
@@ -130,14 +140,12 @@ bot.dialog('/getStarted', [
 
 bot.dialog('/promptButtons', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
-			session,
-			`Em que assunto eu posso te ajudar? ${emoji.get('hugging_face').repeat(2)}`,
-			[GastosAbertosInformation, GameSignUp, Missions, InformationAcessRequest],
+			session, menuMessage,	menuOptions,
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
-				promptAfterAction: false,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -149,11 +157,11 @@ bot.dialog('/promptButtons', [
 			case GastosAbertosInformation:
 				session.beginDialog('gastosAbertosInformation:/', {	User });
 				break;
-			case GameSignUp:
-				session.beginDialog('gameSignUp:/');
-				break;
 			case Missions:
-				session.beginDialog('game2:/', { User });
+				session.beginDialog('game:/', { user: User });
+				break;
+			case sendMessage:
+				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -178,3 +186,63 @@ bot.dialog('/promptButtons', [
 // 		}));
 // 	},
 // });
+
+bot.dialog('/askPermission', [
+	(session) => {
+		custom.updateSession(session.userData.userid, session);
+		builder.Prompts.choice(
+			session, permissionQuestion,
+			[Yes, No],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choiceIntent,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case Yes:
+				session.send('Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre ' +
+				'dados abertos e transparência orçamentária na sua cidade ou em seu círculo de amizades!');
+				User.update({
+					address: session.message.address,
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+					},
+					returning: true,
+				})
+					.then(() => {
+						console.log('User address updated sucessfuly');
+					})
+					.catch((err) => {
+						console.log(err);
+						throw err;
+					});
+				break;
+			default: // No
+				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
+				User.update({
+					address: null,
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+					},
+					returning: true,
+				})
+					.then(() => {
+						console.log('User address erased sucessfuly');
+					})
+					.catch((err) => {
+						console.log(err);
+						throw err;
+					});
+				break;
+			}
+			session.replaceDialog('/promptButtons');
+		}
+	},
+]);

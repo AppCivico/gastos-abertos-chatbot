@@ -1,11 +1,12 @@
+const User = require('../server/schema/models').user;
 // A class for attaching custom intents to dialogs
-const request2 = require('request');
+const request = require('request');
 
 const allIntents = (message, intents, callback) => {
-	intents.recognize(message, (iDontGetIt, request) => {
-		console.log(`Intent: ${Object.entries(request)}`);
+	intents.recognize(message, (iDontGetIt, request2) => {
+		console.log(`Intent: ${Object.entries(request2)}`);
 		let dialog;
-		switch (request.intent) {
+		switch (request2.intent) {
 		case 'ajuda':
 			dialog = 'gastosAbertosInformation:/';
 			break;
@@ -27,7 +28,7 @@ module.exports.allIntents = allIntents;
 
 // request
 const userFacebook = (userID, pageToken, callback) => {
-	request2(`https://graph.facebook.com/v2.12/${userID}?fields=first_name,last_name,email,birthday&access_token=${pageToken}`, (error, response, body) => {
+	request(`https://graph.facebook.com/v2.12/${userID}?fields=first_name,last_name,email,birthday&access_token=${pageToken}`, (error, response, body) => {
 		console.log('error:', error); // Print the error if one occurred
 		console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
 		console.log('body:', body); // Print the HTML for the Google homepage.
@@ -36,3 +37,24 @@ const userFacebook = (userID, pageToken, callback) => {
 };
 
 module.exports.userFacebook = userFacebook;
+
+// update user session
+const updateSession = (fbId, session) => {
+	User.update({
+		session: session.dialogStack()[session.dialogStack().length - 1].id,
+	}, {
+		where: {
+			fb_id: fbId,
+		},
+		returning: true,
+	})
+		.then(() => {
+			console.log('User session updated sucessfuly');
+		})
+		.catch((err) => {
+			console.log(`Couldn't update  session updated sucessfuly: ${err}`);
+			throw err;
+		});
+};
+
+module.exports.updateSession = updateSession;

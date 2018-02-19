@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
 			approved: DataTypes.BOOLEAN,
 			active: DataTypes.BOOLEAN,
 			fb_id: DataTypes.STRING,
+			fb_name: DataTypes.STRING,
+			address: DataTypes.JSON,
+			admin: DataTypes.BOOLEAN,
+			session: DataTypes.JSON,
 		},
 		{
 			classMethods: {

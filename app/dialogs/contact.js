@@ -6,8 +6,10 @@
 const Trello = require('trello');
 
 const trello = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_USER_TOKEN);
+
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
+const custom = require('../misc/custom_intents');
 
 const library = new builder.Library('contact');
 
@@ -20,6 +22,7 @@ let Subject = '';
 
 library.dialog('/', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -98,7 +101,7 @@ library.dialog('/', [
 		);
 	},
 ]).customAction({
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
 		session.endDialog();
 	},

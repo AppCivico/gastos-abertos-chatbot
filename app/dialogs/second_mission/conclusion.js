@@ -1,4 +1,6 @@
-/* global builder:true */
+/* global bot: true builder:true */
+
+bot.library(require('../contact'));
 
 const library = new builder.Library('secondMissionConclusion');
 const emoji = require('node-emoji');
@@ -10,6 +12,7 @@ const answers = {
 };
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
+const custom = require('../../misc/custom_intents');
 
 // const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -17,7 +20,7 @@ const UserMission = require('../../server/schema/models').user_mission;
 const HappyYes = 'Vamos lá!';
 const Yes = 'Sim';
 const No = 'Não';
-const Confirm = 'Beleza!';
+const Contact = 'Contato';
 const WelcomeBack = 'Voltar para o início';
 
 let user;
@@ -26,6 +29,7 @@ let user;
 
 library.dialog('/', [
 	(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		if (!args.user && args.user_mission) {
 			session.send('Ooops, houve algum problema, vamos voltar para o início.');
 			session.endDialog();
@@ -60,15 +64,14 @@ library.dialog('/', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 
 });
 
 
 library.dialog('/secondMissionQuestions', [
 	(session) => {
-		// (session, args) => {
-
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -99,7 +102,6 @@ library.dialog('/secondMissionQuestions', [
 			default: // No
 				session.send(`Que pena! ${emoji.get('cold_sweat').repeat(2)} No entanto, recomendamos que você o protocolize mesmo assim ` +
 				'pois é muito importante que a sociedade civil demande dados.');
-				session.send('Agora vou te levar para o início.');
 				session.endDialog();
 				break;
 			}
@@ -148,13 +150,13 @@ library.dialog('/secondMissionQuestions', [
 		session.replaceDialog('/conclusion');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 
 });
 
 library.dialog('/conclusion', [
 	(session) => {
-		//		(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		UserMission.update({
 			completed: true,
 			metadata: answers,
@@ -178,12 +180,12 @@ library.dialog('/conclusion', [
 			});
 	} // eslint-disable-line comma-dangle
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
-
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/congratulations', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo dessa tarefa! ' +
 		`\n\nAposto que você e eu aprendemos muitas coisas novas nesse processo! ${emoji.get('slightly_smiling_face').repeat(2)}` +
 		'\n\nDarei a você uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!');
@@ -195,9 +197,9 @@ library.dialog('/congratulations', [
 
 		builder.Prompts.choice(
 			session,
-			'Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a terceira missão, okay? ' +
-			`${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[Confirm, WelcomeBack],
+			'Você pode também nos contatar para tirar alguma dúvida ou relatar suas ações.' +
+			` ${emoji.get('slightly_smiling_face').repeat(2)}`,
+			[Contact, WelcomeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
@@ -207,19 +209,15 @@ library.dialog('/congratulations', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Confirm:
-		// TODO melhorar isso aqui e ali em cima com a terceira missão
-			session.send('No momento, pararemos por aqui. ' +
-		'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
-			session.endConversation();
+		case Contact:
+			session.replaceDialog('contact:/');
 			break;
 		default: // WelcomeBack
 			session.endDialog();
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 
 });
 

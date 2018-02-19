@@ -15,6 +15,7 @@ const NotYet = 'Ainda não';
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
+const custom = require('../../misc/custom_intents');
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
@@ -23,8 +24,7 @@ let MissionUser;
 library.dialog('/', [
 	(session, args) => {
 		[user] = [args.user];
-		MissionUser = args.user_mission;
-
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
 			'Agora, vamos ver nossa segunda missão?',
@@ -39,7 +39,7 @@ library.dialog('/', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
-			session.replaceDialog('/assign');
+			session.replaceDialog('/assign', { user });
 			break;
 		default: // No
 			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);
@@ -48,12 +48,15 @@ library.dialog('/', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 
 });
 
 library.dialog('/assign', [
-	(session) => {
+	(session, args) => {
+		custom.updateSession(session.userData.userid, session);
+		[user] = [args.user];
+		MissionUser = args.user_mission;
 		UserMission.create({
 			user_id: user.id,
 			mission_id: 2,
@@ -87,12 +90,12 @@ library.dialog('/assign', [
 			break;
 		default: // NotYet
 			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);
-			session.endDialog();
+			session.replaceDialog('*:/getStarted');
 			break;
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 
 });
 

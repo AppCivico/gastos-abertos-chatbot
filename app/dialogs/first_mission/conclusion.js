@@ -1,8 +1,9 @@
-/* global builder:true */
+/* global bot:true builder:true */
 /* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor":
 ["session"] }] */
 
 const library = new builder.Library('firstMissionConclusion');
+bot.library(require('../second_mission/assign'));
 
 const answers = {
 	transparencyPortalExists: '',
@@ -18,6 +19,7 @@ const answers = {
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 const emoji = require('node-emoji');
+const custom = require('../../misc/custom_intents');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -25,17 +27,18 @@ const UserMission = require('../../server/schema/models').user_mission;
 const Yes = 'Sim';
 const No = 'Não';
 const MoreInformations = 'Detalhes da missão';
-const Confirm = 'Beleza!';
-const WelcomeBack = 'Voltar para o início';
+const nextMission = 'Ir para a próxima missão';
+const WelcomeBack = 'Beleza!';
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-// let missionUser;
+let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
-		// const missionUser = args.user_mission;
+		missionUser = args.user_mission;
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -67,11 +70,12 @@ library.dialog('/', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/conclusionPromptAfterMoreDetails', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -99,13 +103,14 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/transparencyPortalExists', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
-		session.send("Caso você queira deixar para outra hora, basta digitar 'cancelar' e eu te levarei para o início.");
+		session.send("Caso você queira deixar para outra hora, basta digitar 'começar' e eu te levarei para o início.");
 		builder.Prompts.choice(
 			session,
 			'Há um portal para transparência orçamentária na cidade, mantido oficialmente pela prefeitura? ',
@@ -134,67 +139,13 @@ library.dialog('/transparencyPortalExists', [
 			}
 		}
 	},
-
-	(session, args) => {
-		session.dialogData.transparencyPortalURL = args.response; // ?
-
-		session.sendTyping();
-		builder.Prompts.choice(
-			session,
-			'Há dados sobre a execução orçamentária disponível no portal de transparência? ',
-			[Yes, No],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-
-	(session, args) => {
-		session.sendTyping();
-		if (args.response) {
-			switch (args.response.entity) {
-			case Yes:
-				session.dialogData.transparencyPortalHasFinancialData = 1;
-				builder.Prompts.choice(
-					session,
-					'É possível realizar download dos dados orçamentários? ',
-					[Yes, No],
-					{
-						listStyle: builder.ListStyle.button,
-						retryPrompt: retryPrompts.choice,
-					} // eslint-disable-line comma-dangle
-				);
-				switch (args.response.entity) {
-				case Yes:
-					session.send('yea');
-					break;
-				default: // No
-					session.send('nope');
-					break;
-				}
-				break;
-			default: // No
-				session.dialogData.transparencyPortalHasFinancialData = 0;
-				builder.Prompts.choice(
-					session,
-					'Os contratos assinados com a prefeitura estão disponíveis no portal de transparência? ',
-					[Yes, No],
-					{
-						listStyle: builder.ListStyle.button,
-						retryPrompt: retryPrompts.choice,
-					} // eslint-disable-line comma-dangle
-				);
-				break;
-			}
-		}
-	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
@@ -205,12 +156,13 @@ library.dialog('/transparencyPortalURL', [
 		session.replaceDialog('/transparencyPortalHasFinancialData');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 
 });
 
 library.dialog('/transparencyPortalHasFinancialData', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -236,11 +188,12 @@ library.dialog('/transparencyPortalHasFinancialData', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -267,11 +220,12 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.' +
 	`\n\n Se não souber, basta digitar 'Não sei'. ${emoji.get('slightly_smiling_face')}`);
@@ -281,11 +235,12 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 		session.replaceDialog('/transparencyPortalHasContractsData');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/transparencyPortalHasContractsData', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -310,11 +265,12 @@ library.dialog('/transparencyPortalHasContractsData', [
 		session.replaceDialog('/transparencyPortalHasBiddingsData');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/transparencyPortalHasBiddingsData', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -339,11 +295,12 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 		session.replaceDialog('/transparencyPortalHasBiddingProcessData');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -368,11 +325,12 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 		session.replaceDialog('/userUpdate');
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/userUpdate', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
 			facebook: {
@@ -425,7 +383,6 @@ library.dialog('/userUpdate', [
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw e;
 			});
-		console.log(`as respostas: ${JSON.stringify(answers, undefined, 2)}`);
 		UserMission.update({
 			completed: true,
 			metadata: answers,
@@ -441,8 +398,8 @@ library.dialog('/userUpdate', [
 				console.log(`${result}Mission updated sucessfuly`);
 				builder.Prompts.choice(
 					session,
-					`Agora pode ficar tranquilo que eu irei te chamar quando a gente puder começar a segunda missão, okay? ${emoji.get('grinning')}`,
-					[Confirm, WelcomeBack],
+					`Se quiser, você já pode começar a segunda missão.Ou fazer uma pausa e continuar mais tarde ${emoji.get('grinning').repeat(2)}`,
+					[nextMission, WelcomeBack],
 					{
 						listStyle: builder.ListStyle.button,
 						retryPrompt: retryPrompts.choice,
@@ -451,7 +408,7 @@ library.dialog('/userUpdate', [
 			})
 			.catch((err) => {
 				console.log(`Error updating mission${err}`);
-				session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
+				session.send('Oooops...Tive um problema ao atualizar seu estado. Tente novamente mais tarde.');
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw err;
 			});
@@ -459,18 +416,21 @@ library.dialog('/userUpdate', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Confirm:
-			session.send('No momento, pararemos por aqui. ' +
-					'\n\nSe quiser conversar comigo novamente, basta me mandar qualquer mensagem.');
-			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
-			session.endConversation();
+		case nextMission:
+			session.replaceDialog(
+				'secondMissionAssign:/assign',
+				{
+					user,
+					user_mission: missionUser,
+				} // eslint-disable-line comma-dangle
+			);
 			break;
 		default: // WelcomeBack
 			session.endDialog();
 		}
 	},
 ]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^desisto/i,
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 module.exports = library;
