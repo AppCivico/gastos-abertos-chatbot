@@ -29,7 +29,6 @@ let missionUser;
 library.dialog('/', [
 	(session, args) => {
 		[user] = [args.user];
-		session.send(`Vamos começar o processo de missões. ${emoji.get('slightly_smiling_face').repeat(2)}`);
 		User.findOne({
 			where: { fb_id: session.userData.userid },
 		}).then((UserData) => {

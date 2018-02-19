@@ -11,7 +11,7 @@ const library = new builder.Library('gastosAbertosInformation');
 const accessLaw = 'Dados abertos?';
 const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
-const receiveMessage = 'Receber Mensagem';
+const receiveMessage = 'Mensagens';
 let receiveDialog;
 let receiveYes;
 let receiveNo;
@@ -51,7 +51,7 @@ library.dialog('/promptButtons', [
 				session.beginDialog('/accessLaw');
 				break;
 			case receiveMessage:
-				session.beginDialog('/receiveMessage');
+				session.replaceDialog('/receiveMessage');
 				break;
 			case contact:
 				session.beginDialog('contact:/');
@@ -71,7 +71,6 @@ library.dialog('/promptButtons', [
 		session.endDialog();
 	},
 });
-
 
 library.dialog('/accessLaw', [
 	(session) => {
@@ -147,7 +146,7 @@ library.dialog('/updateAddress', [
 					});
 				break;
 			default: // receiveNo
-				session.send('Ok! Suas preferências não foram atualizadas');
+				session.send(`Ok! Suas preferências não foram atualizadas. ${emoji.get('slightly_smiling_face').repeat(2)}`);
 				session.replaceDialog('/promptButtons');
 				break;
 			}

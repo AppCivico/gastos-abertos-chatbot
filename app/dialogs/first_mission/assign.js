@@ -4,20 +4,14 @@ const library = new builder.Library('firstMissionAssign');
 
 bot.library(require('../contact'));
 bot.library(require('./conclusion'));
-bot.library(require('./details'));
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 const custom = require('../../misc/custom_intents');
 
-const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 const emoji = require('node-emoji');
 
-const MoreInformations = 'Mais detalhes';
-const Conclusion = 'Conclusão da missão';
-const Contact = 'Entrar em contato';
-const Restart = 'Voltar para o início';
 const Yes = 'Sim';
 const No = 'Não';
 
@@ -29,84 +23,23 @@ library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
-		console.log(`args.User : ${args.UserData}`);
 		missionUser = args.user_mission;
-		if (session.message.address.channelId === 'facebook') {
-			User.update({
-				fb_id: session.message.sourceEvent.sender.id,
-			}, {
-				where: {
-					id: User.id,
-				},
-				returning: true,
-			})
-				.then(() => {
-					console.log('User updated sucessfuly');
-				})
-				.catch((err) => {
-					console.log(err);
-					throw err;
-				});
-		}
 		UserMission.create({
 			user_id: user.id,
 			mission_id: 1,
-		})
-			.then(() => {
-				session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
-				session.beginDialog('/moreDetails');
-			})
-			.catch((err) => {
-				console.log(`Error creating user mission: ${err}`);
-				session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde ou entre em contato conosco.' +
+		}).then(() => {
+			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
+			session.beginDialog('/moreDetails');
+		}).catch((err) => {
+			console.log(`Error creating user mission: ${err}`);
+			session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde ou entre em contato conosco.' +
 				` ${emoji.get('dizzy_face').repeat(3)}`);
-				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-				throw err;
-			});
+			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+			throw err;
+		});
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
-});
-
-library.dialog('/promptButtons', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
-		builder.Prompts.choice(
-			session,
-			'Posso te ajudar com mais alguma coisa?',
-			[Conclusion, MoreInformations, Contact, Restart],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-	(session, args) => {
-		switch (args.response.entity) {
-		case MoreInformations:
-			session.replaceDialog('/moreDetails');
-			break;
-		case Contact:
-			session.beginDialog('contact:/');
-			break;
-		case Restart:
-			session.endDialog();
-			break;
-		default: // Conclusion
-			session.beginDialog(
-				'firstMissionConclusion:/',
-				{
-					user,
-					user_mission: missionUser,
-				} // eslint-disable-line comma-dangle
-			);
-			break;
-		}
-	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
 });
 
 library.dialog('/moreDetails', [
@@ -133,30 +66,17 @@ library.dialog('/moreDetails', [
 			` ${emoji.get('slightly_smiling_face').repeat(2)}`);
 			break;
 		}
-		builder.Prompts.choice(
-			session,
-			'Quer ver quais serão os pontos sobre os quais eu farei perguntas sobre o portal de transparência?',
-			[Yes, No],
+
+		session.beginDialog(
+			'firstMissionConclusion:/transparencyPortalExists',
 			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				user,
+				user_mission: missionUser,
 			} // eslint-disable-line comma-dangle
 		);
 	},
-	(session, args) => {
-		switch (args.response.entity) {
-		case Yes:
-			session.send(texts.first_mission.questions);
-			break;
-		default: // No
-			session.send('Beleza!');
-			break;
-		}
-		session.replaceDialog('/promptButtons');
-	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
 });
 
 module.exports = library;
