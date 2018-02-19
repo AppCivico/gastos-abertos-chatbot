@@ -408,7 +408,7 @@ library.dialog('/userUpdate', [
 			})
 			.catch((err) => {
 				console.log(`Error updating mission${err}`);
-				session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
+				session.send('Oooops...Tive um problema ao atualizar seu estado. Tente novamente mais tarde.');
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw err;
 			});

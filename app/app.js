@@ -7,12 +7,12 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
+const Timer = require('./misc/timer');
 
 bot.library(require('./dialogs/send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
-
 
 const User = require('./server/schema/models').user;
 
@@ -26,6 +26,7 @@ const No = 'Não';
 
 let menuMessage;
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
+
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -102,14 +103,11 @@ bot.dialog('/', [
 
 bot.dialog('/getStarted', [
 	(session) => {
+		Timer.timer(55);
 		session.sendTyping();
-
-
 		if (!session.userData.firstRun) { // first run
 			menuMessage = 'Vamos lá, como posso te ajudar?';
 			session.userData.firstRun = true;
-			session.sendTyping();
-
 			session.send({
 				attachments: [
 					{

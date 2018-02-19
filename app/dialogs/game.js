@@ -37,7 +37,7 @@ library.dialog('/', [
 				where: { user_id: UserData.dataValues.id },
 			}).then((count) => {
 				if (count === 0) {
-					session.beginDialog(
+					session.replaceDialog(
 						'firstMissionAssign:/',
 						{
 							user,
@@ -67,7 +67,7 @@ library.dialog('/currentMission', [
 			switch (missionUser.mission_id) {
 			case 1:
 				if (missionUser.completed) {
-					session.beginDialog(
+					session.replaceDialog(
 						'secondMissionAssign:/',
 						{
 							user,
@@ -75,7 +75,7 @@ library.dialog('/currentMission', [
 						} // eslint-disable-line comma-dangle
 					);
 				} else {
-					session.beginDialog(
+					session.replaceDialog(
 						'firstMissionConclusion:/',
 						{
 							user,
@@ -128,7 +128,7 @@ library.dialog('/currentMission', [
 			session.endDialog();
 			break;
 		default: // Contact
-			session.beginDialog('contact:/');
+			session.replaceDialog('contact:/');
 		}
 	},
 ]).cancelAction('cancelAction', '', {
