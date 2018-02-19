@@ -141,6 +141,7 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
+		Timer.timer(55);
 		builder.Prompts.choice(
 			session, menuMessage,	menuOptions,
 			{
