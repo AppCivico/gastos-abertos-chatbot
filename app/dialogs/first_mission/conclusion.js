@@ -110,7 +110,7 @@ library.dialog('/transparencyPortalExists', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
-		session.send("Caso você queira deixar para outra hora, basta digitar 'cancelar' e eu te levarei para o início.");
+		session.send("Caso você queira deixar para outra hora, basta digitar 'começar' e eu te levarei para o início.");
 		builder.Prompts.choice(
 			session,
 			'Há um portal para transparência orçamentária na cidade, mantido oficialmente pela prefeitura? ',
