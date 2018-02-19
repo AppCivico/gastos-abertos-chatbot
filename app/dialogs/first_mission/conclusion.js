@@ -19,6 +19,7 @@ const answers = {
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 const emoji = require('node-emoji');
+const custom = require('../../misc/custom_intents');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -35,6 +36,7 @@ let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
 		missionUser = args.user_mission;
 
@@ -73,6 +75,7 @@ library.dialog('/', [
 
 library.dialog('/conclusionPromptAfterMoreDetails', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -105,6 +108,7 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 
 library.dialog('/transparencyPortalExists', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		session.send("Caso você queira deixar para outra hora, basta digitar 'cancelar' e eu te levarei para o início.");
 		builder.Prompts.choice(
@@ -135,67 +139,13 @@ library.dialog('/transparencyPortalExists', [
 			}
 		}
 	},
-
-	(session, args) => {
-		session.dialogData.transparencyPortalURL = args.response; // ?
-
-		session.sendTyping();
-		builder.Prompts.choice(
-			session,
-			'Há dados sobre a execução orçamentária disponível no portal de transparência? ',
-			[Yes, No],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-
-	(session, args) => {
-		session.sendTyping();
-		if (args.response) {
-			switch (args.response.entity) {
-			case Yes:
-				session.dialogData.transparencyPortalHasFinancialData = 1;
-				builder.Prompts.choice(
-					session,
-					'É possível realizar download dos dados orçamentários? ',
-					[Yes, No],
-					{
-						listStyle: builder.ListStyle.button,
-						retryPrompt: retryPrompts.choice,
-					} // eslint-disable-line comma-dangle
-				);
-				switch (args.response.entity) {
-				case Yes:
-					session.send('yea');
-					break;
-				default: // No
-					session.send('nope');
-					break;
-				}
-				break;
-			default: // No
-				session.dialogData.transparencyPortalHasFinancialData = 0;
-				builder.Prompts.choice(
-					session,
-					'Os contratos assinados com a prefeitura estão disponíveis no portal de transparência? ',
-					[Yes, No],
-					{
-						listStyle: builder.ListStyle.button,
-						retryPrompt: retryPrompts.choice,
-					} // eslint-disable-line comma-dangle
-				);
-				break;
-			}
-		}
-	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
@@ -212,6 +162,7 @@ library.dialog('/transparencyPortalURL', [
 
 library.dialog('/transparencyPortalHasFinancialData', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -242,6 +193,7 @@ library.dialog('/transparencyPortalHasFinancialData', [
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -273,6 +225,7 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.' +
 	`\n\n Se não souber, basta digitar 'Não sei'. ${emoji.get('slightly_smiling_face')}`);
@@ -287,6 +240,7 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 
 library.dialog('/transparencyPortalHasContractsData', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -316,6 +270,7 @@ library.dialog('/transparencyPortalHasContractsData', [
 
 library.dialog('/transparencyPortalHasBiddingsData', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -345,6 +300,7 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -374,6 +330,7 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 
 library.dialog('/userUpdate', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
 			facebook: {

@@ -9,6 +9,7 @@ bot.library(require('./second_mission/conclusion'));
 
 const emoji = require('node-emoji');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
+const custom = require('../misc/custom_intents');
 
 const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
@@ -56,6 +57,7 @@ library.dialog('/', [
 
 library.dialog('/currentMission', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		UserMission.findAll({
 			where: {
 				user_id: user.id,

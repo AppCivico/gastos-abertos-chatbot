@@ -273,7 +273,6 @@ library.dialog('/askText', [ // asks user for text message
 
 library.dialog('/sendingMessage', [ // sends text message
 	(session, args) => {
-		console.log(`asdjfasdfasdjfjasdfjasdjfjasd:${Object.entries(session.dialogStack()[session.dialogStack().length - 1])}`);
 		if (!args) {
 			messageText = '<<Mensagem proativa de teste>>';
 		} else {
