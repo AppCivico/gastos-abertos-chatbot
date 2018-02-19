@@ -59,12 +59,12 @@ bot.dialog('/', [
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		// TODO teste sem ID
 		session.userData = {}; // for testing purposes
-		// session.userData.userid = session.message.sourceEvent.sender.id;
+		session.userData.userid = session.message.sourceEvent.sender.id;
 		// session.userData.pageid = session.message.sourceEvent.recipient.id;
 		// session.userData.pageToken = pageToken;
 
 		// hardcoded ids for testing purposes
-		session.userData.userid = '100004770631443';
+		// session.userData.userid = '100004770631443';
 		session.userData.pageToken = pageToken;
 
 		// default value: 'undefined'. Yes, it's only a string.
