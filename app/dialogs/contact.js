@@ -7,9 +7,9 @@ const Trello = require('trello');
 
 const trello = new Trello(process.env.TRELLO_API_KEY, process.env.TRELLO_USER_TOKEN);
 
-const custom = require('../misc/custom_intents');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
+const custom = require('../misc/custom_intents');
 
 const library = new builder.Library('contact');
 

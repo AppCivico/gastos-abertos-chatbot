@@ -6,6 +6,7 @@ bot.library(require('./conclusion'));
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
+const custom = require('../../misc/custom_intents');
 
 const Contact = 'Entrar em contato';
 const Restart = 'Voltar para o início';
@@ -13,6 +14,7 @@ const Conclusion = 'Concluir a missão';
 
 library.dialog('/', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.send(texts.first_mission.details);
 
 		builder.Prompts.choice(

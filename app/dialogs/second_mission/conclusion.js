@@ -12,6 +12,7 @@ const answers = {
 };
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
+const custom = require('../../misc/custom_intents');
 
 // const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -28,6 +29,7 @@ let user;
 
 library.dialog('/', [
 	(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		if (!args.user && args.user_mission) {
 			session.send('Ooops, houve algum problema, vamos voltar para o início.');
 			session.endDialog();
@@ -69,8 +71,7 @@ library.dialog('/', [
 
 library.dialog('/secondMissionQuestions', [
 	(session) => {
-		// (session, args) => {
-
+		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -155,7 +156,7 @@ library.dialog('/secondMissionQuestions', [
 
 library.dialog('/conclusion', [
 	(session) => {
-		//		(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		UserMission.update({
 			completed: true,
 			metadata: answers,
@@ -184,6 +185,7 @@ library.dialog('/conclusion', [
 
 library.dialog('/congratulations', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo dessa tarefa! ' +
 		`\n\nAposto que você e eu aprendemos muitas coisas novas nesse processo! ${emoji.get('slightly_smiling_face').repeat(2)}` +
 		'\n\nDarei a você uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!');

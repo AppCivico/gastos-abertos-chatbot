@@ -8,6 +8,7 @@ bot.library(require('./details'));
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
+const custom = require('../../misc/custom_intents');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -26,6 +27,7 @@ let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
 		console.log(`args.User : ${args.UserData}`);
 		missionUser = args.user_mission;
@@ -69,6 +71,7 @@ library.dialog('/', [
 
 library.dialog('/promptButtons', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
 			'Posso te ajudar com mais alguma coisa?',
@@ -108,6 +111,7 @@ library.dialog('/promptButtons', [
 
 library.dialog('/moreDetails', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		session.send(texts.first_mission.details);
 		builder.Prompts.choice(
 			session,

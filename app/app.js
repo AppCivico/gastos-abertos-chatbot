@@ -55,10 +55,10 @@ bot.beginDialogAction('reset', '/reset');
 
 bot.dialog('/', [
 	(session) => {
-		session.userData = {}; // for testing purposes
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		// TODO teste sem ID
-		session.userData.userid = session.message.sourceEvent.sender.id;
+		session.userData = {}; // for testing purposes
+		// session.userData.userid = session.message.sourceEvent.sender.id;
 		// session.userData.pageid = session.message.sourceEvent.recipient.id;
 		// session.userData.pageToken = pageToken;
 
@@ -96,7 +96,6 @@ bot.dialog('/', [
 					console.log(`Was created? => ${created}`);
 				})) // eslint-disable-line comma-dangle
 		);
-		console.log(`asdjfasdfasdjfjasdfjasdjfjasd:${Object.entries(session.dialogStack())}`);
 		session.replaceDialog('/getStarted');
 	},
 ]);

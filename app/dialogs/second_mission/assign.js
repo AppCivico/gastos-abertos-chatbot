@@ -15,13 +15,16 @@ const NotYet = 'Ainda não';
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
+const custom = require('../../misc/custom_intents');
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let MissionUser;
 
 library.dialog('/', [
-	(session) => {
+	(session, args) => {
+		[user] = [args.user];
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
 			'Agora, vamos ver nossa segunda missão?',
@@ -36,7 +39,7 @@ library.dialog('/', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
-			session.replaceDialog('/assign');
+			session.replaceDialog('/assign', { user });
 			break;
 		default: // No
 			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);
@@ -51,6 +54,7 @@ library.dialog('/', [
 
 library.dialog('/assign', [
 	(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
 		MissionUser = args.user_mission;
 		UserMission.create({
@@ -86,7 +90,7 @@ library.dialog('/assign', [
 			break;
 		default: // NotYet
 			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);
-			session.endDialog();
+			session.replaceDialog('*:/getStarted');
 			break;
 		}
 	},
