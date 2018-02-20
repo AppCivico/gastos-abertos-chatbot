@@ -110,6 +110,7 @@ library.dialog('/transparencyPortalExists', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
+		session.send(`Agora vamos avaliar o portal de transparêcia no seu município! ${emoji.get('slightly_smiling_face')}`);
 		session.send("Caso você queira deixar para outra hora, basta digitar 'começar' e eu te levarei para o início.");
 		builder.Prompts.choice(
 			session,

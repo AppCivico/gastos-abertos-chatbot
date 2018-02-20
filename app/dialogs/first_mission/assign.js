@@ -9,6 +9,7 @@ const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 const custom = require('../../misc/custom_intents');
 
+const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 const emoji = require('node-emoji');
 
@@ -18,6 +19,9 @@ const No = 'Não';
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let missionUser;
+
+let userCity;
+let userState;
 
 library.dialog('/', [
 	(session, args) => {
@@ -29,7 +33,8 @@ library.dialog('/', [
 			mission_id: 1,
 		}).then(() => {
 			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
-			session.beginDialog('/moreDetails');
+			session.send(texts.first_mission.details);
+			session.beginDialog('/askState');
 		}).catch((err) => {
 			console.log(`Error creating user mission: ${err}`);
 			session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde ou entre em contato conosco.' +
@@ -42,10 +47,56 @@ library.dialog('/', [
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
+library.dialog('/askState', [
+	(session) => {
+		custom.updateSession(session.userData.userid, session);
+		session.sendTyping();
+		session.beginDialog('validators:state', {
+			prompt: `Qual é o estado(sigla) que você mora? ${emoji.get('flag-br')}`,
+			retryPrompt: retryPrompts.state,
+			maxRetries: 10,
+		});
+	},
+
+	(session, args) => {
+		userState = args.response;
+		session.replaceDialog('/askCity');
+	},
+]);
+
+library.dialog('/askCity', [
+	(session) => {
+		custom.updateSession(session.userData.userid, session);
+		session.sendTyping();
+		builder.Prompts.text(session, `Qual é o município que você representará? ${emoji.get('cityscape')}`);
+	},
+
+	(session, args) => {
+		userCity = args.response;
+		User.update({
+			state: userState.toUpperCase(),
+			city: userCity,
+		}, {
+			where: {
+				fb_id: session.userData.userid,
+			},
+			returning: true,
+		})
+			.then(() => {
+				console.log('User address updated sucessfuly');
+			})
+			.catch((err) => {
+				console.log(err);
+				throw err;
+			});
+		session.replaceDialog('/moreDetails');
+	},
+]);
+
+
 library.dialog('/moreDetails', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
-		session.send(texts.first_mission.details);
 		builder.Prompts.choice(
 			session,
 			'Quer o link para alguns portais de transparência para usar como referência?',
