@@ -50,6 +50,7 @@ const custom = require('./misc/custom_intents');
 
 const { pageToken } = process.env;
 const { emulatorUser } = process.env;
+const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
@@ -65,6 +66,12 @@ bot.dialog('/', [
 			// hardcoded ids for testing purposes
 			session.userData.userid = emulatorUser;
 			session.userData.pageToken = pageToken;
+		}
+
+		// checks if user should be an admin using the ID
+		let isItAdmin = false;
+		if (adminArray.includes(session.userData.userid)) {
+			isItAdmin = true;
 		}
 
 		// default value: 'undefined'. Yes, it's only a string.
@@ -84,6 +91,7 @@ bot.dialog('/', [
 					approved: true,
 					fb_id: result.id,
 					fb_name: `${result.first_name} ${result.last_name}`,
+					admin: isItAdmin,
 					session: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
 			}).spread((user, created) => {
