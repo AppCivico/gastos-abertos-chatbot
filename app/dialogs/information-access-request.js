@@ -85,8 +85,12 @@ library.dialog('/', [
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
 			session.send('Além disso, você pode a qualquer momento digitar \'cancelar\' e eu te levo para o início');
 		} else {
-			session.send('Você está gerando um pedido de acesso à informação, que poderá ser encaminhado a prefeitura de seu ' +
-			'município quando estão faltando informações nos portais de transparência.');
+			// session.send('Você está gerando um pedido de acesso à informação, que poderá ' +
+			// 'ser encaminhado a prefeitura de seu município quando estão '+
+			// 'faltando informações nos portais de transparência.');
+			session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
+			'isto, irei lhe fazer diversas perguntas, e não se preocupe se não' +
+			'souber. Caso você não encontrar ou não ter certeza, sua resposta deve ser NÃO, ok?');
 		}
 		session.beginDialog('/looseRequest');
 	},

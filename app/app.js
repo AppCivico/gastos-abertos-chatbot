@@ -26,7 +26,6 @@ const No = 'Não';
 
 let menuMessage;
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
-
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -50,6 +49,7 @@ const custom = require('./misc/custom_intents');
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
 const { pageToken } = process.env;
+const { emulatorUser } = process.env;
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
@@ -57,15 +57,15 @@ bot.beginDialogAction('reset', '/reset');
 bot.dialog('/', [
 	(session) => {
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
-		// TODO teste sem ID
-		session.userData = {}; // for testing purposes
-		session.userData.userid = session.message.sourceEvent.sender.id;
-		// session.userData.pageid = session.message.sourceEvent.recipient.id;
-		// session.userData.pageToken = pageToken;
-
-		// hardcoded ids for testing purposes
-		// session.userData.userid = '100004770631443';
-		session.userData.pageToken = pageToken;
+		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
+		if (session.message.address.channelId === 'facebook') {
+			session.userData.userid = session.message.sourceEvent.sender.id;
+			session.userData.pageid = session.message.sourceEvent.recipient.id;
+		} else {
+			// hardcoded ids for testing purposes
+			session.userData.userid = emulatorUser;
+			session.userData.pageToken = pageToken;
+		}
 
 		// default value: 'undefined'. Yes, it's only a string.
 		custom.userFacebook(
@@ -86,18 +86,18 @@ bot.dialog('/', [
 					fb_name: `${result.first_name} ${result.last_name}`,
 					session: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
-			})
-				.spread((user, created) => {
-					console.log(user.get({
-						plain: true,
-					}));
-					if (user.get('admin') === true) { // shows hidden admin menu
-						menuOptions.push(sendMessage);
-					}
-					console.log(`Was created? => ${created}`);
-				})) // eslint-disable-line comma-dangle
+			}).spread((user, created) => {
+				console.log(user.get({ plain: true })); // prints user data
+				console.log(`Was created? => ${created}`);
+
+				if (user.get('admin') === true) { // adds hidden adimn menu to options
+					menuOptions.push(sendMessage);
+				}
+				session.replaceDialog('/getStarted');
+			}).catch(() => {
+				session.replaceDialog('/promptButtons');
+			})) // eslint-disable-line comma-dangle
 		);
-		session.replaceDialog('/getStarted');
 	},
 ]);
 
@@ -120,7 +120,18 @@ bot.dialog('/getStarted', [
 			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
-			session.replaceDialog('/askPermission');
+			User.findOne({ // checks if user has an address and asks permission if he doesn't
+				attributes: ['address'],
+				where: { fb_id: session.userData.userid },
+			}).then((user) => {
+				if (user.address === null) {
+					session.replaceDialog('/askPermission');
+				} else {
+					session.replaceDialog('/promptButtons');
+				}
+			}).catch(() => {
+				session.replaceDialog('/promptButtons');
+			});
 		} else { // welcome back
 			menuMessage = 'Como posso te ajudar?';
 			User.findOne({

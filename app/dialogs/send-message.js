@@ -38,23 +38,24 @@ let userDialog; // user's last active dialog
 // 	bot.send(textMessage);
 // }
 
-function startProactiveImage(address, customMessage, customImage) {
+function startProactiveImage(user, customMessage, customImage) {
 	try {
 		msgCount = +1;
-		const textMessage = new builder.Message().address(address);
-		textMessage.text(customMessage);
-		textMessage.textLocale('pt-BR');
-		const image = new builder.Message().address(address);
+		const image = new builder.Message().address(user.address);
 		image.addAttachment({
 			contentType: 'image/jpeg',
 			contentUrl: customImage,
 		});
+		const textMessage = new builder.Message().address(user.address);
+		textMessage.text(customMessage);
+		textMessage.textLocale('pt-BR');
 		bot.send(image);
 		bot.send(textMessage);
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
-	bot.beginDialog(address, '*:/askingPermission');
+	bot.beginDialog(user.address, user.session);
+	// bot.beginDialog(address, '*:/askingPermission');
 }
 
 function startProactiveDialog(user, customMessage) {
@@ -71,6 +72,8 @@ function startProactiveDialog(user, customMessage) {
 	// bot.beginDialog(user.address, '*:/askingPermission', { userDialog: user.session });
 }
 
+// TODO rever esse fluxo
+// Adicionar opção para retornar ao fluxo normal
 bot.dialog('/askingPermission', [
 	(session, args) => {
 		[userDialog] = [args.userDialog];
@@ -214,7 +217,7 @@ library.dialog('/sendingImage', [ // sends image and text message
 		[messageText] = [args.messageText];
 		[imageUrl] = [args.imageUrl];
 		User.findAll({
-			attributes: ['fb_name', 'address'],
+			attributes: ['address', 'session'],
 			where: {
 				address: {
 					$ne: null,
@@ -226,7 +229,7 @@ library.dialog('/sendingImage', [ // sends image and text message
 		}).then((user) => {
 			user.forEach((element) => {
 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				startProactiveImage(element.dataValues.address, messageText, imageUrl);
+				startProactiveImage(element.dataValues, messageText, imageUrl);
 			});
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');
@@ -280,7 +283,7 @@ library.dialog('/sendingMessage', [ // sends text message
 			[messageText] = [args.messageText];
 		}
 		User.findAll({
-			attributes: ['fb_name', 'address', 'session'],
+			attributes: ['address', 'session'],
 			where: {
 				address: {
 					$ne: null,
