@@ -58,7 +58,7 @@ bot.dialog('/', [
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		// TODO teste sem ID
 		session.userData = {}; // for testing purposes
-		// session.userData.userid = session.message.sourceEvent.sender.id;
+		session.userData.userid = session.message.sourceEvent.sender.id;
 		// session.userData.pageid = session.message.sourceEvent.recipient.id;
 		// session.userData.pageToken = pageToken;
 
