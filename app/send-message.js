@@ -2,7 +2,7 @@
 
 const library = new builder.Library('sendMessage');
 
-const User = require('../server/schema/models').user;
+const User = require('./server/schema/models').user;
 
 const writeMsg = 'Escrever Mensagem';
 const imageMsg = 'Mensagem com Imagem';
@@ -17,26 +17,6 @@ let messageText; // custom message text
 let imageUrl; // desired image url
 let msgCount; // counts number of messages sent
 let userDialog; // user's last active dialog
-
-// function sendProactiveMessage(address, customMessage) {
-// 	const msg = new builder.Message().address(address);
-// 	msg.textLocale('pt-BR');
-// 	msg.text(customMessage);
-// 	bot.send(msg);
-// }
-
-// function sendProactiveImage(address, customMessage, customImage) {
-// 	const textMessage = new builder.Message().address(address);
-// 	textMessage.text(customMessage);
-// 	textMessage.textLocale('pt-BR');
-// 	const image = new builder.Message().address(address);
-// 	image.addAttachment({
-// 		contentType: 'image/jpeg',
-// 		contentUrl: customImage,
-// 	});
-// 	bot.send(image);
-// 	bot.send(textMessage);
-// }
 
 function startProactiveImage(user, customMessage, customImage) {
 	try {
@@ -53,9 +33,9 @@ function startProactiveImage(user, customMessage, customImage) {
 		bot.send(textMessage);
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
+	} finally {
+		bot.beginDialog(user.address, '*:/confirm', { userDialog: user.session });
 	}
-	bot.beginDialog(user.address, user.session);
-	// bot.beginDialog(address, '*:/askingPermission');
 }
 
 function startProactiveDialog(user, customMessage) {
@@ -68,62 +48,77 @@ function startProactiveDialog(user, customMessage) {
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
-	bot.beginDialog(user.address, user.session);
-	// bot.beginDialog(user.address, '*:/askingPermission', { userDialog: user.session });
+	bot.beginDialog(user.address, '*:/confirm', { userDialog: user.session });
 }
 
-// TODO rever esse fluxo
-// Adicionar opção para retornar ao fluxo normal
-bot.dialog('/askingPermission', [
+bot.dialog('/confirm', [
 	(session, args) => {
 		[userDialog] = [args.userDialog];
 		builder.Prompts.choice(
-			session, 'Se você não desejar mais ver essas mensagens, escolha \'Parar\' abaixo',
-			[keepMessage, stopMessage],
+			session, 'Você pode desativar mensagens automáticas como a de cima no menu de Informações.', 'Ok',
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: 'Escolha uma das opções abaixo. Escolha \'Parar\' para não receber novas mensagens.',
 			} // eslint-disable-line comma-dangle
 		);
 	},
-	(session, result, next) => {
-		if (result.response) {
-			switch (result.response.entity) {
-			case stopMessage:
-				User.update({
-					address: null,
-				}, {
-					where: {
-						fb_id: session.userData.userid,
-					},
-					returning: true,
-				})
-					.then(() => {
-						session.send('Pronto! Você não receberá mais as mensagens.' +
-						'\n\nSe desejar se vincular novamente, vá para o menu de Informações.');
-						console.log('User address erased sucessfuly');
-					})
-					.catch((err) => {
-						session.send('Epa! Tive um problema técnico e não consegui te desvincular!' +
-						'\n\nVocê pode tentar se desvincular mais tarde no menu de Informações.');
-						console.log(err);
-						throw err;
-					});
-				break;
-			default: // keepMessage
-				session.send('Legal! Agradecemos seu interesse!');
-				break;
-			}
-			session.send('Vamos voltar pro fluxo normal...');
-			next();
-		}
-	},
 	(session) => {
-		console.log(`Estariamos indo para => ${userDialog}`);
+		session.send('Voltando pro fluxo normal...');
 		session.replaceDialog(userDialog);
-		// session.endDialog();
 	},
 ]);
+
+// TODO rever esse fluxo
+// bot.dialog('/askingPermission', [
+// 	(session, args) => {
+// 		[userDialog] = [args.userDialog];
+// 		builder.Prompts.choice(
+// 			session, 'Se você não desejar mais ver essas mensagens, escolha \'Parar\' abaixo',
+// 			[keepMessage, stopMessage],
+// 			{
+// 				listStyle: builder.ListStyle.button,
+// 				retryPrompt: 'Escolha uma das opções abaixo. Escolha \'Parar\' '+
+//        'para não receber novas mensagens.',
+// 			} // eslint-disable-line comma-dangle
+// 		);
+// 	},
+// 	(session, result, next) => {
+// 		if (result.response) {
+// 			switch (result.response.entity) {
+// 			case stopMessage:
+// 				User.update({
+// 					address: null,
+// 				}, {
+// 					where: {
+// 						fb_id: session.userData.userid,
+// 					},
+// 					returning: true,
+// 				})
+// 					.then(() => {
+// 						session.send('Pronto! Você não receberá mais as mensagens.' +
+// 						'\n\nSe desejar se vincular novamente, vá para o menu de Informações.');
+// 						console.log('User address erased sucessfuly');
+// 					})
+// 					.catch((err) => {
+// 						session.send('Epa! Tive um problema técnico e não consegui te desvincular!' +
+// 						'\n\nVocê pode tentar se desvincular mais tarde no menu de Informações.');
+// 						console.log(err);
+// 						throw err;
+// 					});
+// 				break;
+// 			default: // keepMessage
+// 				session.send('Legal! Agradecemos seu interesse!');
+// 				break;
+// 			}
+// 			session.send('Vamos voltar pro fluxo normal...');
+// 			next();
+// 		}
+// 	},
+// 	(session) => {
+// 		console.log(`Estariamos indo para => ${userDialog}`);
+// 		session.replaceDialog(userDialog);
+// 		// session.endDialog();
+// 	},
+// ]);
 
 library.dialog('/', [
 	(session) => {
