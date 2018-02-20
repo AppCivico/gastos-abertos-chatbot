@@ -6,7 +6,6 @@ module.exports = {
 	recognize: (context, callback) => {
 		const request = app.textRequest(context.message.text, {
 			sessionId: Math.random(),
-			language: 'pt-BR',
 		});
 
 		request.on('response', (response) => {

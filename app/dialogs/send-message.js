@@ -67,7 +67,8 @@ function startProactiveDialog(user, customMessage) {
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
-	bot.beginDialog(user.address, '*:/askingPermission', { userDialog: user.session });
+	bot.beginDialog(user.address, user.session);
+	// bot.beginDialog(user.address, '*:/askingPermission', { userDialog: user.session });
 }
 
 bot.dialog('/askingPermission', [

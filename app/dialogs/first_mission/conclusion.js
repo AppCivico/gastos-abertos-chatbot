@@ -228,8 +228,7 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
-		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.' +
-	`\n\n Se não souber, basta digitar 'Não sei'. ${emoji.get('slightly_smiling_face')}`);
+		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
 	},
 	(session, args) => {
 		answers.transparencyPortalFinancialDataFormats = args.response;
