@@ -7,7 +7,7 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-const Timer = require('./misc/timer');
+const Timer = require('./timer');
 
 bot.library(require('./dialogs/send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
@@ -103,7 +103,6 @@ bot.dialog('/', [
 
 bot.dialog('/getStarted', [
 	(session) => {
-		Timer.timer(55);
 		session.sendTyping();
 		if (!session.userData.firstRun) { // first run
 			menuMessage = 'Vamos lá, como posso te ajudar?';
@@ -171,7 +170,7 @@ bot.dialog('/promptButtons', [
 		}
 	},
 	(session) => {
-		session.replaceDialog('/getStarted');
+		session.replaceDialog('/promptButtons');
 	},
 ]);
 // ]).customAction({
