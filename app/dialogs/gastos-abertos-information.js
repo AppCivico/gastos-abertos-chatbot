@@ -11,7 +11,7 @@ const library = new builder.Library('gastosAbertosInformation');
 const accessLaw = 'Dados abertos?';
 const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
-const receiveMessage = 'Receber Mensagem';
+const receiveMessage = 'Receber Mensagens?';
 let receiveDialog;
 let receiveYes;
 let receiveNo;
@@ -48,13 +48,13 @@ library.dialog('/promptButtons', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case accessLaw:
-				session.beginDialog('/accessLaw');
+				session.replaceDialog('/accessLaw');
 				break;
 			case receiveMessage:
-				session.beginDialog('/receiveMessage');
+				session.replaceDialog('/receiveMessage');
 				break;
 			case contact:
-				session.beginDialog('contact:/');
+				session.replaceDialog('contact:/');
 				break;
 			default: // reset
 				session.endDialog();
