@@ -140,7 +140,6 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
-		Timer.timer(55);
 		builder.Prompts.choice(
 			session, menuMessage,	menuOptions,
 			{
@@ -151,6 +150,7 @@ bot.dialog('/promptButtons', [
 	},
 
 	(session, result) => {
+		Timer.timer(62);
 		session.sendTyping();
 		if (result.response) {
 			switch (result.response.entity) {

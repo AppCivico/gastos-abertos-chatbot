@@ -93,7 +93,6 @@ library.dialog('/askCity', [
 	},
 ]);
 
-
 library.dialog('/moreDetails', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);

@@ -17,19 +17,16 @@ function sendWarning(address) {
 }
 
 const timer = (missionId) => {
-	console.log('i am here');
 	UserMission.findOne({
 		attributes: ['createdAt', 'updatedAt', 'completed', 'user_id'],
 		where: { id: missionId },
 	}).then((misionData) => {
-		console.log(`resultado: ${misionData.updatedAt - misionData.createdAt}`);
-		if (misionData.completed === false && executedAlready === false) {
+		if (misionData.completed === false) {
 			User.findOne({
 				attributes: ['address', 'session'],
 				where: { id: misionData.user_id },
 			}).then((userData) => {
-				console.log('i am here222');
-				sendWarning(userData.address, userData.session);
+				sendWarning(userData.address);
 			}).catch(() => {
 				console.log('Coundn\'t find User');
 			});
