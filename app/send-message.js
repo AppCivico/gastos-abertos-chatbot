@@ -18,6 +18,20 @@ let imageUrl; // desired image url
 let msgCount; // counts number of messages sent
 let userDialog; // user's last active dialog
 
+function messagePedido(user, customMessage) {
+	try {
+		msgCount = +1;
+		const textMessage = new builder.Message().address(user.address);
+		textMessage.text(customMessage);
+		textMessage.textLocale('pt-BR');
+		bot.send(textMessage);
+	} catch (err) {
+		console.log(`Erro ao enviar mensagem: ${err}`);
+	} finally {
+		bot.send('Obs, essa foi uma mensagem automática de informação. Você já está no fluxo normal.');
+	}
+}
+
 function startProactiveImage(user, customMessage, customImage) {
 	try {
 		msgCount = +1;
@@ -225,9 +239,9 @@ library.dialog('/sendingImage', [ // sends image and text message
 			user.forEach((element) => {
 				if (!element.dataValues.session.match(/informationAccessRequest*/i)) {
 					console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-					startProactiveImage(element.dataValues, messageText);
+					startProactiveImage(element.dataValues, messageText, imageUrl);
 				} else {
-					console.log('Não fomos');
+					messagePedido(element.dataValues, messageText);
 				}
 			});
 		}).catch((err) => {
@@ -297,7 +311,7 @@ library.dialog('/sendingMessage', [ // sends text message
 					console.log(`Usuário: ${Object.entries(element.dataValues)}`);
 					startProactiveDialog(element.dataValues, messageText);
 				} else {
-					console.log('Não fomos');
+					messagePedido(element.dataValues, messageText);
 				}
 			});
 		}).catch((err) => {
