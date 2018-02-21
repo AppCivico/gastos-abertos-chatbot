@@ -10,6 +10,8 @@ const Base64File = require('js-base64-file');
 const emoji = require('node-emoji');
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
+const custom = require('../misc/custom_intents');
+
 const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
 const infoRequest = require('../server/schema/models').user_information_access_request;
@@ -64,6 +66,7 @@ const headers = {
 
 library.dialog('/', [
 	(session, args) => {
+		custom.updateSession(session.userData.userid, session);
 		if (args && args.user && args.user_mission) {
 			[user] = [args.user];
 			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
@@ -87,6 +90,7 @@ library.dialog('/', [
 
 library.dialog('/askLAI', [
 	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		// questionNumber shows the question number in each question(disabled 2 rules for this)
 		session.userData.questionNumber = 1; // reseting value
 		session.sendTyping();
@@ -129,7 +133,7 @@ library.dialog('/askLAI', [
 	},
 
 	// Start of testing comment ----------
-	/*
+
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
@@ -405,7 +409,7 @@ library.dialog('/askLAI', [
 		);
 	},
 	// End of testing comment ----------
-*/
+
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
@@ -416,9 +420,31 @@ library.dialog('/askLAI', [
 			' função, subfunção, programa, ação, valor liquidado e valor empenhado\n\n</p>');
 			break;
 		}
+
+		// checks if users full name alrealdy exists
+		User.findOne({
+			attributes: ['name'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			if (userData.name === 'undefined' || userData.name === null) {
+				session.replaceDialog('/askFullName');
+			} else {
+				session.replaceDialog('/generateRequest');
+			}
+		}).catch(() => {
+			session.replaceDialog('/askFullName');
+		});
+	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+});
+
+
+library.dialog('/askFullName', [
+	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
-
 	(session, args) => {
 		answers.requesterName = args.response;
 		User.update({
@@ -435,22 +461,32 @@ library.dialog('/askLAI', [
 			.catch((err) => {
 				console.log(err);
 				throw err;
+			}).finally(() => {
+				session.beginDialog('/generateRequest');
 			});
+	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+});
 
+library.dialog('/generateRequest', [
+	(session) => {
+		custom.updateSession(session.userData.userid, session);
 		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em'; // style config that will be used for the html creation
 		const html = `<p style="${styleDiv}">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011,` +
-			' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
-			' e na Lei Complementar 131, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em' +
-			` página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="${styleDiv}">${itens.join('')}` +
-			`</div><div style="${styleDiv}"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível,` +
-			' solicito que a impossibilidade de apresentação de informações seja motivada, sob pena de responsabilidade, ' +
-			' e que a série histórica mais longa disponível à Prefeitura das informações seja disponibilizada em página oficial na internet ' +
-			' e que acompanhe a resposta a esta solicitação.</p></div>';
+		' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
+		' e na Lei Complementar 131, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em' +
+		` página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="${styleDiv}">${itens.join('')}` +
+		`</div><div style="${styleDiv}"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível,` +
+		' solicito que a impossibilidade de apresentação de informações seja motivada, sob pena de responsabilidade, ' +
+		' e que a série histórica mais longa disponível à Prefeitura das informações seja disponibilizada em página oficial na internet ' +
+		' e que acompanhe a resposta a esta solicitação.</p></div>';
 
 		pdf.create(html).toStream((err, stream) => {
 			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${answers.requesterName}_LAI.pdf`));
 			file = pdfFile.path;
 
+			// TODO is this question necessary?
 			builder.Prompts.choice(
 				session,
 				'Muito bem! Acabamos! Vamos gerar seu pedido?',
@@ -464,21 +500,17 @@ library.dialog('/askLAI', [
 		itens.length = 0;
 	},
 
-	(session, args) => {
+	(session, args, next) => {
 		switch (args.response.entity) {
 		case HappyYes:
-			session.beginDialog('/generateRequest');
+			next();
 			break;
 		default: // Unhappy
 			session.send('Ocorreu um erro.');
 			break;
 		}
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-});
 
-library.dialog('/generateRequest', [
 	(session) => {
 		let data = generatedRequest.loadSync(path, file.slice(5));
 		data = JSON.stringify(data);
