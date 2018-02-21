@@ -1,7 +1,7 @@
-/* global  bot:true builder:true */
+/* global  builder:true */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 /* eslint no-plusplus: 0 */
-
-bot.library(require('./contact'));
 
 const request = require('request');
 const pdf = require('html-pdf');
@@ -21,10 +21,8 @@ const Denial = 'Ainda não';
 const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos lá!';
-const Contact = 'Entrar em contato';
 const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
-let questionNumber; // shows the question number in each question(disabled no-plusplus for this)
 
 let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
@@ -50,18 +48,7 @@ const answers = {
 	expensesFile: '0',
 };
 
-const itens = [];
-
-let options = {
-	border: {
-		top: '5em',
-		right: '3.5em',
-		bottom: '3.5em',
-		left: '3em',
-	},
-
-	'font-size': '10px',
-};
+let itens = []; // eslint-disable-line prefer-const
 
 const generatedRequest = new Base64File();
 const path = '/tmp/';
@@ -89,18 +76,19 @@ library.dialog('/', [
 			// 'ser encaminhado a prefeitura de seu município quando estão '+
 			// 'faltando informações nos portais de transparência.');
 			session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
-			'isto, irei lhe fazer diversas perguntas, e não se preocupe se não' +
+			'isto, irei lhe fazer diversas perguntas, e não se preocupe se não ' +
 			'souber. Caso você não encontrar ou não ter certeza, sua resposta deve ser NÃO, ok?');
 		}
-		session.beginDialog('/looseRequest');
+		session.beginDialog('/askLAI');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
-library.dialog('/looseRequest', [
+library.dialog('/askLAI', [
 	(session) => {
-		questionNumber = 1; // reseting value
+		// questionNumber shows the question number in each question(disabled 2 rules for this)
+		session.userData.questionNumber = 1; // reseting value
 		session.sendTyping();
 		session.send('Irei te perguntar se o site permite que você identifique todos os seguintes itens:' +
 						'\n\n\n - Qual o número do processo que deu origem aquele gasto;' +
@@ -122,7 +110,7 @@ library.dialog('/looseRequest', [
 		switch (args.response.entity) {
 		case Generate:
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
-			currentQuestion = `${questionNumber++} - Seu município identifica de onde vêm os recursos que ele recebe? ` +
+			currentQuestion = `${session.userData.questionNumber++} - Seu município identifica de onde vêm os recursos que ele recebe? ` +
 			'\n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.';
 			builder.Prompts.choice(
 				session, currentQuestion,
@@ -140,6 +128,8 @@ library.dialog('/looseRequest', [
 		}
 	},
 
+	// Start of testing comment ----------
+	/*
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
@@ -151,7 +141,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência disponibiliza dados referentes a remuneração de ` +
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência disponibiliza dados referentes a remuneração de ` +
 		'cada um dos agentes públicos, individualizada?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -162,7 +152,6 @@ library.dialog('/looseRequest', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
@@ -174,7 +163,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência disponibiliza: a relação de pagamentos de diárias, ` +
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência disponibiliza: a relação de pagamentos de diárias, ` +
 		'a aquisição de passagens aéreas e adiantamento de despesas?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -196,7 +185,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência disponibiliza as despesas realizadas com cartões corporativos em nome da prefeitura?`;
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência disponibiliza as despesas realizadas com cartões corporativos em nome da prefeitura?`;
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -217,7 +206,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion =	`${questionNumber++} - O portal de transparência disponibiliza os valores referentes às verbas de representação,` +
+		currentQuestion =	`${session.userData.questionNumber++} - O portal de transparência disponibiliza os valores referentes às verbas de representação,` +
 		'de gabinete e reembolsáveis de qualquer natureza?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -239,7 +228,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, com indicação das ` +
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, com indicação das ` +
 		'licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -262,7 +251,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e ` +
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e ` +
 		'inexigibilidade de licitações, com respectivas fundamentações?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -284,8 +273,8 @@ library.dialog('/looseRequest', [
 			'com respectivas fundamentações</p>');
 			break;
 		}
-		session.send(`Ufa! Não desanime, parceiro. Faltam apenas ${14 - questionNumber} perguntas para finalizar seu pedido. ${emoji.get('wink')}`);
-		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização do controle de estoque da prefeitura, ` +
+		session.send(`Ufa! Não desanime, parceiro. Faltam apenas ${14 - session.userData.questionNumber} perguntas para finalizar seu pedido. ${emoji.get('wink')}`);
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência realiza a disponibilização do controle de estoque da prefeitura, ` +
 		'com lista de entradas e saídas de bens patrimoniais, além da relação de cessões, permutas e doação de bens?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -308,7 +297,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas ` +
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas ` +
 		'que deram origem a pagamentos?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -330,7 +319,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização do plano plurianual; ` +
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência realiza a disponibilização do plano plurianual; ` +
 		'da lei de diretrizes orçamentárias; da lei orçamentária?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -352,7 +341,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização dos relatórios Resumido de Execução Orçamentária; ` +
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência realiza a disponibilização dos relatórios Resumido de Execução Orçamentária; ` +
 					'Relatórios de Gestão Fiscal; Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões: ' +
 					' 		\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
 					'			\n\nii) Demonstrativo de Aplicação na Área de Saúde;' +
@@ -382,7 +371,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização dos extratos de conta única?`;
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência realiza a disponibilização dos extratos de conta única?`;
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -403,7 +392,7 @@ library.dialog('/looseRequest', [
 			break;
 		}
 
-		currentQuestion = `${questionNumber++} - O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato ` +
+		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato ` +
 		'legível por máquina incluindo as colunas: função, subfunção, programa, ação, valor liquidado e valor empenhado?';
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -415,7 +404,8 @@ library.dialog('/looseRequest', [
 			} // eslint-disable-line comma-dangle
 		);
 	},
-
+	// End of testing comment ----------
+*/
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
@@ -426,11 +416,11 @@ library.dialog('/looseRequest', [
 			' função, subfunção, programa, ação, valor liquidado e valor empenhado\n\n</p>');
 			break;
 		}
-		questionNumber = 1;
 		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
 
 	(session, args) => {
+		answers.requesterName = args.response;
 		User.update({
 			name: args.response,
 		}, {
@@ -447,17 +437,18 @@ library.dialog('/looseRequest', [
 				throw err;
 			});
 
-		const html = `<p style="font-size:7pt">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011, e na Lei Complementar 131,` +
+		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em'; // style config that will be used for the html creation
+		const html = `<p style="${styleDiv}">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011,` +
 			' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
-			' que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em página oficial na internet desde o momento ' +
-			`em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="font-size:7pt"">${itens.join('')}` +
-			'</div><div style="font-size:7pt"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível,' +
+			' e na Lei Complementar 131, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em' +
+			` página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="${styleDiv}">${itens.join('')}` +
+			`</div><div style="${styleDiv}"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível,` +
 			' solicito que a impossibilidade de apresentação de informações seja motivada, sob pena de responsabilidade, ' +
 			' e que a série histórica mais longa disponível à Prefeitura das informações seja disponibilizada em página oficial na internet ' +
 			' e que acompanhe a resposta a esta solicitação.</p></div>';
 
 		pdf.create(html).toStream((err, stream) => {
-			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${answers.requesterName}LAI.pdf`));
+			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${answers.requesterName}_LAI.pdf`));
 			file = pdfFile.path;
 
 			builder.Prompts.choice(
@@ -470,7 +461,6 @@ library.dialog('/looseRequest', [
 				} // eslint-disable-line comma-dangle
 			);
 		});
-
 		itens.length = 0;
 	},
 
@@ -493,9 +483,9 @@ library.dialog('/generateRequest', [
 		let data = generatedRequest.loadSync(path, file.slice(5));
 		data = JSON.stringify(data);
 		// Uploading the generated PDF to MailChimp
-		const dataString = `{"name":"${answers.requesterName}LAI.pdf" , "file_data":${data}}`;
+		const dataString = `{"name":"${answers.requesterName}_LAI.pdf" , "file_data":${data}}`;
 
-		options = {
+		const options = {
 			url: apiUri,
 			method: 'POST',
 			headers,
@@ -507,12 +497,8 @@ library.dialog('/generateRequest', [
 		};
 
 		function callback(error, response, body) {
-			// TODO teste
-			// if (error) {
-			// const obj = 'testeteste';
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
-
 				console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
@@ -559,7 +545,6 @@ library.dialog('/generateRequest', [
 							}).catch((err) => {
 								console.log(`Couldn't save request :( -> ${err})`);
 							});
-
 							console.log(`${result} Mission updated successfully`);
 							session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
 							session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
@@ -569,7 +554,7 @@ library.dialog('/generateRequest', [
 							builder.Prompts.choice(
 								session,
 								`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-								[Contact, goBack],
+								[goBack],
 								{
 									listStyle: builder.ListStyle.button,
 									retryPrompt: retryPrompts.choice,
@@ -586,9 +571,8 @@ library.dialog('/generateRequest', [
 					builder.Prompts.choice(
 						session,
 						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
-						'ou levar esse pedido em formato físico e protocolizá-lo. Você pode também nos contatar para tirar alguma dúvida ou ' +
-						'relatar suas ações.',
-						[Contact, goBack],
+						'ou levar esse pedido em formato físico e protocolizá-lo.',
+						[goBack],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
@@ -603,11 +587,8 @@ library.dialog('/generateRequest', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Contact:
-			session.replaceDialog('contact:/');
-			break;
-		default: // Contact
-			session.endDialog();
+		default: // GoBack
+			session.replaceDialog('*:/getStarted');
 		}
 	},
 ]).cancelAction('cancelAction', '', {

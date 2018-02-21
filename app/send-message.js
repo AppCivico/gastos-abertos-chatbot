@@ -10,8 +10,8 @@ const testMessage = 'Mensagem Teste(Temporário)';
 const goBack = 'Voltar para o menu';
 const Confirm = 'Enviar';
 const Negate = 'Não enviar/Voltar';
-const keepMessage = 'Continue mandando';
-const stopMessage = 'Parar';
+// const keepMessage = 'Continue mandando';
+// const stopMessage = 'Parar';
 
 let messageText; // custom message text
 let imageUrl; // desired image url

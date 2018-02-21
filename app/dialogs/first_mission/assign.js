@@ -2,7 +2,6 @@
 
 const library = new builder.Library('firstMissionAssign');
 
-bot.library(require('../contact'));
 bot.library(require('./conclusion'));
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');

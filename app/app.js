@@ -1,6 +1,6 @@
 /* global  bot:true builder:true */
-/* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor":
-["session"] }] */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 
 require('dotenv').config();
 require('./connectorSetup.js')();
@@ -24,7 +24,7 @@ const sendMessage = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
 
-let menuMessage;
+let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
