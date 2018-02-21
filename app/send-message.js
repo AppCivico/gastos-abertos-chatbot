@@ -66,7 +66,7 @@ bot.dialog('/confirm', [
 		session.replaceDialog(userDialog);
 	},
 ]);
-
+// TODO create alternate way of sending messages to those at gerar pedido
 // TODO rever esse fluxo
 // bot.dialog('/askingPermission', [
 // 	(session, args) => {
@@ -214,17 +214,21 @@ library.dialog('/sendingImage', [ // sends image and text message
 		User.findAll({
 			attributes: ['address', 'session'],
 			where: {
-				address: {
+				address: { // search for people that accepted to receive messages(address = not null)
 					$ne: null,
 				},
-				fb_id: {
+				fb_id: { // excludes whoever is sending the direct message
 					$ne: session.userData.userid,
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				startProactiveImage(element.dataValues, messageText, imageUrl);
+				if (!element.dataValues.session.match(/informationAccessRequest*/i)) {
+					console.log(`Usuário: ${Object.entries(element.dataValues)}`);
+					startProactiveImage(element.dataValues, messageText);
+				} else {
+					console.log('Não fomos');
+				}
 			});
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');
@@ -280,17 +284,21 @@ library.dialog('/sendingMessage', [ // sends text message
 		User.findAll({
 			attributes: ['address', 'session'],
 			where: {
-				address: {
+				address: { // search for people that accepted to receive messages(address = not null)
 					$ne: null,
 				},
-				fb_id: {
+				fb_id: { // excludes whoever is sending the direct message
 					$ne: session.userData.userid,
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				startProactiveDialog(element.dataValues, messageText);
+				if (!element.dataValues.session.match(/informationAccessRequest*/i)) {
+					console.log(`Usuário: ${Object.entries(element.dataValues)}`);
+					startProactiveDialog(element.dataValues, messageText);
+				} else {
+					console.log('Não fomos');
+				}
 			});
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');

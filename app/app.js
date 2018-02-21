@@ -57,6 +57,8 @@ bot.beginDialogAction('reset', '/reset');
 
 bot.dialog('/', [
 	(session) => {
+		// TODO reestruturar esse menu options
+		// TODO rever toda a estrura do 'cancelar'
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
 		if (session.message.address.channelId === 'facebook') {
@@ -142,16 +144,8 @@ bot.dialog('/getStarted', [
 			});
 		} else { // welcome back
 			menuMessage = 'Como posso te ajudar?';
-			User.findOne({
-				attributes: ['fb_name'],
-				where: { fb_id: session.userData.userid },
-			}).then((user) => {
-				session.send(`Olá, ${user.get('fb_name').substr(0, user.get('fb_name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
-				session.replaceDialog('/promptButtons');
-			}).catch(() => {
-				session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
-				session.replaceDialog('/promptButtons');
-			});
+			session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+			session.replaceDialog('/promptButtons');
 		}
 	},
 ]);
@@ -183,7 +177,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
-				session.beginDialog('informationAccessRequest:/');
+				session.replaceDialog('informationAccessRequest:/');
 				break;
 			}
 		}
@@ -208,7 +202,6 @@ bot.dialog('/promptButtons', [
 
 bot.dialog('/askPermission', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session, permissionQuestion,
 			[Yes, No],

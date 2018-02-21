@@ -127,13 +127,12 @@ library.dialog('/askLAI', [
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
-			session.endDialog();
+			session.replaceDialog('*:/getStarted');
 			break;
 		}
 	},
 
 	// Start of testing comment ----------
-
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
