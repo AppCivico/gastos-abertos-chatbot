@@ -66,7 +66,7 @@ const headers = {
 
 library.dialog('/', [
 	(session, args) => {
-		custom.updateSession(session.userData.userid, session);
+	//	custom.updateSession(session.userData.userid, session);
 		if (args && args.user && args.user_mission) {
 			[user] = [args.user];
 			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
@@ -75,9 +75,18 @@ library.dialog('/', [
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
 			session.send('Além disso, você pode a qualquer momento digitar \'cancelar\' e eu te levo para o início');
 		} else {
-			// session.send('Você está gerando um pedido de acesso à informação, que poderá ' +
-			// 'ser encaminhado a prefeitura de seu município quando estão '+
-			// 'faltando informações nos portais de transparência.');
+			// TODO a mission 2 without mission 1?
+			// user.findOne({
+			// 	where: { fb_id: session.userData.userid },
+			// }).then((UserData) => {
+			// 	user = UserData;
+			// 	UserMission.create({
+			// 		user_id: user.id,
+			// 		mission_id: 2,
+			// 		metadata: { request_generated: 0 },
+			// 	});
+			// });
+
 			session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
 			'isto, irei lhe fazer diversas perguntas, e não se preocupe se não ' +
 			'souber. Caso você não encontrar ou não ter certeza, sua resposta deve ser NÃO, ok?');

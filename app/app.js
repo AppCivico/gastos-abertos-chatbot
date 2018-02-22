@@ -57,9 +57,7 @@ bot.beginDialogAction('reset', '/reset');
 
 bot.dialog('/', [
 	(session) => {
-		// TODO reestruturar esse menu options
 		// TODO rever toda a estrura do 'cancelar'
-		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
 		if (session.message.address.channelId === 'facebook') {
 			session.userData.userid = session.message.sourceEvent.sender.id;
@@ -100,9 +98,6 @@ bot.dialog('/', [
 				console.log(user.get({ plain: true })); // prints user data
 				console.log(`Was created? => ${created}`);
 
-				if (user.get('admin') === true) { // adds hidden adimn menu to options
-					menuOptions.push(sendMessage);
-				}
 				session.replaceDialog('/getStarted');
 			}).catch(() => {
 				session.replaceDialog('/promptButtons');
@@ -151,8 +146,24 @@ bot.dialog('/getStarted', [
 ]);
 
 bot.dialog('/promptButtons', [
-	(session) => {
+	(session, args, next) => { // adds admin menu to admin
 		custom.updateSession(session.userData.userid, session);
+		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
+		User.findOne({
+			attributes: ['admin'],
+			where: { fb_id: session.userData.userid },
+		}).then((user) => {
+			if (user.admin === true) {
+				menuOptions.push(sendMessage);
+			}
+		}).catch(() => {
+			session.replaceDialog('/promptButtons');
+		}).finally(() => {
+			next();
+		});
+	},
+
+	(session) => {
 		builder.Prompts.choice(
 			session, menuMessage, menuOptions,
 			{
