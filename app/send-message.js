@@ -306,6 +306,7 @@ library.dialog('/sendingMessage', [ // sends text message
 			},
 		}).then((user) => {
 			user.forEach((element) => {
+				// TODO change here(i think)
 				if (!element.dataValues.session.match(/informationAccessRequest*/i)) {
 					console.log(`Usuário: ${Object.entries(element.dataValues)}`);
 					startProactiveDialog(element.dataValues, messageText);
