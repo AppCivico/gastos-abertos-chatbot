@@ -18,6 +18,7 @@ const Negate = 'Não enviar/Voltar';
 let messageText; // custom message text
 let imageUrl; // desired image url
 let msgCount; // counts number of messages sent
+let userDialog; // user's last active dialog
 
 function messagePedido(user, customMessage) {
 	try {
@@ -48,7 +49,7 @@ function startProactiveImage(user, customMessage, customImage) {
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	} finally {
-		bot.beginDialog(user.address, '*:/confirm', { userDialogo: user.session.dialogName, usefulData: user.session.usefulData });
+		bot.beginDialog(user.address, '*:/confirm', { userDialog: user.session.dialogName });
 	}
 }
 
@@ -62,7 +63,7 @@ function startProactiveDialog(user, customMessage) {
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
-	console.log(`${user.name} vai para ${user.session.dialogName}\n`);
+	console.log(`${user.name} vai para ${user.session.dialogName}\n\n`);
 	bot.beginDialog(user.address, '*:/confirm', { userDialogo: user.session.dialogName, usefulData: user.session.usefulData });
 }
 

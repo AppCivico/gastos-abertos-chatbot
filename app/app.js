@@ -7,7 +7,7 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-const Timer = require('./timer');
+// const Timer = require('./timer');
 
 bot.library(require('./send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
@@ -36,15 +36,16 @@ let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 // 		{
 // 			"type":"web_url",
 // 			"title":"Ver nosso site",
-// 			"url":"https://google.com/"
+// 			"url":"https://gastosabertos.org/"
 // 		},
 // 		{
 // 			"type":"postback",
 // 			"title":"Ir para o Início",
-// 			"payload":"reset"
+// 			"payload":"reset2"
 // 		}
 // 	]
 // }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token=[page_token]"
+
 
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
@@ -78,6 +79,7 @@ bot.beginDialogAction('reset', '/reset');
 bot.dialog('/reset', [
 	(session) => {
 		session.endDialog();
+		console.log('sdfsdf');
 		session.beginDialog('/');
 	},
 ]);
@@ -123,6 +125,7 @@ bot.dialog('/', [
 						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 					},
 				},
+
 			}).spread((user, created) => {
 				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
 				console.log(user.get({ plain: true })); // prints user data
@@ -169,7 +172,7 @@ bot.dialog('/getStarted', [
 			});
 		} else { // welcome back
 			menuMessage = 'Como posso te ajudar?';
-			session.send('Olá, parceiro! Bem vindo de volta!');
+			session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
 			session.replaceDialog('/promptButtons');
 		}
 	},
@@ -178,6 +181,7 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session, args, next) => { // adds admin menu to admin
 		custom.updateSession(session.userData.userid, session);
+		// Timer.timer();
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
 			attributes: ['admin'],
@@ -214,7 +218,6 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/', { user: User });
 				break;
 			case sendMessage:
-				Timer.timer();
 				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
