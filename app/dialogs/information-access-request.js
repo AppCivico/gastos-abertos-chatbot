@@ -123,12 +123,12 @@ library.dialog('/askLAI', [
 		switch (args.response.entity) {
 		case Generate:
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
-			session.replaceDialog('/questionOne');
-			// session.replaceDialog('/questionThirteen'); for time-saving testing purposes
+			session.beginDialog('/questionOne');
+			// session.beginDialog('/questionThirteen'); for time-saving testing purposes
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
-			session.replaceDialog('*:/getStarted');
+			session.beginDialog('*:/getStarted');
 			break;
 		}
 	},
@@ -162,7 +162,7 @@ library.dialog('/questionOne', [
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
 		}
-		session.replaceDialog('/questionTwo');
+		session.beginDialog('/questionTwo');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -192,7 +192,7 @@ library.dialog('/questionTwo', [
 			'individualizada – o modelo do Portal da Transparência do Governo Federal é um exemplo;</p>');
 			break;
 		}
-		session.replaceDialog('/questionThree');
+		session.beginDialog('/questionThree');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -222,7 +222,7 @@ library.dialog('/questionThree', [
 			'e adiantamento de despesas</p>');
 			break;
 		}
-		session.replaceDialog('/questionFour');
+		session.beginDialog('/questionFour');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -250,7 +250,7 @@ library.dialog('/questionFour', [
 			itens.push('<p> - Disponibilização das despesas realizadas com cartões corporativos em nome da prefeitura</p>');
 			break;
 		}
-		session.replaceDialog('/questionFive');
+		session.beginDialog('/questionFive');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -279,7 +279,7 @@ library.dialog('/questionFive', [
 			itens.push('<p> - Disponibilização dos valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza</p>');
 			break;
 		}
-		session.replaceDialog('/questionSix');
+		session.beginDialog('/questionSix');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -308,7 +308,7 @@ library.dialog('/questionSix', [
 			itens.push('<p> - Disponibilização dos editais de licitação, dos procedimentos licitatórios, com indicação das licitações abertas,' +
 			' em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados</p>');			break;
 		}
-		session.replaceDialog('/questionSeven');
+		session.beginDialog('/questionSeven');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -338,7 +338,7 @@ library.dialog('/questionSeven', [
 			'com respectivas fundamentações</p>');
 			break;
 		}
-		session.replaceDialog('/questionEight');
+		session.beginDialog('/questionEight');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -369,7 +369,7 @@ library.dialog('/questionEight', [
 		' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
 			break;
 		}
-		session.replaceDialog('/questionNine');
+		session.beginDialog('/questionNine');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -398,7 +398,7 @@ library.dialog('/questionNine', [
 			itens.push('<p> - Disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos</p>');
 			break;
 		}
-		session.replaceDialog('/questionTen');
+		session.beginDialog('/questionTen');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -427,7 +427,7 @@ library.dialog('/questionTen', [
 			itens.push('<p> - Disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária</p>');
 			break;
 		}
-		session.replaceDialog('/questionEleven');
+		session.beginDialog('/questionEleven');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -463,7 +463,7 @@ library.dialog('/questionEleven', [
 			'	\n\niii) Demonstrativo de Aplicação na Área Social');
 			break;
 		}
-		session.replaceDialog('/questionTwelve');
+		session.beginDialog('/questionTwelve');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -491,7 +491,7 @@ library.dialog('/questionTwelve', [
 			itens.push('<p> - Disponibilização dos extratos de conta única</p>');
 			break;
 		}
-		session.replaceDialog('/questionThirteen');
+		session.beginDialog('/questionThirteen');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -529,13 +529,12 @@ library.dialog('/questionThirteen', [
 			where: { fb_id: session.userData.userid },
 		}).then((userData) => {
 			if (userData.name === 'undefined' || userData.name === null) {
-				session.replaceDialog('/askFullName');
+				session.beginDialog('/askFullName');
 			} else {
-				session.replaceDialog('/askFullName');
-				// session.replaceDialog('/generateRequest');
+				session.beginDialog('/generateRequest');
 			}
 		}).catch(() => {
-			session.replaceDialog('/askFullName');
+			session.beginDialog('/askFullName');
 		});
 	},
 ]).cancelAction('cancelAction', '', {

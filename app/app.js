@@ -26,6 +26,27 @@ const No = 'Não';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
+
+// fb-get-started-button add [page_token] --payload getStarted
+
+// curl -X POST -H "Content-Type: application/json" -d '{
+// 	"setting_type" : "call_to_actions",
+// 	"thread_state" : "existing_thread",
+// 	"call_to_actions":[
+// 		{
+// 			"type":"web_url",
+// 			"title":"Ver nosso site",
+// 			"url":"https://gastosabertos.org/"
+// 		},
+// 		{
+// 			"type":"postback",
+// 			"title":"Ir para o Início",
+// 			"payload":"reset2"
+// 		}
+// 	]
+// }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token=[page_token]"
+
+
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -54,6 +75,14 @@ const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
+
+bot.dialog('/reset', [
+	(session) => {
+		session.endDialog();
+		console.log('sdfsdf');
+		session.beginDialog('/');
+	},
+]);
 
 bot.dialog('/', [
 	(session) => {
@@ -188,7 +217,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
-				session.replaceDialog('informationAccessRequest:/');
+				session.beginDialog('informationAccessRequest:/');
 				break;
 			}
 		}

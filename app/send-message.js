@@ -25,10 +25,9 @@ function messagePedido(user, customMessage) {
 		textMessage.text(customMessage);
 		textMessage.textLocale('pt-BR');
 		bot.send(textMessage);
+		bot.send('Obs, essa foi uma mensagem automática de informação. Você já está no fluxo normal.');
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
-	} finally {
-		bot.send('Obs, essa foi uma mensagem automática de informação. Você já está no fluxo normal.');
 	}
 }
 
