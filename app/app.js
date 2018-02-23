@@ -121,9 +121,12 @@ bot.dialog('/', [
 					fb_id: result.id,
 					fb_name: `${result.first_name} ${result.last_name}`,
 					admin: isItAdmin,
-					session: session.dialogStack()[session.dialogStack().length - 1].id,
+					session: `dialogName:${session.dialogStack()[session.dialogStack().length - 1].id},` +
+					`waterfallStep:${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`,
 				},
+
 			}).spread((user, created) => {
+				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
 				console.log(user.get({ plain: true })); // prints user data
 				console.log(`Was created? => ${created}`);
 

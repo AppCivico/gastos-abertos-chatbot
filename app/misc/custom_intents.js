@@ -41,7 +41,8 @@ module.exports.userFacebook = userFacebook;
 // update user session
 const updateSession = (fbId, session) => {
 	User.update({
-		session: session.dialogStack()[session.dialogStack().length - 1].id,
+		session: `dialogName:${session.dialogStack()[session.dialogStack().length - 1].id},` +
+		`waterfallStep:${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`,
 	}, {
 		where: {
 			fb_id: fbId,

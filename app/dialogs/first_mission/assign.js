@@ -115,27 +115,6 @@ library.dialog('/moreDetails', [
 			` ${emoji.get('slightly_smiling_face').repeat(2)}`);
 			break;
 		}
-		// TODO confirm removal of this
-		// builder.Prompts.choice(
-		// 	session,
-		// 	'Quer ver quais serão os pontos sobre os quais eu ' +
-		// 'farei perguntas sobre o portal de transparência?',
-		// 	[Yes, No],
-		// 	{
-		// 		listStyle: builder.ListStyle.button,
-		// 		retryPrompt: retryPrompts.choice,
-		// 	} // eslint-disable-line comma-dangle
-		// );
-	},
-	(session) => {
-		// switch (args.response.entity) {
-		// case Yes:
-		// 	session.send(texts.first_mission.questions);
-		// 	break;
-		// default: // No
-		// 	session.send('Beleza!');
-		// 	break;
-		// }
 		session.beginDialog(
 			'firstMissionConclusion:/transparencyPortalExists',
 			{
