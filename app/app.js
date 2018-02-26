@@ -181,7 +181,7 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session, args, next) => { // adds admin menu to admin
 		custom.updateSession(session.userData.userid, session);
-		Timer.timer();
+		// Timer.timer();
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
 			attributes: ['admin'],

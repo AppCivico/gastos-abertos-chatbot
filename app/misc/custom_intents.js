@@ -63,11 +63,11 @@ const updateSession = (fbId, session) => {
 module.exports.updateSession = updateSession;
 
 // update user session saving useful flow data TODO
-const updateSessionData = (fbId, session) => {
+const updateSessionData = (fbId, session, usefulData) => {
 	User.update({
 		session: {
 			dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
-		//	waterfallStep: Object.values(session.dialogStack()[session.dialogStack().length - 1].state),
+			usefulData,
 		},
 	}, {
 		where: {

@@ -64,8 +64,12 @@ library.dialog('/askState', [
 ]);
 
 library.dialog('/askCity', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, userState);
+		if (!userState) {
+			console.log('no user state');
+			userState = args.usefulData;
+		}
 		session.sendTyping();
 		builder.Prompts.text(session, `Qual é o município que você representará? ${emoji.get('cityscape')}`);
 	},

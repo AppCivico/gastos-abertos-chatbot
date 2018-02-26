@@ -1,4 +1,6 @@
 /* global bot:true builder:true */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 
 const library = new builder.Library('sendMessage');
 
@@ -61,12 +63,14 @@ function startProactiveDialog(user, customMessage) {
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
-	bot.beginDialog(user.address, '*:/confirm', { userDialog: user.session.dialogName });
+	console.log(`${user.name} vai para ${user.session.dialogName}\n\n`);
+	bot.beginDialog(user.address, '*:/confirm', { userDialogo: user.session.dialogName, usefulData: user.session.usefulData });
 }
 
 bot.dialog('/confirm', [
 	(session, args) => {
-		[userDialog] = [args.userDialog];
+		session.userData.dialogName = args.userDialogo;
+		session.userData.usefulData = args.usefulData;
 		builder.Prompts.choice(
 			session, 'Você pode desativar mensagens automáticas como a de cima no menu de Informações.', 'Ok',
 			{
@@ -75,8 +79,10 @@ bot.dialog('/confirm', [
 		);
 	},
 	(session) => {
+		const { dialogName } = session.userData; // it seems that doing this is necessary because
+		const { usefulData } = session.userData; // session.dialogName adds '*:' at replaceDialog
 		session.send('Voltando pro fluxo normal...');
-		session.replaceDialog(userDialog);
+		session.replaceDialog(dialogName, { usefulData });
 	},
 ]);
 // TODO create alternate way of sending messages to those at gerar pedido
@@ -295,7 +301,7 @@ library.dialog('/sendingMessage', [ // sends text message
 			[messageText] = [args.messageText];
 		}
 		User.findAll({
-			attributes: ['address', 'session'],
+			attributes: ['name', 'address', 'session'],
 			where: {
 				address: { // search for people that accepted receiving messages(address = not null)
 					$ne: null,
@@ -306,13 +312,10 @@ library.dialog('/sendingMessage', [ // sends text message
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				// TODO change here(i think)
-				if (!element.dataValues.session.match(/informationAccessRequest*/i)) {
-					console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-					startProactiveDialog(element.dataValues, messageText);
-				} else {
-					messagePedido(element.dataValues, messageText);
-				}
+				//				if (!element.dataValues.session.dialogName.match(/informationAccessRequest*/i)) {
+				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
+				startProactiveDialog(element.dataValues, messageText);
+				//		messagePedido(element.dataValues, messageText);
 			});
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');
