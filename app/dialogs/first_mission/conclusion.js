@@ -34,6 +34,13 @@ let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let missionUser;
 
+function reloadArgs(args) { // called after session updates to saves us some lines
+	if (!answers || !user) { // empty when dialog gets interrupted
+		[answers] = args.usefulData.answers; // stores saved values from bd
+		[user] = args.usefulData.User; // necessary => user.state
+	}
+}
+
 library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
@@ -145,14 +152,8 @@ library.dialog('/transparencyPortalExists', [
 });
 
 library.dialog('/transparencyPortalURL', [
-	(session, args) => {
+	(session) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
-		if (!answers || !user || !missionUser) {
-			[answers] = args.usefulData.answers;
-			[user] = args.usefulData.User;
-			[missionUser] = args.usefulData.missionUser;
-		}
-		custom.updateSession(session.userData.userid, session);
 		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
@@ -170,11 +171,7 @@ library.dialog('/transparencyPortalURL', [
 library.dialog('/transparencyPortalHasFinancialData', [
 	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
-		if (!answers || !user || !missionUser) {
-			[answers] = args.usefulData.answers;
-			[user] = args.usefulData.User;
-			[missionUser] = args.usefulData.missionUser;
-		}
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -206,11 +203,7 @@ library.dialog('/transparencyPortalHasFinancialData', [
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
-		if (!answers || !user || !missionUser) {
-			[answers] = args.usefulData.answers;
-			[user] = args.usefulData.User;
-			[missionUser] = args.usefulData.missionUser;
-		}
+		reloadArgs(args);
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -243,11 +236,7 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
-		if (!answers || !user || !missionUser) {
-			[answers] = args.usefulData.answers;
-			[user] = args.usefulData.User;
-			[missionUser] = args.usefulData.missionUser;
-		}
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
 	},
@@ -262,11 +251,7 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 library.dialog('/transparencyPortalHasContractsData', [
 	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
-		if (!answers || !user || !missionUser) {
-			[answers] = args.usefulData.answers;
-			[user] = args.usefulData.User;
-			[missionUser] = args.usefulData.missionUser;
-		}
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -297,11 +282,7 @@ library.dialog('/transparencyPortalHasContractsData', [
 library.dialog('/transparencyPortalHasBiddingsData', [
 	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
-		if (!answers || !user || !missionUser) {
-			[answers] = args.usefulData.answers;
-			[user] = args.usefulData.User;
-			[missionUser] = args.usefulData.missionUser;
-		}
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -332,11 +313,7 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 library.dialog('/transparencyPortalHasBiddingProcessData', [
 	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
-		if (!answers || !user || !missionUser) {
-			[answers] = args.usefulData.answers;
-			[user] = args.usefulData.User;
-			[missionUser] = args.usefulData.missionUser;
-		}
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -367,9 +344,7 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 library.dialog('/userUpdate', [
 	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, User, UserMission });
-		if (!answers) {
-			answers = args.usefulData;
-		}
+		reloadArgs(args);
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
 			facebook: {
@@ -465,7 +440,7 @@ library.dialog('/userUpdate', [
 			);
 			break;
 		default: // WelcomeBack
-			session.endDialog();
+			session.replaceDialog('*:/getStarted');
 		}
 	},
 ]).cancelAction('cancelAction', '', {

@@ -207,7 +207,7 @@ library.dialog('/congratulations', [
 	(session, args) => {
 		switch (args.response.entity) {
 		default: // WelcomeBack
-			session.endDialog();
+			session.replaceDialog('*:/getStarted');
 		}
 	},
 ]).cancelAction('cancelAction', '', {
