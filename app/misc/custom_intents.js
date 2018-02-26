@@ -43,7 +43,7 @@ const updateSession = (fbId, session) => {
 	User.update({
 		session: {
 			dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
-			waterfallStep: Object.values(session.dialogStack()[session.dialogStack().length - 1].state),
+		//	waterfallStep: Object.values(session.dialogStack()[session.dialogStack().length - 1].state),
 		},
 	}, {
 		where: {
@@ -61,3 +61,27 @@ const updateSession = (fbId, session) => {
 };
 
 module.exports.updateSession = updateSession;
+
+// update user session saving useful flow data TODO
+const updateSessionData = (fbId, session) => {
+	User.update({
+		session: {
+			dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
+		//	waterfallStep: Object.values(session.dialogStack()[session.dialogStack().length - 1].state),
+		},
+	}, {
+		where: {
+			fb_id: fbId,
+		},
+		returning: true,
+	})
+		.then(() => {
+			console.log('User session updated sucessfuly');
+		})
+		.catch((err) => {
+			console.log(`Couldn't update  session updated sucessfuly: ${err}`);
+			throw err;
+		});
+};
+
+module.exports.updateSessionData = updateSessionData;

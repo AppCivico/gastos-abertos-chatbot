@@ -47,7 +47,7 @@ function startProactiveImage(user, customMessage, customImage) {
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	} finally {
-		bot.beginDialog(user.address, '*:/confirm', { userDialog: user.session });
+		bot.beginDialog(user.address, '*:/confirm', { userDialog: user.session.dialogName });
 	}
 }
 
@@ -61,7 +61,7 @@ function startProactiveDialog(user, customMessage) {
 	} catch (err) {
 		console.log(`Erro ao enviar mensagem: ${err}`);
 	}
-	bot.beginDialog(user.address, '*:/confirm', { userDialog: user.session });
+	bot.beginDialog(user.address, '*:/confirm', { userDialog: user.session.dialogName });
 }
 
 bot.dialog('/confirm', [
@@ -297,7 +297,7 @@ library.dialog('/sendingMessage', [ // sends text message
 		User.findAll({
 			attributes: ['address', 'session'],
 			where: {
-				address: { // search for people that accepted to receive messages(address = not null)
+				address: { // search for people that accepted receiving messages(address = not null)
 					$ne: null,
 				},
 				fb_id: { // excludes whoever is sending the direct message

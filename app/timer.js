@@ -4,33 +4,62 @@
 const UserMission = require('./server/schema/models').user_mission;
 const User = require('./server/schema/models').user;
 
-let executedAlready = false;
-// const limit = (60 * 60 * 1000) * 5;
+// console.log(`dasd:${new Date(Date.now() - limit)}`);
 
-function sendWarning(address) {
-	const msg = new builder.Message().address(address);
-	executedAlready = true;
+
+let userDialog; // user's last active dialog
+
+function sendWarning(user) {
+	const msg = new builder.Message().address(user.address);
 	msg.textLocale('pt-BR');
 	msg.text('Percebemos que você não terminou um de nossos processos.\n\nSe precisar de ajuda, entre em contato conosco. :)');
 	bot.send(msg);
-	// bot.beginDialog(address, session);
+	bot.beginDialog(user.address, '*:/confirmTimer', { userDialog: user.session.dialogName });
 }
 
-const timer = (missionId) => {
-	UserMission.findOne({
-		attributes: ['createdAt', 'updatedAt', 'completed', 'user_id'],
-		where: { id: missionId },
-	}).then((misionData) => {
-		if (misionData.completed === false) {
+bot.dialog('/confirmTimer', [
+	(session, args) => {
+		[userDialog] = [args.userDialog];
+		builder.Prompts.choice(
+			session, 'Você pode desativar mensagens automáticas como a de cima no menu de Informações.', 'Ok',
+			{
+				listStyle: builder.ListStyle.button,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session) => {
+		session.send('Voltando pro fluxo normal...');
+		session.replaceDialog(userDialog);
+	},
+]);
+
+const timer = () => {
+	const d = new Date(Date.now());
+	const limit = new Date(d.setHours(d.getHours() - 5));
+
+	UserMission.findAll({
+		attributes: ['createdAt', 'completed', 'user_id'],
+		where: {
+			completed: false,
+			createdAt: { $lte: limit },
+		},
+	}).then((missions) => {
+		missions.forEach((element) => {
+			console.log(`mandando para: ${element.user_id}`);
 			User.findOne({
 				attributes: ['address', 'session'],
-				where: { id: misionData.user_id },
+				where: {
+					id: element.user_id,
+					address: { // search for people that accepted receiving messages(address = not null)
+						$ne: null,
+					},
+				},
 			}).then((userData) => {
-				sendWarning(userData.address);
+				sendWarning(userData);
 			}).catch(() => {
 				console.log('Coundn\'t find User');
 			});
-		}
+		});
 	}).catch(() => {
 		console.log('Coundn\'t find UserMission');
 	});

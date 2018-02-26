@@ -121,8 +121,9 @@ bot.dialog('/', [
 					fb_id: result.id,
 					fb_name: `${result.first_name} ${result.last_name}`,
 					admin: isItAdmin,
-					session: `dialogName:${session.dialogStack()[session.dialogStack().length - 1].id},` +
-					`waterfallStep:${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`,
+					session: {
+						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
+					},
 				},
 
 			}).spread((user, created) => {
@@ -180,6 +181,7 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session, args, next) => { // adds admin menu to admin
 		custom.updateSession(session.userData.userid, session);
+		Timer.timer();
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
 			attributes: ['admin'],
@@ -206,7 +208,6 @@ bot.dialog('/promptButtons', [
 	},
 
 	(session, result) => {
-		Timer.timer(62);
 		session.sendTyping();
 		if (result.response) {
 			switch (result.response.entity) {
