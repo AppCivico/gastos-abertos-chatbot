@@ -5,7 +5,7 @@
 const library = new builder.Library('firstMissionConclusion');
 bot.library(require('../second_mission/assign'));
 
-const answers = {
+let answers = {
 	transparencyPortalExists: '',
 	transparencyPortalURL: '',
 	transparencyPortalHasFinancialData: '',
@@ -145,7 +145,13 @@ library.dialog('/transparencyPortalExists', [
 });
 
 library.dialog('/transparencyPortalURL', [
-	(session) => {
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		if (!answers || !user || !missionUser) {
+			[answers] = args.usefulData.answers;
+			[user] = args.usefulData.User;
+			[missionUser] = args.usefulData.missionUser;
+		}
 		custom.updateSession(session.userData.userid, session);
 		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
@@ -162,8 +168,13 @@ library.dialog('/transparencyPortalURL', [
 });
 
 library.dialog('/transparencyPortalHasFinancialData', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		if (!answers || !user || !missionUser) {
+			[answers] = args.usefulData.answers;
+			[user] = args.usefulData.User;
+			[missionUser] = args.usefulData.missionUser;
+		}
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -193,8 +204,13 @@ library.dialog('/transparencyPortalHasFinancialData', [
 });
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		if (!answers || !user || !missionUser) {
+			[answers] = args.usefulData.answers;
+			[user] = args.usefulData.User;
+			[missionUser] = args.usefulData.missionUser;
+		}
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -225,8 +241,13 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 });
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		if (!answers || !user || !missionUser) {
+			[answers] = args.usefulData.answers;
+			[user] = args.usefulData.User;
+			[missionUser] = args.usefulData.missionUser;
+		}
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
 	},
@@ -239,8 +260,13 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 });
 
 library.dialog('/transparencyPortalHasContractsData', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		if (!answers || !user || !missionUser) {
+			[answers] = args.usefulData.answers;
+			[user] = args.usefulData.User;
+			[missionUser] = args.usefulData.missionUser;
+		}
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -269,8 +295,13 @@ library.dialog('/transparencyPortalHasContractsData', [
 });
 
 library.dialog('/transparencyPortalHasBiddingsData', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		if (!answers || !user || !missionUser) {
+			[answers] = args.usefulData.answers;
+			[user] = args.usefulData.User;
+			[missionUser] = args.usefulData.missionUser;
+		}
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -299,8 +330,13 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 });
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		if (!answers || !user || !missionUser) {
+			[answers] = args.usefulData.answers;
+			[user] = args.usefulData.User;
+			[missionUser] = args.usefulData.missionUser;
+		}
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -329,8 +365,11 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 });
 
 library.dialog('/userUpdate', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, User, UserMission });
+		if (!answers) {
+			answers = args.usefulData;
+		}
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
 			facebook: {
