@@ -30,24 +30,24 @@ let user;
 // antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
 let missionUser;
 
-// 0 means the item isn't included in the request
+// '' => no answer
+// 0 => portal has thing, nice!
+// 1 => portal doesn't has thing, we have to ask
 const answers = {
 	requesterName: '',
-	resourceLocation: '0',
-	individualRemuneration: '0',
-	dailyPayments: '0',
-	expensesCityHall: '0',
-	expensesCards: '0',
-	refundableValue: '0',
-	biddingEdicts: '0',
-	biddingEditals: '0',
-	expenseProcedures: '0',
-	stockControl: '0',
-	eletronicInvoice: '0',
-	multiannualPlan: '0',
-	abridgedReports: '0',
-	singleExtract: '0',
-	expensesFile: '0',
+	answer1: '',
+	answer2: '',
+	answer3: '',
+	answer4: '',
+	answer5: '',
+	answer6: '',
+	answer7: '',
+	answer8: '',
+	answer9: '',
+	answer10: '',
+	answer11: '',
+	answer12: '',
+	answer13: '',
 };
 
 let itens = []; // eslint-disable-line prefer-const
@@ -103,11 +103,6 @@ library.dialog('/askLAI', [
 		// questionNumber shows the question number in each question(disabled 2 rules for this)
 		session.userData.questionNumber = 1; // reseting value
 		session.sendTyping();
-		session.send('Irei te perguntar se o site permite que você identifique todos os seguintes itens:' +
-						'\n\n\n - Qual o número do processo que deu origem aquele gasto;' +
-						'\n\n\n - O bem fornecido ou o serviço prestado ao seu município;' +
-						'\n\n\n - Pessoa física ou jurídica beneficiária do pagamento;' +
-						'\n\n\n - E, quando for o caso, o procedimento licitatório realizado.');
 		builder.Prompts.choice(
 			session,
 			'Serão 13 perguntas no total. Vamos lá?',
@@ -124,7 +119,7 @@ library.dialog('/askLAI', [
 		case Generate:
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
 			session.beginDialog('/questionOne');
-			// session.beginDialog('/questionThirteen'); for time-saving testing purposes
+			// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
@@ -137,7 +132,7 @@ library.dialog('/askLAI', [
 });
 // Start of testing comment ----------
 // Testing: Comment out line below and change dialog name up there
-// /*
+//
 library.dialog('/questionOne', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
@@ -155,9 +150,10 @@ library.dialog('/questionOne', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer1 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer1 = 1;
 			itens.push('<p> - Disponibilização sobre receitas, despesas e endividamento público, nos termos da Lei Complementar 131, ' +
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
@@ -185,9 +181,10 @@ library.dialog('/questionTwo', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer2 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer2 = 1;
 			itens.push('<p> - Disponibilização sobre remuneração de cada um dos agentes públicos, ' +
 			'individualizada – o modelo do Portal da Transparência do Governo Federal é um exemplo;</p>');
 			break;
@@ -215,9 +212,10 @@ library.dialog('/questionThree', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer3 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer3 = 1;
 			itens.push('<p> - Disponibilização da relação de pagamentos de diárias, aquisição de passagens aéreas (destino e motivo da viagem) ' +
 			'e adiantamento de despesas</p>');
 			break;
@@ -244,9 +242,10 @@ library.dialog('/questionFour', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer4 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer4 = 1;
 			itens.push('<p> - Disponibilização das despesas realizadas com cartões corporativos em nome da prefeitura</p>');
 			break;
 		}
@@ -273,9 +272,10 @@ library.dialog('/questionFive', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer5 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer5 = 1;
 			itens.push('<p> - Disponibilização dos valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza</p>');
 			break;
 		}
@@ -302,9 +302,10 @@ library.dialog('/questionSix', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer6 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer6 = 1;
 			itens.push('<p> - Disponibilização dos editais de licitação, dos procedimentos licitatórios, com indicação das licitações abertas,' +
 			' em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados</p>');			break;
 		}
@@ -331,9 +332,10 @@ library.dialog('/questionSeven', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer7 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer7 = 1;
 			itens.push('<p> - Disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, ' +
 			'com respectivas fundamentações</p>');
 			break;
@@ -362,9 +364,10 @@ library.dialog('/questionEight', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer8 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer8 = 1;
 			itens.push('<p>-Disponibilização do controle de estoque da prefeitura, com lista de entradas' +
 		' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
 			break;
@@ -392,9 +395,10 @@ library.dialog('/questionNine', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer9 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer9 = 1;
 			itens.push('<p> - Disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos</p>');
 			break;
 		}
@@ -421,9 +425,10 @@ library.dialog('/questionTen', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer10 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer10 = 1;
 			itens.push('<p> - Disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária</p>');
 			break;
 		}
@@ -453,9 +458,10 @@ library.dialog('/questionEleven', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer11 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer11 = 1;
 			itens.push('<p> - Disponibilização dos relatórios Resumido de Execução Orçamentária; Relatórios de Gestão Fiscal; ' +
 			' Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões:' +
 			'	\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
@@ -485,9 +491,10 @@ library.dialog('/questionTwelve', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer12 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer12 = 1;
 			itens.push('<p> - Disponibilização dos extratos de conta única</p>');
 			break;
 		}
@@ -516,9 +523,10 @@ library.dialog('/questionThirteen', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
+			answers.answer13 = 0;
 			break;
 		default: // No
-			answers.resourceLocation = 1;
+			answers.answer13 = 1;
 			itens.push('<p> - Disponibilização das despesas em um único arquivo em formato legível por máquina incluindo as colunas:' +
 			' função, subfunção, programa, ação, valor liquidado e valor empenhado\n\n</p>');
 			break;
@@ -584,7 +592,6 @@ library.dialog('/generateRequest', [
 		' e que acompanhe a resposta a esta solicitação.</p></div>';
 
 		pdf.create(html).toStream((err, stream) => {
-			// const aaa = answers.requesterName.split('/').join('');
 			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${answers.requesterName}_LAI.pdf`));
 			file = pdfFile.path;
 
