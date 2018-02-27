@@ -33,7 +33,7 @@ let missionUser;
 // '' => no answer
 // 0 => portal has thing, nice!
 // 1 => portal doesn't has thing, we have to ask
-const answers = {
+let answers = {
 	requesterName: '',
 	answer1: '',
 	answer2: '',
@@ -64,9 +64,16 @@ const headers = {
 	'content-type': 'application/json',
 };
 
+function reloadArgs(args, session) { // called after session updates to saves us some lines
+	if (!answers || !user) { // empty when dialog gets interrupted
+		[answers] = args.usefulData.answers; // stores saved values from bd
+		[user] = args.usefulData.User; // necessary => user.state
+		session.userData.questionNumber -= 1;
+	}
+}
+
 library.dialog('/', [
 	(session, args) => {
-	//	custom.updateSession(session.userData.userid, session);
 		if (args && args.user && args.user_mission) {
 			[user] = [args.user];
 			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
@@ -75,6 +82,14 @@ library.dialog('/', [
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
 			session.send('Além disso, você pode a qualquer momento digitar \'cancelar\' e eu te levo para o início');
 		} else {
+			User.findOne({
+				attributes: ['id'],
+				where: {
+					fb_id: session.userData.userid,
+				},
+			}).then((userData) => {
+				user = userData;
+			});
 			session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
 			'isto, irei lhe fazer diversas perguntas, e não se preocupe se não ' +
 			'souber. Caso você não encontrar ou não ter certeza, sua resposta deve ser NÃO, ok?');
@@ -88,8 +103,6 @@ library.dialog('/', [
 library.dialog('/askLAI', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
-		// questionNumber shows the question number in each question(disabled 2 rules for this)
-		session.userData.questionNumber = 1; // reseting value
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -105,9 +118,9 @@ library.dialog('/askLAI', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Generate:
-			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
-			// session.beginDialog('/questionOne');
-			session.beginDialog('/questionThirteen'); // for time-saving testing purposes
+			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)}`);
+			session.beginDialog('/questionOne');
+			// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
@@ -120,10 +133,12 @@ library.dialog('/askLAI', [
 });
 // Start of testing comment ----------
 // Testing: Comment out line below and change dialog name up there
-/*
 library.dialog('/questionOne', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		reloadArgs(args);
+		// questionNumber shows the question number in each question(disabled 2 rules for this)
+		session.userData.questionNumber = 1; // reseting value
 		currentQuestion = `${session.userData.questionNumber++} - Seu município identifica de onde vêm os recursos que ele recebe? ` +
 		'\n- ele tem que identificar, pelo menos, se os recursos vêm da União, do estado, da cobrança de impostos ou de empréstimos.';
 		builder.Prompts.choice(
@@ -153,8 +168,9 @@ library.dialog('/questionOne', [
 });
 
 library.dialog('/questionTwo', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		reloadArgs(args);
 		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência disponibiliza dados referentes a remuneração de ` +
 		'cada um dos agentes públicos, individualizada?';
 		builder.Prompts.choice(
@@ -177,12 +193,13 @@ library.dialog('/questionTwo', [
 			'individualizada – o modelo do Portal da Transparência do Governo Federal é um exemplo;</p>');
 			break;
 		}
-		session.beginDialog('/questionThree');
+		session.beginDialog('/questionThirteen');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
+/*
 library.dialog('/questionThree', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
@@ -495,8 +512,9 @@ library.dialog('/questionTwelve', [
 // End of testing comment ----------
 
 library.dialog('/questionThirteen', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		reloadArgs(args);
 		currentQuestion = `${session.userData.questionNumber++} - O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato ` +
 		'legível por máquina incluindo as colunas: função, subfunção, programa, ação, valor liquidado e valor empenhado?';
 		builder.Prompts.choice(

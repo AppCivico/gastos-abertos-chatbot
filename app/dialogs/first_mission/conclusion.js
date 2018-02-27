@@ -153,7 +153,7 @@ library.dialog('/transparencyPortalExists', [
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
@@ -170,7 +170,7 @@ library.dialog('/transparencyPortalURL', [
 
 library.dialog('/transparencyPortalHasFinancialData', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -202,7 +202,7 @@ library.dialog('/transparencyPortalHasFinancialData', [
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
@@ -235,7 +235,7 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
@@ -250,7 +250,7 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 
 library.dialog('/transparencyPortalHasContractsData', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -281,7 +281,7 @@ library.dialog('/transparencyPortalHasContractsData', [
 
 library.dialog('/transparencyPortalHasBiddingsData', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -312,7 +312,7 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user, missionUser });
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -343,7 +343,7 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 
 library.dialog('/userUpdate', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, User, UserMission });
+		custom.updateSessionData(session.userData.userid, session, { answers, User });
 		reloadArgs(args);
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
