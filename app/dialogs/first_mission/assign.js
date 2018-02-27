@@ -7,10 +7,12 @@ bot.library(require('./conclusion'));
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 const custom = require('../../misc/custom_intents');
+const emoji = require('node-emoji');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
-const emoji = require('node-emoji');
+const Notification = require('../../server/schema/models').notification;
+
 
 const Yes = 'Sim';
 const No = 'Não';
@@ -30,7 +32,17 @@ library.dialog('/', [
 		UserMission.create({
 			user_id: user.id,
 			mission_id: 1,
-		}).then(() => {
+		}).then((MissionData) => {
+			Notification.create({
+				missionID: MissionData.id,
+				userID: user.id,
+				userAdress: user.address,
+			}).then(() => {
+				console.log('Added a new message to be sent!');
+			}).catch((errRequest) => {
+				console.log(`Couldn't save request :( -> ${errRequest})`);
+			});
+
 			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
 			session.send(texts.first_mission.details);
 			session.beginDialog('/askState');

@@ -9,11 +9,12 @@ const User = require('./server/schema/models').user;
 
 let messageTxt;
 
-function sendWarning(user, msgToSend, missionID) {
+function sendWarning(user, msgToSend) {
 	const msg = new builder.Message().address(user.address);
 	msg.textLocale('pt-BR');
 	msg.text(msgToSend);
 	bot.send(msg);
+
 	bot.beginDialog(user.address, '*:/confirmTimer', { userDialogo: user.session.dialogName, usefulData: user.session.usefulData });
 }
 
@@ -57,7 +58,7 @@ const timer = () => {
 		misionData.forEach((element) => {
 			console.log(`mandando para: ${element.user_id}`);
 			User.findOne({
-				attributes: ['address', 'session'],
+				attributes: ['address', 'session', 'id'],
 				where: {
 					id: element.user_id,
 					address: { // search for people that accepted receiving messages(address = not null)

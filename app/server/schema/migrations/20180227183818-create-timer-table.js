@@ -1,5 +1,5 @@
 module.exports = {
-	up: (queryInterface, Sequelize) => queryInterface.createTable('messages', {
+	up: (queryInterface, Sequelize) => queryInterface.createTable('notification', {
 		id: {
 			allowNull: false,
 			autoIncrement: true,
@@ -14,8 +14,12 @@ module.exports = {
 			allowNull: false,
 			type: Sequelize.INTEGER,
 		},
-		msgSent: {
+		userID: {
 			allowNull: false,
+			type: Sequelize.INTEGER,
+		},
+		msgSent: {
+			allowNull: true,
 			type: Sequelize.STRING,
 		},
 		sentAlready: {

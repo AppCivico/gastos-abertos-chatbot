@@ -1,7 +1,7 @@
 
 module.exports = (sequelize, DataTypes) => {
-	const messages = sequelize.define(
-		'messages', {
+	const notification = sequelize.define(
+		'notification', {
 			userAdress: DataTypes.INTEGER,
 			missionID: DataTypes.INTEGER,
 			msgSent: DataTypes.STRING,
@@ -12,5 +12,5 @@ module.exports = (sequelize, DataTypes) => {
 			freezeTableName: true,
 		} // eslint-disable-line comma-dangle
 	);
-	return messages;
+	return notification;
 };
