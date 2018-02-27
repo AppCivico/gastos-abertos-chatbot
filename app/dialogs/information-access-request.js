@@ -117,7 +117,7 @@ library.dialog('/askLAI', [
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
-			session.beginDialog('*:/getStarted');
+			session.replaceDialog('*:/getStarted');
 			break;
 		}
 	},
