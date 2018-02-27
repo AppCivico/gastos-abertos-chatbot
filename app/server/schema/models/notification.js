@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
 	const notification = sequelize.define(
 		'notification', {
-			userAdress: DataTypes.INTEGER,
+			userID: DataTypes.INTEGER,
 			missionID: DataTypes.INTEGER,
 			msgSent: DataTypes.STRING,
 			sentAlready: DataTypes.BOOLEAN,

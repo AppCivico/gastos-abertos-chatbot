@@ -6,15 +6,11 @@ module.exports = {
 			primaryKey: true,
 			type: Sequelize.INTEGER,
 		},
-		userAdress: {
+		userID: {
 			allowNull: false,
 			type: Sequelize.INTEGER,
 		},
 		missionID: {
-			allowNull: false,
-			type: Sequelize.INTEGER,
-		},
-		userID: {
 			allowNull: false,
 			type: Sequelize.INTEGER,
 		},
@@ -24,6 +20,7 @@ module.exports = {
 		},
 		sentAlready: {
 			allowNull: false,
+			defaultValue: false,
 			type: Sequelize.STRING,
 		},
 		timeSent: {
@@ -41,6 +38,6 @@ module.exports = {
 	}),
 
 	down(queryInterface) {
-		return queryInterface.dropTable('messages');
+		return queryInterface.dropTable('notification');
 	},
 };

@@ -32,17 +32,15 @@ library.dialog('/', [
 		UserMission.create({
 			user_id: user.id,
 			mission_id: 1,
-		}).then((MissionData) => {
+		}).then((missionData) => {
 			Notification.create({
-				missionID: MissionData.id,
-				userID: user.id,
-				userAdress: user.address,
+				missionID: missionData.dataValues.id, // this is 'mission id' as in 'primary key'
+				userID: missionData.dataValues.user_id,
 			}).then(() => {
-				console.log('Added a new message to be sent!');
-			}).catch((errRequest) => {
-				console.log(`Couldn't save request :( -> ${errRequest})`);
+				console.log('Added a new notification to be sent!');
+			}).catch((errNotification) => {
+				console.log(`Couldn't save notification :( -> ${errNotification})`);
 			});
-
 			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
 			session.send(texts.first_mission.details);
 			session.beginDialog('/askState');

@@ -5,7 +5,16 @@
 const library = new builder.Library('firstMissionConclusion');
 bot.library(require('../second_mission/assign'));
 
-let answers = {
+const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
+const texts = require('../../misc/speeches_utils/big-texts');
+const emoji = require('node-emoji');
+const custom = require('../../misc/custom_intents');
+
+const User = require('../../server/schema/models').user;
+const UserMission = require('../../server/schema/models').user_mission;
+const Notification = require('../../server/schema/models').notification;
+
+const answers = {
 	transparencyPortalExists: '',
 	transparencyPortalURL: '',
 	transparencyPortalHasFinancialData: '',
@@ -15,14 +24,6 @@ let answers = {
 	transparencyPortalHasBiddingsData: '',
 	transparencyPortalHasBiddingProcessData: '',
 };
-
-const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
-const texts = require('../../misc/speeches_utils/big-texts');
-const emoji = require('node-emoji');
-const custom = require('../../misc/custom_intents');
-
-const User = require('../../server/schema/models').user;
-const UserMission = require('../../server/schema/models').user_mission;
 
 const Yes = 'Sim';
 const No = 'Não';
@@ -36,8 +37,8 @@ let missionUser;
 
 function reloadArgs(args) { // called after session updates to saves us some lines
 	if (!answers || !user) { // empty when dialog gets interrupted
-		[answers] = args.usefulData.answers; // stores saved values from bd
-		[user] = args.usefulData.User; // necessary => user.state
+	//	[answers] = args.usefulData.answers; // stores saved values from bd
+	// 	[user] = args.usefulData.User; // necessary => user.state
 	}
 }
 
@@ -407,12 +408,26 @@ library.dialog('/userUpdate', [
 				completed: false,
 			},
 			returning: true,
+			raw: true,
 		})
-			.then((result) => {
-				console.log(`${result}Mission updated sucessfuly`);
+			.then((missionData) => {
+				console.log(`Mission ${missionData[1][0].id} Updated!`);
+				Notification.update({
+					// sentAlready == true and timeSent == null
+					// means that no message was sent, because there was no need to
+					sentAlready: true,
+				}, {
+					where: {
+						userID: missionData[1][0].user_id,
+						missionID: missionData[1][0].id,
+					},
+				}).then(() => {
+					console.log('Notification Updated! This message will not be sent!');
+				}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
+
 				builder.Prompts.choice(
 					session,
-					`Se quiser, você já pode começar a segunda missão.Ou fazer uma pausa e continuar mais tarde ${emoji.get('grinning').repeat(2)}`,
+					`Se quiser, você já pode começar a segunda missão. Ou fazer uma pausa e continuar mais tarde ${emoji.get('grinning').repeat(2)}`,
 					[nextMission, WelcomeBack],
 					{
 						listStyle: builder.ListStyle.button,
