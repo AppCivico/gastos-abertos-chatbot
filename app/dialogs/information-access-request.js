@@ -75,18 +75,6 @@ library.dialog('/', [
 			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
 			session.send('Além disso, você pode a qualquer momento digitar \'cancelar\' e eu te levo para o início');
 		} else {
-			// TODO a mission 2 without mission 1?
-			// user.findOne({
-			// 	where: { fb_id: session.userData.userid },
-			// }).then((UserData) => {
-			// 	user = UserData;
-			// 	UserMission.create({
-			// 		user_id: user.id,
-			// 		mission_id: 2,
-			// 		metadata: { request_generated: 0 },
-			// 	});
-			// });
-
 			session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
 			'isto, irei lhe fazer diversas perguntas, e não se preocupe se não ' +
 			'souber. Caso você não encontrar ou não ter certeza, sua resposta deve ser NÃO, ok?');
@@ -118,8 +106,8 @@ library.dialog('/askLAI', [
 		switch (args.response.entity) {
 		case Generate:
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)} `);
-			session.beginDialog('/questionOne');
-			// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
+			// session.beginDialog('/questionOne');
+			session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
@@ -132,7 +120,7 @@ library.dialog('/askLAI', [
 });
 // Start of testing comment ----------
 // Testing: Comment out line below and change dialog name up there
-//
+/*
 library.dialog('/questionOne', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
@@ -503,7 +491,7 @@ library.dialog('/questionTwelve', [
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
-// */
+*/
 // End of testing comment ----------
 
 library.dialog('/questionThirteen', [
@@ -661,6 +649,22 @@ library.dialog('/generateRequest', [
 				});
 				session.send(msg);
 
+				User.findOne({
+					attributes: ['id'],
+					where: { fb_id: session.userData.userid },
+				}).then((userData) => {
+					infoRequest.create({
+						user_id: userData.id,
+						metadata: answers,
+					}).then(() => {
+						console.log('Request saved successfully! :)');
+					}).catch((erro) => {
+						console.log(`Couldn't save request :( -> ${erro})`);
+					});
+				}).catch(() => {
+					console.log('Couldn\'t find user!');
+				});
+
 				if (user && missionUser) {
 					UserMission.update(
 						{ metadata: { request_generated: 1 } },
@@ -675,14 +679,14 @@ library.dialog('/generateRequest', [
 					)
 						.then((result) => {
 							// saves request in user_information_acess_request
-							infoRequest.create({
-								user_id: user.id,
-								metadata: answers,
-							}).then(() => {
-								console.log('Request saved successfully! :)');
-							}).catch((err) => {
-								console.log(`Couldn't save request :( -> ${err})`);
-							});
+							// infoRequest.create({
+							// 	user_id: user.id,
+							// 	metadata: answers,
+							// }).then(() => {
+							// 	console.log('Request saved successfully! :)');
+							// }).catch((err) => {
+							// 	console.log(`Couldn't save request :( -> ${err})`);
+							// });
 							console.log(`${result} Mission updated successfully`);
 							session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
 							session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +

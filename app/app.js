@@ -7,7 +7,7 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-const Timer = require('./timer');
+// const Timer = require('./timer');
 
 bot.library(require('./send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
