@@ -9,7 +9,7 @@ const User = require('./server/schema/models').user;
 
 let messageTxt;
 
-function sendWarning(user, msgToSend) {
+function sendWarning(user, msgToSend, missionID) {
 	const msg = new builder.Message().address(user.address);
 	msg.textLocale('pt-BR');
 	msg.text(msgToSend);
@@ -35,7 +35,7 @@ bot.dialog('/confirmTimer', [
 		session.replaceDialog(dialogName, { usefulData });
 	},
 ]);
-
+// createdAt, updatedAt, msgSent, timeOf, missionID, userID
 const timer = () => {
 	const d = new Date(Date.now());
 	const limit = new Date(d.setHours(d.getHours() - 5));
@@ -65,7 +65,7 @@ const timer = () => {
 					},
 				},
 			}).then((userData) => {
-				sendWarning(userData, messageTxt);
+				sendWarning(userData, messageTxt, misionData.mission_id);
 			}).catch(() => {
 				console.log('Coundn\'t find User');
 			});
