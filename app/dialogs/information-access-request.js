@@ -649,22 +649,6 @@ library.dialog('/generateRequest', [
 				});
 				session.send(msg);
 
-				User.findOne({
-					attributes: ['id'],
-					where: { fb_id: session.userData.userid },
-				}).then((userData) => {
-					infoRequest.create({
-						user_id: userData.id,
-						metadata: answers,
-					}).then(() => {
-						console.log('Request saved successfully! :)');
-					}).catch((erro) => {
-						console.log(`Couldn't save request :( -> ${erro})`);
-					});
-				}).catch(() => {
-					console.log('Couldn\'t find user!');
-				});
-
 				if (user && missionUser) {
 					UserMission.update(
 						{ metadata: { request_generated: 1 } },
@@ -675,34 +659,36 @@ library.dialog('/generateRequest', [
 								completed: false,
 							},
 							returning: true,
+							raw: true,
 						} // eslint-disable-line comma-dangle
-					)
-						.then((result) => {
-							// saves request in user_information_acess_request
-							// infoRequest.create({
-							// 	user_id: user.id,
-							// 	metadata: answers,
-							// }).then(() => {
-							// 	console.log('Request saved successfully! :)');
-							// }).catch((err) => {
-							// 	console.log(`Couldn't save request :( -> ${err})`);
-							// });
-							console.log(`${result} Mission updated successfully`);
-							session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
-							session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
+					).then((missionData) => {
+						// creates request in user_information_acess_request
+						infoRequest.create({ // saves the request generated
+							user_id: user.id,
+							metadata: answers,
+							isMission: true,
+							missionID: missionData[1][0].id,
+						}).then(() => {
+							console.log('Mission/Request created successfully! :)');
+						}).catch((errRequest) => {
+							console.log(`Couldn't save request :( -> ${errRequest})`);
+						});
+						console.log(`Mission ${missionData[1][0].id} updated successfully`);
+						session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
+						session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
 							'ou levar esse pedido em formato físico e protocola-lo.');
-							session.send('No entanto, o poder público tem um tempo limite de 20 dias para responder o seu pedido.');
-							session.send(`E precisamos dessa resposta para completar nossa segunda missão. ${emoji.get('page_facing_up')}`);
-							builder.Prompts.choice(
-								session,
-								`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-								[goBack],
-								{
-									listStyle: builder.ListStyle.button,
-									retryPrompt: retryPrompts.choice,
-								} // eslint-disable-line comma-dangle
-							);
-						})
+						session.send('No entanto, o poder público tem um tempo limite de 20 dias para responder o seu pedido.');
+						session.send(`E precisamos dessa resposta para completar nossa segunda missão. ${emoji.get('page_facing_up')}`);
+						builder.Prompts.choice(
+							session,
+							`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
+							[goBack],
+							{
+								listStyle: builder.ListStyle.button,
+								retryPrompt: retryPrompts.choice,
+							} // eslint-disable-line comma-dangle
+						);
+					})
 						.catch((err) => {
 							console.log(`Error updating mission${err}`);
 							session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
@@ -710,6 +696,21 @@ library.dialog('/generateRequest', [
 							throw err;
 						});
 				} else {
+					User.findOne({ // finds current user, to get his id
+						attributes: ['id'],
+						where: { fb_id: session.userData.userid },
+					}).then((userData) => {
+						infoRequest.create({ // saves the request generated
+							user_id: userData.id, // isMission defaults to false
+							metadata: answers, // doesn't save missionID
+						}).then(() => {
+							console.log('Request saved successfully! :)');
+						}).catch((errRequest) => {
+							console.log(`Couldn't save request :( -> ${errRequest})`);
+						});
+					}).catch((errUser) => {
+						console.log(`Couldn't find user :( -> ${errUser})`);
+					});
 					builder.Prompts.choice(
 						session,
 						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
