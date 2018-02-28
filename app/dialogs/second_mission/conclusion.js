@@ -1,6 +1,4 @@
-/* global bot: true builder:true */
-
-bot.library(require('../contact'));
+/* global  builder:true */
 
 const library = new builder.Library('secondMissionConclusion');
 const emoji = require('node-emoji');
@@ -20,7 +18,6 @@ const UserMission = require('../../server/schema/models').user_mission;
 const HappyYes = 'Vamos lá!';
 const Yes = 'Sim';
 const No = 'Não';
-const Contact = 'Contato';
 const WelcomeBack = 'Voltar para o início';
 
 let user;
@@ -199,7 +196,7 @@ library.dialog('/congratulations', [
 			session,
 			'Você pode também nos contatar para tirar alguma dúvida ou relatar suas ações.' +
 			` ${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[Contact, WelcomeBack],
+			[WelcomeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
@@ -209,11 +206,8 @@ library.dialog('/congratulations', [
 
 	(session, args) => {
 		switch (args.response.entity) {
-		case Contact:
-			session.replaceDialog('contact:/');
-			break;
 		default: // WelcomeBack
-			session.endDialog();
+			session.replaceDialog('*:/getStarted');
 		}
 	},
 ]).cancelAction('cancelAction', '', {

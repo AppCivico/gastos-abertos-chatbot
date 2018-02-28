@@ -8,10 +8,10 @@ const emoji = require('node-emoji');
 
 const library = new builder.Library('gastosAbertosInformation');
 
-const accessLaw = 'Dados abertos?';
+const accessLaw = 'Saber mais';
 const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
-const receiveMessage = 'Mensagens';
+const receiveMessage = 'Receber Mensagens?';
 let receiveDialog;
 let receiveYes;
 let receiveNo;
@@ -35,7 +35,7 @@ library.dialog('/promptButtons', [
 		builder.Prompts.choice(
 			session,
 			`Como posso te ajudar? ${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[accessLaw, receiveMessage, contact, reset],
+			[accessLaw, receiveMessage, reset],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.about,
@@ -48,13 +48,13 @@ library.dialog('/promptButtons', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case accessLaw:
-				session.beginDialog('/accessLaw');
+				session.replaceDialog('/accessLaw');
 				break;
 			case receiveMessage:
 				session.replaceDialog('/receiveMessage');
 				break;
 			case contact:
-				session.beginDialog('contact:/');
+				session.replaceDialog('contact:/');
 				break;
 			default: // reset
 				session.endDialog();
