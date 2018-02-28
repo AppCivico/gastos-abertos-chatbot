@@ -4,12 +4,14 @@
 
 // A class for adding a timer to the missions and sending warning messages
 
+const Cron = require('cron');
+
 const Notification = require('./server/schema/models').notification;
 const User = require('./server/schema/models').user;
 
 function sendWarning(user, text, missionID) {
 	Notification.update({
-		sentAlready: true,
+		sentAlready: true, // TODO false for testing
 	}, {
 		where: {
 			userID: user.id,
@@ -46,36 +48,46 @@ bot.dialog('/confirmTimer', [
 	},
 ]);
 
-const timer = () => {
-	const d = new Date(Date.now());
-	const limit = new Date(d.setHours(d.getHours() - 5));
+const timerJob = new Cron.CronJob(
+	'00 00 9-23/3 * * 1-5', () => {
+		const d = new Date(Date.now());
+		const limit = new Date(d.setHours(d.getHours() - 5)); // limit = now - N hours
 
-	Notification.findAll({
-		attributes: ['userID', 'missionID', 'msgSent'],
-		where: {
-			sentAlready: false,
-			createdAt: { $lte: limit },
-		},
-	}).then((listNotification) => {
-		listNotification.forEach((element) => {
-			console.log(`mandando para: ${element.userID}`);
-			User.findOne({
-				attributes: ['address', 'session', 'id'],
-				where: {
-					id: element.userID,
-					address: { // search for people that accepted receiving messages(address = not null)
-						$ne: null,
+		Notification.findAll({
+			attributes: ['userID', 'missionID', 'msgSent'],
+			where: {
+				sentAlready: false,
+				createdAt: { $lte: limit }, // createdAt <= limit
+			},
+		}).then((listNotification) => {
+			listNotification.forEach((element) => {
+				console.log(`Sending notification to user ${element.userID}`);
+				console.log(`Time: ${new Date(Date.now())}`);
+				User.findOne({
+					attributes: ['address', 'session', 'id'],
+					where: {
+						id: element.userID,
+						address: { // search for people that accepted receiving messages(address = not null)
+							$ne: null,
+						},
 					},
-				},
-			}).then((userData) => {
-				sendWarning(userData, element.msgSent, element.missionID);
-			}).catch((errUser) => {
-				console.log(`Coundn't find User => ${errUser}`);
+				}).then((userData) => {
+					sendWarning(userData, element.msgSent, element.missionID);
+				}).catch((errUser) => {
+					console.log(`Coundn't find User => ${errUser}`);
+				});
 			});
+		}).catch((errMission) => {
+			console.log(`Coundn't find Notifications => ${errMission}`);
 		});
-	}).catch((errMission) => {
-		console.log(`Coundn't find Notifications => ${errMission}`);
-	});
-};
+	}, (() => {
+		console.log('Crontab \'timer\' stopped.');
+	}),
+	true, /* Start the job right now (no need for timerJob.start()) */
+	'America/Sao_Paulo',
+	false, // context
+	// runOnInit = true TODO useful only for tests
+	true // eslint-disable-line comma-dangle
+);
 
-module.exports.timer = timer;
+module.exports.timerJob = timerJob;

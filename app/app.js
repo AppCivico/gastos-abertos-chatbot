@@ -7,7 +7,7 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-const Timer = require('./timer');
+const Timer = require('./timer'); // eslint-disable-line no-unused-vars
 
 bot.library(require('./send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
@@ -79,7 +79,6 @@ bot.beginDialogAction('reset', '/reset');
 bot.dialog('/reset', [
 	(session) => {
 		session.endDialog();
-		console.log('sdfsdf');
 		session.beginDialog('/');
 	},
 ]);
@@ -218,7 +217,6 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/', { user: User });
 				break;
 			case sendMessage:
-				Timer.timer();
 				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
