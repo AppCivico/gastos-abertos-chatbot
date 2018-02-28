@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
 			missionID: DataTypes.INTEGER,
 			msgSent: DataTypes.STRING,
 			sentAlready: DataTypes.BOOLEAN,
+			numberSent: DataTypes.INTEGER,
 			timeSent: DataTypes.DATE,
 		},
 		{

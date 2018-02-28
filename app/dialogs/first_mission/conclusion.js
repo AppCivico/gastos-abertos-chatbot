@@ -413,9 +413,8 @@ library.dialog('/userUpdate', [
 			.then((missionData) => {
 				console.log(`Mission ${missionData[1][0].id} Updated!`);
 				Notification.update({
-					// sentAlready == true and timeSent == null
+					// sentAlready == true and timeSent == null or numberSent = 0
 					// means that no message was sent, because there was no need to
-					sentAlready: true,
 				}, {
 					where: {
 						userID: missionData[1][0].user_id,

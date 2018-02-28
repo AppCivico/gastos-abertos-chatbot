@@ -115,19 +115,19 @@ library.dialog('/askLAI', [
 
 			Notification.findOrCreate({
 				where: { // checks if exists
-					missionID: 0,
+					missionID: 2,
 					userID: user.id,
 				},
 				defaults: {
-					missionID: 0, // zero means this notification isnt part of a mission
+					missionID: 2, // mission 2 and lone request are beign treated the same way
 					userID: user.id,
 					msgSent: 'Percebemos que você ainda não terminou de gerar um pedido de acesso a informação.' +
 			'\n\nSe precisar de ajuda, entre em contato conosco ou visite nosso grupo de lideranças: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS',
 				},
 			}).then(() => {
-				console.log('Added a new notification to be sent!');
+				console.log('Added a new notification 2 to be sent!');
 			}).catch((errNotification) => {
-				console.log(`Couldn't save notification :( -> ${errNotification})`);
+				console.log(`Couldn't save notification 2 :( -> ${errNotification})`);
 			});
 
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)}`);
@@ -775,11 +775,27 @@ library.dialog('/generateRequest', [
 		}, {
 			where: {
 				userID: user.id,
-				missionID: 0,
+				missionID: 2,
 			},
 		}).then(() => {
 			console.log('Notification Updated! This message will not be sent!');
 		}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
+
+		Notification.findOrCreate({
+			where: { // checks if exists
+				missionID: 3,
+				userID: user.id,
+			},
+			defaults: {
+				missionID: 3, // mission 2 and lone request are beign treated the same way
+				userID: user.id,
+				msgSent: 'E aí, já protocolou o pedido?',
+			},
+		}).then(() => {
+			console.log('Added a new notification 3 to be sent!');
+		}).catch((errNotification) => {
+			console.log(`Couldn't save notification 3 :( -> ${errNotification})`);
+		});
 	},
 
 	(session, args) => {

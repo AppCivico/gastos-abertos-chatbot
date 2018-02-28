@@ -9,7 +9,8 @@ const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const Timer = require('./timer'); // eslint-disable-line no-unused-vars
 
-console.log(`Crontab timerJob is running? => ${Timer.timerJob.running}`);
+console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
+console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
 
 bot.library(require('./send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
