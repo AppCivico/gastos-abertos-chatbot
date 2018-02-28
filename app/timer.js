@@ -12,6 +12,7 @@ const User = require('./server/schema/models').user;
 function sendWarning(user, text, missionID) {
 	Notification.update({
 		sentAlready: false, // TODO false for testing
+		timeSent: new Date(Date.now()),
 	}, {
 		where: {
 			userID: user.id,
@@ -57,7 +58,7 @@ const timerJob = new Cron.CronJob(
 			attributes: ['userID', 'missionID', 'msgSent'],
 			where: {
 				sentAlready: false,
-				createdAt: { $lte: limit }, // createdAt <= limit
+				// createdAt: { $lte: limit }, // createdAt <= limit
 			},
 		}).then((listNotification) => {
 			listNotification.forEach((element) => {

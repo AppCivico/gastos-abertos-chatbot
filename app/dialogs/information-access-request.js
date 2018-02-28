@@ -17,7 +17,6 @@ const UserMission = require('../server/schema/models').user_mission;
 const infoRequest = require('../server/schema/models').user_information_access_request;
 const Notification = require('../server/schema/models').notification;
 
-
 const library = new builder.Library('informationAccessRequest');
 
 const Generate = 'Gerar Pedido';
@@ -308,8 +307,8 @@ library.dialog('/questionFive', [
 library.dialog('/questionSix', [
 	(session) => {
 		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
-		currentQuestion = `${answers.questionNumber} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, com indicação das ` +
-		'licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
+		currentQuestion = `${answers.questionNumber} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, ` +
+		'com indicação das licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -610,7 +609,8 @@ library.dialog('/askFullName', [
 library.dialog('/generateRequest', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
-		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em'; // style config that will be used for the html creation
+		// style config that will be used for the html creation
+		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em';
 		const html = `<p style="${styleDiv}">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011,` +
 		' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
 		' e na Lei Complementar 131, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em' +
