@@ -67,27 +67,22 @@ const headers = {
 };
 
 library.dialog('/', [
-	(session, args) => {
-		if (args && args.user && args.user_mission) {
-			[user] = [args.user];
-			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
-			session.send('Esse é um processo bem extenso e tem bastante conteúdo.' +
-				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
-			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
-			session.send('Além disso, você pode a qualquer momento digitar \'cancelar\' e eu te levo para o início');
-		} else {
-			User.findOne({
-				attributes: ['id'],
-				where: {
-					fb_id: session.userData.userid,
-				},
-			}).then((userData) => {
-				user = userData;
-			});
-			session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
+	(session) => {
+		User.findOne({
+			attributes: ['id'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			user = userData;
+		});
+
+		session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
 			'isto, irei lhe fazer diversas perguntas, e não se preocupe se não ' +
 			'souber. Caso você não encontrar ou não ter certeza, sua resposta deve ser NÃO, ok?');
-		}
+		session.send('Esse é um processo bem extenso e tem bastante conteúdo.' +
+				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
+			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
+		session.send('Além disso, você pode a qualquer momento digitar \'começar\' e eu te levo para o início.');
+
 		session.beginDialog('/askLAI');
 	},
 ]).cancelAction('cancelAction', '', {
@@ -113,6 +108,20 @@ library.dialog('/askLAI', [
 		switch (args.response.entity) {
 		case Generate:
 
+			UserMission.findOrCreate({
+				where: { // checks if exists
+					user_id: user.id,
+					mission_id: 2,
+				},
+				defaults: {
+					user_id: user.id,
+					mission_id: 2,
+					metadata: { request_generated: 0 },
+				},
+			}).catch((err) => {
+				console.log(`Error findind or creating UserMission => ${err}`);
+			});
+
 			Notification.findOrCreate({
 				where: { // checks if exists
 					missionID: 2,
@@ -131,8 +140,8 @@ library.dialog('/askLAI', [
 			});
 
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)}`);
-			session.beginDialog('/questionOne');
-			// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
+			// session.beginDialog('/questionOne');
+			session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
@@ -144,7 +153,8 @@ library.dialog('/askLAI', [
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 // Start of testing comment ----------
-// Testing: Comment out line below and change dialog name up there
+// Testing: Comment line below and change dialog name up there
+/*
 library.dialog('/questionOne', [
 	(session) => {
 		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
@@ -690,81 +700,54 @@ library.dialog('/generateRequest', [
 				});
 				session.send(msg);
 
-				if (user && missionUser) {
-					UserMission.update(
-						{ metadata: { request_generated: 1 } },
-						{
-							where: {
-								user_id: user.id,
-								mission_id: 2,
-								completed: false,
-							},
-							returning: true,
-							raw: true,
-						} // eslint-disable-line comma-dangle
-					).then((missionData) => {
-						// creates request in user_information_acess_request
-						infoRequest.create({ // saves the request generated
+				UserMission.update(
+					{ metadata: { request_generated: 1 } },
+					{
+						where: {
 							user_id: user.id,
-							metadata: answers,
-							isMission: true,
-							missionID: missionData[1][0].id,
-						}).then(() => {
-							console.log('Mission/Request created successfully! :)');
-						}).catch((errRequest) => {
-							console.log(`Couldn't save request :( -> ${errRequest})`);
-						});
-						console.log(`Mission ${missionData[1][0].id} updated successfully`);
-						session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
-						session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
+							mission_id: 2,
+							completed: false,
+						},
+						returning: true,
+						raw: true,
+					} // eslint-disable-line comma-dangle
+				).then((missionData) => {
+					// TODO alinhas comportamento desejado (salvar todos os protocolos gerados?)
+					// creates request in user_information_acess_request
+					infoRequest.create({ // saves the request generated
+						user_id: user.id,
+						metadata: answers,
+						isMission: true,
+						missionID: missionData[1][0].id,
+					}).then(() => {
+						console.log('Mission/Request created successfully! :)');
+					}).catch((errRequest) => {
+						console.log(`Couldn't save request :( -> ${errRequest})`);
+					});
+					console.log(`Mission ${missionData[1][0].id} updated successfully`);
+					session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
+					session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
 						'ou levar esse pedido em formato físico e protocola-lo.' +
 						'\n\nNo entanto, o poder público tem um tempo limite de 20 dias para responder o seu pedido.');
-						session.send(`E precisamos dessa resposta para completar nossa segunda missão. ${emoji.get('page_facing_up')}`);
-						builder.Prompts.choice(
-							session,
-							`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-							[goBack],
-							{
-								listStyle: builder.ListStyle.button,
-								retryPrompt: retryPrompts.choice,
-							} // eslint-disable-line comma-dangle
-						);
-					})
-						.catch((err) => {
-							console.log(`Error updating mission${err}`);
-							session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
-							session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-							throw err;
-						});
-				} else {
-					User.findOne({ // finds current user, to get his id
-						attributes: ['id'],
-						where: { fb_id: session.userData.userid },
-					}).then((userData) => {
-						infoRequest.create({ // saves the request generated
-							user_id: userData.id, // isMission defaults to false
-							metadata: answers, // doesn't save missionID
-						}).then(() => {
-							console.log('Request saved successfully! :)');
-						}).catch((errRequest) => {
-							console.log(`Couldn't save request :( -> ${errRequest})`);
-						});
-					}).catch((errUser) => {
-						console.log(`Couldn't find user :( -> ${errUser})`);
-					});
+					session.send(`E precisamos dessa resposta para completar nosso objetivo. ${emoji.get('page_facing_up')}`);
 					builder.Prompts.choice(
 						session,
-						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
-						'ou levar esse pedido em formato físico e protocolizá-lo.',
+						`Quando puder concluir nosso processo, vá em 'Minha Cidade' e responda as questões. ${emoji.get('wink')}`,
 						[goBack],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
 						} // eslint-disable-line comma-dangle
 					);
-				}
+				}).catch((err) => {
+					console.log(`Error updating mission${err}`);
+					session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
+					session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+					throw err;
+				});
 			}
 		}
+
 		request(options, callback);
 		fs.unlink(file);
 

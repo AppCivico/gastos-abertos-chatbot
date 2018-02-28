@@ -189,12 +189,8 @@ library.dialog('/sendingImage', [ // sends image and text message
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				if (!element.dataValues.session.match(/informationAccessRequest*/i)) {
-					console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-					startProactiveImage(element.dataValues, messageText, imageUrl);
-				} else {
-					messagePedido(element.dataValues, messageText);
-				}
+				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
+				startProactiveImage(element.dataValues, messageText, imageUrl);
 			});
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');

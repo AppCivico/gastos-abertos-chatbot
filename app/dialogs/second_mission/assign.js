@@ -5,7 +5,6 @@ const emoji = require('node-emoji');
 
 bot.library(require('../information-access-request'));
 
-// const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 
 const Yes = 'Sim';
@@ -18,8 +17,6 @@ const texts = require('../../misc/speeches_utils/big-texts');
 const custom = require('../../misc/custom_intents');
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let MissionUser;
 
 library.dialog('/', [
 	(session, args) => {
@@ -39,7 +36,7 @@ library.dialog('/', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
-			session.replaceDialog('/assign', { user });
+			session.replaceDialog('/assign');
 			break;
 		default: // No
 			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);
@@ -53,14 +50,18 @@ library.dialog('/', [
 });
 
 library.dialog('/assign', [
-	(session, args) => {
+	(session) => {
 		custom.updateSession(session.userData.userid, session);
-		[user] = [args.user];
-		MissionUser = args.user_mission;
-		UserMission.create({
-			user_id: user.id,
-			mission_id: 2,
-			metadata: { request_generated: 0 },
+		UserMission.findOrCreate({
+			where: { // checks if exists
+				user_id: user.id,
+				mission_id: 2,
+			},
+			defaults: {
+				user_id: user.id,
+				mission_id: 2,
+				metadata: { request_generated: 0 },
+			},
 		}).then(() => {
 			session.send('Vamos nessa!');
 			session.send(texts.second_mission.assign);
@@ -82,7 +83,6 @@ library.dialog('/assign', [
 				'informationAccessRequest:/',
 				{
 					user,
-					user_mission: MissionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;

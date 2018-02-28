@@ -133,7 +133,7 @@ const RequestTimer = new Cron.CronJob(
 				missionID: {
 					$eq: 3,
 				},
-				// createdAt: { $lte: limit }, // createdAt <= limit
+				createdAt: { $lte: limit }, // createdAt <= limit
 			},
 		}).then((listNotification) => {
 			listNotification.forEach((element) => {

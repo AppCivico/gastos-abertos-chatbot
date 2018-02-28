@@ -18,7 +18,6 @@ const library = new builder.Library('game');
 
 const Yes = 'Sim';
 const No = 'Não';
-const Contact = 'Entrar em contato';
 const Restart = 'Voltar para o início';
 const Confirm = 'Por hoje, chega';
 
@@ -71,7 +70,6 @@ library.dialog('/currentMission', [
 						'secondMissionAssign:/',
 						{
 							user,
-							user_mission: missionUser,
 						} // eslint-disable-line comma-dangle
 					);
 				} else {
@@ -94,7 +92,7 @@ library.dialog('/currentMission', [
 					builder.Prompts.choice(
 						session,
 						'Posso te ajudar com mais alguma coisa?',
-						[Contact, Restart, Confirm],
+						[Restart, Confirm],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
@@ -102,13 +100,12 @@ library.dialog('/currentMission', [
 					);
 				} else if (missionUser.metadata.request_generated === 0) {
 					session.send(`Você está na segunda missão, no entanto, não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
-					session.replaceDialog('/sendToInformationAccessRequest');
+					session.replaceDialog('/sendToInformationAccessRequest', 	{ user });
 				} else {
 					session.replaceDialog(
 						'secondMissionConclusion:/',
 						{
 							user,
-							user_mission: missionUser,
 						} // eslint-disable-line comma-dangle
 					);
 				}
@@ -124,11 +121,9 @@ library.dialog('/currentMission', [
 			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
 			session.endConversation();
 			break;
-		case Restart: // WelcomeBack
-			session.endDialog();
+		default: // WelcomeBack
+			session.replaceDialog('*:/getStarted');
 			break;
-		default: // Contact
-			session.replaceDialog('contact:/');
 		}
 	},
 ]).cancelAction('cancelAction', '', {
@@ -155,7 +150,6 @@ library.dialog('/sendToInformationAccessRequest', [
 				'informationAccessRequest:/',
 				{
 					user,
-					user_mission: missionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;
