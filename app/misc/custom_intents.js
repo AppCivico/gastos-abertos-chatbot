@@ -29,9 +29,9 @@ module.exports.allIntents = allIntents;
 // request
 const userFacebook = (userID, pageToken, callback) => {
 	request(`https://graph.facebook.com/v2.12/${userID}?fields=first_name,last_name,email,birthday&access_token=${pageToken}`, (error, response, body) => {
-		console.log('error:', error); // Print the error if one occurred
-		console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-		console.log('body:', body); // Print the HTML for the Google homepage.
+		console.log('error:', error);
+		console.log('statusCode:', response && response.statusCode);
+		console.log('body:', body);
 		callback(JSON.parse(body));
 	});
 };
@@ -39,10 +39,11 @@ const userFacebook = (userID, pageToken, callback) => {
 module.exports.userFacebook = userFacebook;
 
 // update user session
-const updateSession = (fbId, session) => {
+const updateSession = (fbId, session, usefulData = '') => {
 	User.update({
 		session: {
 			dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
+			usefulData,
 		//	waterfallStep: Object.values(session.dialogStack()[session.dialogStack().length - 1].state),
 		},
 	}, {
@@ -62,7 +63,7 @@ const updateSession = (fbId, session) => {
 
 module.exports.updateSession = updateSession;
 
-// update user session saving useful flow data TODO
+// TODO replace
 const updateSessionData = (fbId, session, usefulData) => {
 	User.update({
 		session: {

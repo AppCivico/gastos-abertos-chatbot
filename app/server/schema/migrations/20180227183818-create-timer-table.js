@@ -21,7 +21,7 @@ module.exports = {
 		sentAlready: {
 			allowNull: false,
 			defaultValue: false,
-			type: Sequelize.STRING,
+			type: Sequelize.BOOLEAN,
 		},
 		timeSent: {
 			allowNull: true,

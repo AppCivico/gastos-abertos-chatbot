@@ -36,6 +36,8 @@ library.dialog('/', [
 			Notification.create({
 				missionID: missionData.dataValues.id, // this is 'mission id' as in 'primary key'
 				userID: missionData.dataValues.user_id,
+				msgSent: 'Percebemos que você não terminou a avaliação do portal de transparência do seu município. ' +
+				'\n\nSe precisar de ajuda, entre em contato conosco. :)',
 			}).then(() => {
 				console.log('Added a new notification to be sent!');
 			}).catch((errNotification) => {
@@ -100,7 +102,6 @@ library.dialog('/askCity', [
 			})
 			.catch((err) => {
 				console.log(err);
-				throw err;
 			});
 		session.replaceDialog('/moreDetails');
 	},

@@ -61,21 +61,19 @@ library.dialog('/assign', [
 			user_id: user.id,
 			mission_id: 2,
 			metadata: { request_generated: 0 },
-		})
-			// .then((UserMission) => {
-			.then(() => {
-				session.send('Vamos nessa!');
-				session.send(texts.second_mission.assign);
-				builder.Prompts.choice(
-					session,
-					'Vamos gerar nosso pedido de acesso à informação? Eu precisarei te fazer mais algumas perguntas referente ao portal de transparência.',
-					[HappyYes, NotYet],
-					{
-						listStyle: builder.ListStyle.button,
-						retryPrompt: retryPrompts.choice,
-					} // eslint-disable-line comma-dangle
-				);
-			});
+		}).then(() => {
+			session.send('Vamos nessa!');
+			session.send(texts.second_mission.assign);
+			builder.Prompts.choice(
+				session,
+				'Vamos gerar nosso pedido de acesso à informação? Eu precisarei te fazer mais algumas perguntas referente ao portal de transparência.',
+				[HappyYes, NotYet],
+				{
+					listStyle: builder.ListStyle.button,
+					retryPrompt: retryPrompts.choice,
+				} // eslint-disable-line comma-dangle
+			);
+		});
 	},
 	(session, args) => {
 		switch (args.response.entity) {
