@@ -15,6 +15,8 @@ const custom = require('../misc/custom_intents');
 const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
 const infoRequest = require('../server/schema/models').user_information_access_request;
+const Notification = require('../server/schema/models').notification;
+
 
 const library = new builder.Library('informationAccessRequest');
 
@@ -111,6 +113,24 @@ library.dialog('/askLAI', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Generate:
+
+			Notification.findOrCreate({
+				where: { // checks if exists
+					missionID: 0,
+					userID: user.id,
+				},
+				defaults: {
+					missionID: 0, // zero means this notification isnt part of a mission
+					userID: user.id,
+					msgSent: 'Percebemos que você ainda não terminou de gerar um pedido de acesso a informação.' +
+			'\n\nSe precisar de ajuda, entre em contato conosco ou visite nosso grupo de lideranças: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS',
+				},
+			}).then(() => {
+				console.log('Added a new notification to be sent!');
+			}).catch((errNotification) => {
+				console.log(`Couldn't save notification :( -> ${errNotification})`);
+			});
+
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)}`);
 			session.beginDialog('/questionOne');
 			// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
@@ -747,6 +767,19 @@ library.dialog('/generateRequest', [
 		}
 		request(options, callback);
 		fs.unlink(file);
+
+		Notification.update({
+			// sentAlready == true and timeSent == null
+			// means that no message was sent, because there was no need to
+			sentAlready: true,
+		}, {
+			where: {
+				userID: user.id,
+				missionID: 0,
+			},
+		}).then(() => {
+			console.log('Notification Updated! This message will not be sent!');
+		}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
 	},
 
 	(session, args) => {

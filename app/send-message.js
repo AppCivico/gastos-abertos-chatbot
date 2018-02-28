@@ -85,59 +85,6 @@ bot.dialog('/confirm', [
 		session.replaceDialog(dialogName, { usefulData });
 	},
 ]);
-// TODO create alternate way of sending messages to those at gerar pedido
-// TODO rever esse fluxo
-// bot.dialog('/askingPermission', [
-// 	(session, args) => {
-// 		[userDialog] = [args.userDialog];
-// 		builder.Prompts.choice(
-// 			session, 'Se você não desejar mais ver essas mensagens, escolha \'Parar\' abaixo',
-// 			[keepMessage, stopMessage],
-// 			{
-// 				listStyle: builder.ListStyle.button,
-// 				retryPrompt: 'Escolha uma das opções abaixo. Escolha \'Parar\' '+
-//        'para não receber novas mensagens.',
-// 			} // eslint-disable-line comma-dangle
-// 		);
-// 	},
-// 	(session, result, next) => {
-// 		if (result.response) {
-// 			switch (result.response.entity) {
-// 			case stopMessage:
-// 				User.update({
-// 					address: null,
-// 				}, {
-// 					where: {
-// 						fb_id: session.userData.userid,
-// 					},
-// 					returning: true,
-// 				})
-// 					.then(() => {
-// 						session.send('Pronto! Você não receberá mais as mensagens.' +
-// 						'\n\nSe desejar se vincular novamente, vá para o menu de Informações.');
-// 						console.log('User address erased sucessfuly');
-// 					})
-// 					.catch((err) => {
-// 						session.send('Epa! Tive um problema técnico e não consegui te desvincular!' +
-// 						'\n\nVocê pode tentar se desvincular mais tarde no menu de Informações.');
-// 						console.log(err);
-// 						throw err;
-// 					});
-// 				break;
-// 			default: // keepMessage
-// 				session.send('Legal! Agradecemos seu interesse!');
-// 				break;
-// 			}
-// 			session.send('Vamos voltar pro fluxo normal...');
-// 			next();
-// 		}
-// 	},
-// 	(session) => {
-// 		console.log(`Estariamos indo para => ${userDialog}`);
-// 		session.replaceDialog(userDialog);
-// 		// session.endDialog();
-// 	},
-// ]);
 
 library.dialog('/', [
 	(session) => {

@@ -9,6 +9,8 @@ const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const Timer = require('./timer'); // eslint-disable-line no-unused-vars
 
+console.log(`Crontab timerJob is running? => ${Timer.timerJob.running}`);
+
 bot.library(require('./send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
@@ -171,7 +173,7 @@ bot.dialog('/getStarted', [
 			});
 		} else { // welcome back
 			menuMessage = 'Como posso te ajudar?';
-			session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+			session.send('Olá, parceiro! Bem vindo de volta!');
 			session.replaceDialog('/promptButtons');
 		}
 	},

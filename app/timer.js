@@ -11,7 +11,7 @@ const User = require('./server/schema/models').user;
 
 function sendWarning(user, text, missionID) {
 	Notification.update({
-		sentAlready: true, // TODO false for testing
+		sentAlready: false, // TODO false for testing
 	}, {
 		where: {
 			userID: user.id,
