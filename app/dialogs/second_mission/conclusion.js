@@ -48,26 +48,17 @@ library.dialog('/', [
 		);
 	},
 
-	(session, result) => {
-		if (result.response) {
-			switch (result.response.entity) {
-			case HappyYes:
-				session.replaceDialog('/secondMissionQuestions');
-				break;
-			default: // unlikelyYes
-				session.replaceDialog('/secondMissionQuestions');
-				break;
-			}
-		}
+	(session) => {
+		session.replaceDialog('/secondMissionQuestions', { user });
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
 });
 
 
 library.dialog('/secondMissionQuestions', [
-	(session) => {
+	(session, args) => {
+		[user] = [args.user];
 		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
