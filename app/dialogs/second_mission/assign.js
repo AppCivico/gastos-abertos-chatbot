@@ -19,8 +19,7 @@ const custom = require('../../misc/custom_intents');
 let user;
 
 library.dialog('/', [
-	(session, args) => {
-		[user] = [args.user];
+	(session) => {
 		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
@@ -46,11 +45,11 @@ library.dialog('/', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
 });
 
 library.dialog('/assign', [
-	(session) => {
+	(session, args) => {
+		[user] = [args.user];
 		custom.updateSession(session.userData.userid, session);
 		UserMission.findOrCreate({
 			where: { // checks if exists
@@ -94,7 +93,6 @@ library.dialog('/assign', [
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
 });
 
 module.exports = library;

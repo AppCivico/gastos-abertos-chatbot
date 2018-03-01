@@ -131,7 +131,7 @@ library.dialog('/alreadyCreated', [
 			session.beginDialog('/questionOne');
 			break;
 		case Feedback:
-			session.replaceDialog('secondMissionConclusion:/', { user });
+			session.replaceDialog('secondMissionConclusion:/secondMissionQuestions', { user });
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para terminarmos! ${emoji.get('wave').repeat(2)}`);
@@ -758,7 +758,7 @@ library.dialog('/generateRequest', [
 						user_id: user.id,
 						metadata: answers,
 						isMission: true,
-						missionID: missionData[1][0].id, // TODO erro aqui
+						missionID: missionData[1][0].id,
 					}).then(() => {
 						console.log('Mission/Request created successfully! :)');
 					}).catch((errRequest) => {
@@ -769,7 +769,7 @@ library.dialog('/generateRequest', [
 					session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
 						'ou levar esse pedido em formato físico e protocola-lo.' +
 						'\n\nNo entanto, o poder público tem um tempo limite de 20 dias para responder o seu pedido.');
-					session.send(`E precisamos dessa resposta para completar nosso objetivo. ${emoji.get('page_facing_up')}`);
+					session.send(`E precisamos dessa resposta para completar nossa ação. ${emoji.get('page_facing_up')}`);
 					builder.Prompts.choice(
 						session,
 						`Quando puder concluir nosso processo, volte em 'Gerar Pedido'  e responda as questões. ${emoji.get('wink')}`,
@@ -812,7 +812,8 @@ library.dialog('/generateRequest', [
 			defaults: {
 				missionID: 3, // mission 2 and lone request are beign treated the same way
 				userID: user.id,
-				msgSent: 'E aí, já protocolou o pedido?',
+				msgSent: 'Olá, parceiro! Detectei que você conseguiu gerar um pedido de acesso a informação.' +
+				'\nVocê poderia me responder algumas perguntinhas?',
 			},
 		}).then(() => {
 			console.log('Added a new notification 3 to be sent!');

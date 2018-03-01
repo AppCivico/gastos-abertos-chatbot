@@ -449,7 +449,6 @@ library.dialog('/userUpdate', [
 				'secondMissionAssign:/assign',
 				{
 					user,
-					user_mission: missionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;

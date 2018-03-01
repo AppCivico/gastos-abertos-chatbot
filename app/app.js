@@ -7,10 +7,10 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-// const Timer = require('./timer'); // eslint-disable-line no-unused-vars
-//
-// console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
-// console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
+const Timer = require('./timer'); // eslint-disable-line no-unused-vars
+
+console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
+console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
 
 bot.library(require('./send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
@@ -67,7 +67,7 @@ const custom = require('./misc/custom_intents');
 // intents.matches('missoes', 'game:/');
 // intents.matches('pedido', 'gastosAbertosInformation:/');
 // intents.matches('Default Welcome Intent', '/getstarted');
-// intents.matches('Default Fallback Intent', '/welcomeBack');
+// intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
@@ -183,7 +183,6 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session, args, next) => { // adds admin menu to admin
 		custom.updateSession(session.userData.userid, session);
-		// Timer.timer();
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
 			attributes: ['admin', 'id'],

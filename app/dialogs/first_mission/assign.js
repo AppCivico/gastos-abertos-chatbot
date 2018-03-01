@@ -34,7 +34,8 @@ library.dialog('/', [
 			mission_id: 1,
 		}).then((missionData) => {
 			Notification.create({
-				missionID: missionData.dataValues.id, // this is 'mission id' as in 'primary key'
+				// this is 'mission id' as in 'type of mission'
+				missionID: 1,
 				userID: missionData.dataValues.user_id,
 				msgSent: 'Percebemos que você não terminou a avaliação do portal de transparência do seu município. ' +
 				'\n\nSe precisar de ajuda, entre em contato conosco. :)',
