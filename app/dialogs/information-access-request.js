@@ -31,8 +31,6 @@ const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser;
 
 // '' => no answer
 // 0 => portal has thing, nice!
@@ -217,8 +215,8 @@ library.dialog('/questionOne', [
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
 		}
-		// session.beginDialog('/questionTwo');
-		session.beginDialog('/questionThirteen'); // for time-saving testing purposes
+		session.beginDialog('/questionTwo');
+		// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -226,7 +224,7 @@ library.dialog('/questionOne', [
 
 // Start of testing comment ----------
 // Testing: Comment line below and change dialog name down there
-/*
+// /*
 
 library.dialog('/questionTwo', [
 	(session) => {

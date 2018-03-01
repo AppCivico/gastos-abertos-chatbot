@@ -25,13 +25,6 @@ const WelcomeBack = 'Voltar para o início';
 
 let user;
 
-function reloadArgs(args) { // called after session updates to saves us some lines
-	if (!answers || !user) { // empty when dialog gets interrupted
-		// [answers] = args.usefulData.answers; // stores saved values from bd
-		[user] = args.usefulData.User; // necessary => user.state
-	}
-}
-
 library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
@@ -61,7 +54,6 @@ library.dialog('/', [
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
-
 
 library.dialog('/secondMissionQuestions', [
 	(session) => {
@@ -151,7 +143,7 @@ library.dialog('/secondMissionQuestions', [
 });
 
 library.dialog('/conclusion', [
-	(session, args) => {
+	(session) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		UserMission.update({
 			completed: true,

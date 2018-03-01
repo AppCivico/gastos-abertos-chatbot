@@ -20,19 +20,6 @@ let imageUrl; // desired image url
 let msgCount; // counts number of messages sent
 // let userDialog; // user's last active dialog
 
-function messagePedido(user, customMessage) {
-	try {
-		msgCount = +1;
-		const textMessage = new builder.Message().address(user.address);
-		textMessage.text(customMessage);
-		textMessage.textLocale('pt-BR');
-		bot.send(textMessage);
-		bot.send('Obs, essa foi uma mensagem automática de informação. Você já está no fluxo normal.');
-	} catch (err) {
-		console.log(`Erro ao enviar mensagem: ${err}`);
-	}
-}
-
 function startProactiveImage(user, customMessage, customImage) {
 	try {
 		msgCount = +1;

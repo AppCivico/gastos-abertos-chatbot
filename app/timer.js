@@ -97,7 +97,7 @@ const MissionTimer = new Cron.CronJob(
 	'America/Sao_Paulo',
 	false, // context
 	// Below: runOnInit = true TODO useful only for tests
-	true // eslint-disable-line comma-dangle
+	false // eslint-disable-line comma-dangle
 );
 
 module.exports.MissionTimer = MissionTimer;
@@ -140,7 +140,7 @@ const RequestTimer = new Cron.CronJob(
 				numberSent: {
 					$lte: 5,
 				},
-				// createdAt: { $lte: limit }, // createdAt <= limit
+				createdAt: { $lte: limit }, // createdAt <= limit
 			},
 		}).then((listNotification) => {
 			listNotification.forEach((element) => {
@@ -170,6 +170,6 @@ const RequestTimer = new Cron.CronJob(
 	'America/Sao_Paulo',
 	false, // context
 	// Below: runOnInit = true TODO useful only for tests
-	true // eslint-disable-line comma-dangle
+	false // eslint-disable-line comma-dangle
 );
 module.exports.RequestTimer = RequestTimer;
