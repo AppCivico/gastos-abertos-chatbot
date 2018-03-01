@@ -26,8 +26,7 @@ let user;
 let missionUser;
 
 library.dialog('/', [
-	(session, args) => {
-		[user] = [args.user];
+	(session) => {
 		User.findOne({
 			where: { fb_id: session.userData.userid },
 		}).then((UserData) => {
@@ -64,6 +63,7 @@ library.dialog('/currentMission', [
 			missionUser = UserMissionData[UserMissionData.length - 1].dataValues;
 
 			switch (missionUser.mission_id) {
+			// TODO Ele manda gerar um pedido mesmo se o pedido já estiver gerado.
 			case 1:
 				if (missionUser.completed) {
 					session.replaceDialog(

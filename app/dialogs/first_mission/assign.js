@@ -18,8 +18,6 @@ const Yes = 'Sim';
 const No = 'Não';
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser;
 
 let userCity;
 let userState;
@@ -28,7 +26,6 @@ library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
-		missionUser = args.user_mission;
 		UserMission.create({
 			user_id: user.id,
 			mission_id: 1,
@@ -135,7 +132,6 @@ library.dialog('/moreDetails', [
 			'firstMissionConclusion:/transparencyPortalExists',
 			{
 				user,
-				user_mission: missionUser,
 			} // eslint-disable-line comma-dangle
 		);
 	},

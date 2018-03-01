@@ -19,7 +19,8 @@ const custom = require('../../misc/custom_intents');
 let user;
 
 library.dialog('/', [
-	(session) => {
+	(session, args) => {
+		[user] = [args.user];
 		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
@@ -35,7 +36,7 @@ library.dialog('/', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Yes:
-			session.replaceDialog('/assign');
+			session.replaceDialog('/assign', { user });
 			break;
 		default: // No
 			session.send(`Beleza! Estarei aqui te esperando para seguirmos em frente! ${emoji.get('thumbsup').repeat(2)}`);

@@ -64,10 +64,9 @@ library.dialog('/', [
 
 
 library.dialog('/secondMissionQuestions', [
-	(session, args) => {
-		[user] = [args.user];
-		session.sendTyping();
+	(session) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		session.sendTyping();
 		// reloadArgs(args);
 		builder.Prompts.choice(
 			session,
@@ -154,7 +153,6 @@ library.dialog('/secondMissionQuestions', [
 library.dialog('/conclusion', [
 	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
 		UserMission.update({
 			completed: true,
 			metadata: answers,

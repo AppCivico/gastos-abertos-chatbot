@@ -90,7 +90,7 @@ library.dialog('/', [
 				return: true,
 			}).spread((missionData, created) => {
 				console.log(`New mission 2 created? => ${created}`);
-				if (JSON.stringify(missionData.dataValues.metadata) !== '{"request_generated":0}') {
+				if (missionData.metadata.request_generated !== 0) {
 					session.beginDialog('/alreadyCreated');
 				}	else {
 					session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
