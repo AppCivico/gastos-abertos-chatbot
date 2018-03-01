@@ -7,7 +7,10 @@ require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-const Timer = require('./timer');
+const Timer = require('./timer'); // eslint-disable-line no-unused-vars
+
+console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
+console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
 
 bot.library(require('./send-message'));
 bot.library(require('./dialogs/gastos-abertos-information'));
@@ -64,7 +67,7 @@ const custom = require('./misc/custom_intents');
 // intents.matches('missoes', 'game:/');
 // intents.matches('pedido', 'gastosAbertosInformation:/');
 // intents.matches('Default Welcome Intent', '/getstarted');
-// intents.matches('Default Fallback Intent', '/welcomeBack');
+// intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
@@ -79,7 +82,6 @@ bot.beginDialogAction('reset', '/reset');
 bot.dialog('/reset', [
 	(session) => {
 		session.endDialog();
-		console.log('sdfsdf');
 		session.beginDialog('/');
 	},
 ]);
@@ -173,7 +175,7 @@ bot.dialog('/getStarted', [
 			});
 		} else { // welcome back
 			menuMessage = 'Como posso te ajudar?';
-			session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
+			session.send('Olá, parceiro! Bem vindo de volta!');
 			session.replaceDialog('/promptButtons');
 		}
 	},
@@ -182,10 +184,9 @@ bot.dialog('/getStarted', [
 bot.dialog('/promptButtons', [
 	(session, args, next) => { // adds admin menu to admin
 		custom.updateSession(session.userData.userid, session);
-		// Timer.timer();
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
-			attributes: ['admin'],
+			attributes: ['admin', 'id'],
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
 			if (user.admin === true) {
@@ -216,10 +217,9 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('gastosAbertosInformation:/', {	User });
 				break;
 			case Missions:
-				session.beginDialog('game:/', { user: User });
+				session.beginDialog('game:/');
 				break;
 			case sendMessage:
-				Timer.timer();
 				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest

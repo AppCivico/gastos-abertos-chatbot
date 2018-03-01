@@ -18,8 +18,6 @@ const Yes = 'Sim';
 const No = 'Não';
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser;
 
 let userCity;
 let userState;
@@ -28,13 +26,13 @@ library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
-		missionUser = args.user_mission;
 		UserMission.create({
 			user_id: user.id,
 			mission_id: 1,
 		}).then((missionData) => {
 			Notification.create({
-				missionID: missionData.dataValues.id, // this is 'mission id' as in 'primary key'
+				// this is 'mission id' as in 'type of mission'
+				missionID: 1,
 				userID: missionData.dataValues.user_id,
 				msgSent: 'Percebemos que você não terminou a avaliação do portal de transparência do seu município. ' +
 				'\n\nSe precisar de ajuda, entre em contato conosco. :)',
@@ -134,7 +132,6 @@ library.dialog('/moreDetails', [
 			'firstMissionConclusion:/transparencyPortalExists',
 			{
 				user,
-				user_mission: missionUser,
 			} // eslint-disable-line comma-dangle
 		);
 	},

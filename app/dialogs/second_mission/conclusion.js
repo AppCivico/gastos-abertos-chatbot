@@ -11,26 +11,26 @@ const answers = {
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const custom = require('../../misc/custom_intents');
+const Notification = require('../../server/schema/models').notification;
+
 
 // const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 
 const HappyYes = 'Vamos lá!';
 const Yes = 'Sim';
+const notYet = 'Ainda Não';
 const No = 'Não';
 const WelcomeBack = 'Voltar para o início';
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-// let missionUser;
 
 library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
 		if (!args.user && args.user_mission) {
 			session.send('Ooops, houve algum problema, vamos voltar para o início.');
-			session.endDialog();
-			session.beginDialog('/welcomeBack');
+			session.replaceDialog('*:/getStarted');
 		}
 
 		[user] = [args.user];
@@ -48,32 +48,22 @@ library.dialog('/', [
 		);
 	},
 
-	(session, result) => {
-		if (result.response) {
-			switch (result.response.entity) {
-			case HappyYes:
-				session.replaceDialog('/secondMissionQuestions');
-				break;
-			default: // unlikelyYes
-				session.replaceDialog('/secondMissionQuestions');
-				break;
-			}
-		}
+	(session) => {
+		session.replaceDialog('/secondMissionQuestions', { user });
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
 });
-
 
 library.dialog('/secondMissionQuestions', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		session.sendTyping();
+		// reloadArgs(args);
 		builder.Prompts.choice(
 			session,
 			'Você protocolou o pedido de acesso à informação?',
-			[Yes, No],
+			[Yes, notYet],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choice,
@@ -96,10 +86,11 @@ library.dialog('/secondMissionQuestions', [
 					} // eslint-disable-line comma-dangle
 				);
 				break;
-			default: // No
-				session.send(`Que pena! ${emoji.get('cold_sweat').repeat(2)} No entanto, recomendamos que você o protocolize mesmo assim ` +
-				'pois é muito importante que a sociedade civil demande dados.');
-				session.endDialog();
+			default: // notYet
+				session.send(`Que pena! ${emoji.get('cold_sweat')} No entanto, recomendamos que você o protocolize mesmo assim ` +
+				'pois é muito importante que a sociedade civil demande dados. ' +
+				'\nDepois de protocolar, você poderá responder esse questionário em \'Gerar Pedido\'. ');
+				session.replaceDialog('*:/getStarted');
 				break;
 			}
 		}
@@ -122,7 +113,7 @@ library.dialog('/secondMissionQuestions', [
 				break;
 			default: // No
 				answers.govAnswered = 0;
-				session.send(`Que pena! ${emoji.get('cold_sweat')} No entanto, não vamos desistir!`);
+				session.send(`Que pena! ${emoji.get('cold_sweat').repeat(2)} No entanto, não vamos desistir!`);
 				session.send('Se houve alguma irregularidade no processo ou você ficou com dúvidas, ' +
 				'encaminhe uma mensagem para a Controladoria Geral da União:\n\n' +
 				'https://sistema.ouvidorias.gov.br/publico/Manifestacao/RegistrarManifestacao.aspx');
@@ -153,7 +144,7 @@ library.dialog('/secondMissionQuestions', [
 
 library.dialog('/conclusion', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		UserMission.update({
 			completed: true,
 			metadata: answers,
@@ -164,17 +155,27 @@ library.dialog('/conclusion', [
 				completed: false,
 			},
 			returning: true,
-		})
-			.then((result) => {
-				console.log(`Mission updated sucessfuly: ${result}`);
-				session.replaceDialog('/congratulations');
-			})
-			.catch((e) => {
-				console.log(`Error updating mission: ${e}`);
-				session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
-				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-				throw e;
-			});
+		}).then((result) => {
+			Notification.update({
+				// sentAlready == true and timeSent == null
+				// means that no message was sent, because there was no need to
+				sentAlready: true,
+			}, {
+				where: {
+					userID: user.id,
+					missionID: 3,
+				},
+			}).then(() => {
+				console.log('Notification Updated! This message will not be sent!');
+			}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
+			console.log(`Mission updated sucessfuly: ${result}`);
+			session.replaceDialog('/congratulations');
+		}).catch((e) => {
+			console.log(`Error updating mission: ${e}`);
+			session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
+			session.replaceDialog('*:/getStarted');
+			throw e;
+		});
 	} // eslint-disable-line comma-dangle
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,

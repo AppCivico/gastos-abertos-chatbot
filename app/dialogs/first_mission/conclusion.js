@@ -14,7 +14,7 @@ const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 const Notification = require('../../server/schema/models').notification;
 
-const answers = {
+let answers = {
 	transparencyPortalExists: '',
 	transparencyPortalURL: '',
 	transparencyPortalHasFinancialData: '',
@@ -32,13 +32,11 @@ const nextMission = 'Ir para a próxima missão';
 const WelcomeBack = 'Beleza!';
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser;
 
 function reloadArgs(args) { // called after session updates to saves us some lines
 	if (!answers || !user) { // empty when dialog gets interrupted
-	//	[answers] = args.usefulData.answers; // stores saved values from bd
-	// 	[user] = args.usefulData.User; // necessary => user.state
+		[answers] = args.usefulData.answers; // stores saved values from bd
+		[user] = args.usefulData.User; // necessary => user.state
 	}
 }
 
@@ -46,7 +44,6 @@ library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
-		missionUser = args.user_mission;
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -413,9 +410,8 @@ library.dialog('/userUpdate', [
 			.then((missionData) => {
 				console.log(`Mission ${missionData[1][0].id} Updated!`);
 				Notification.update({
-					// sentAlready == true and timeSent == null
+					// sentAlready == true and timeSent == null or numberSent = 0
 					// means that no message was sent, because there was no need to
-					sentAlready: true,
 				}, {
 					where: {
 						userID: missionData[1][0].user_id,
@@ -427,7 +423,7 @@ library.dialog('/userUpdate', [
 
 				builder.Prompts.choice(
 					session,
-					`Se quiser, você já pode começar a segunda missão. Ou fazer uma pausa e continuar mais tarde ${emoji.get('grinning').repeat(2)}`,
+					`Se quiser, você já pode começar a segunda missão. Ou fazer uma pausa e continuar mais tarde. ${emoji.get('grinning').repeat(2)}`,
 					[nextMission, WelcomeBack],
 					{
 						listStyle: builder.ListStyle.button,
@@ -438,7 +434,7 @@ library.dialog('/userUpdate', [
 			.catch((err) => {
 				console.log(`Error updating mission${err}`);
 				session.send('Oooops...Tive um problema ao atualizar seu estado. Tente novamente mais tarde.');
-				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+				session.replaceDialog('*:/getStarted');
 				throw err;
 			});
 	},
@@ -450,7 +446,6 @@ library.dialog('/userUpdate', [
 				'secondMissionAssign:/assign',
 				{
 					user,
-					user_mission: missionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;

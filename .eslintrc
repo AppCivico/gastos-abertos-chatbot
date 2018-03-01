@@ -1,12 +1,12 @@
 {
-  "extends": "airbnb-base",
-  "env": {
-    "browser": true,
-    "node": true
-    },
-    "rules": {
-
-      "indent": ["error", "tab"],
-    "no-tabs": 0
-  }
+	"extends": "airbnb-base",
+	"env": {
+		"browser": true,
+		"node": true
+		},
+		"rules": {
+				"no-console": 'off',
+			"indent": ["error", "tab"],
+		"no-tabs": 0
+	}
 }

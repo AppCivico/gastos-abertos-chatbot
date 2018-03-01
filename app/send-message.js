@@ -20,19 +20,6 @@ let imageUrl; // desired image url
 let msgCount; // counts number of messages sent
 // let userDialog; // user's last active dialog
 
-function messagePedido(user, customMessage) {
-	try {
-		msgCount = +1;
-		const textMessage = new builder.Message().address(user.address);
-		textMessage.text(customMessage);
-		textMessage.textLocale('pt-BR');
-		bot.send(textMessage);
-		bot.send('Obs, essa foi uma mensagem automática de informação. Você já está no fluxo normal.');
-	} catch (err) {
-		console.log(`Erro ao enviar mensagem: ${err}`);
-	}
-}
-
 function startProactiveImage(user, customMessage, customImage) {
 	try {
 		msgCount = +1;
@@ -85,59 +72,6 @@ bot.dialog('/confirm', [
 		session.replaceDialog(dialogName, { usefulData });
 	},
 ]);
-// TODO create alternate way of sending messages to those at gerar pedido
-// TODO rever esse fluxo
-// bot.dialog('/askingPermission', [
-// 	(session, args) => {
-// 		[userDialog] = [args.userDialog];
-// 		builder.Prompts.choice(
-// 			session, 'Se você não desejar mais ver essas mensagens, escolha \'Parar\' abaixo',
-// 			[keepMessage, stopMessage],
-// 			{
-// 				listStyle: builder.ListStyle.button,
-// 				retryPrompt: 'Escolha uma das opções abaixo. Escolha \'Parar\' '+
-//        'para não receber novas mensagens.',
-// 			} // eslint-disable-line comma-dangle
-// 		);
-// 	},
-// 	(session, result, next) => {
-// 		if (result.response) {
-// 			switch (result.response.entity) {
-// 			case stopMessage:
-// 				User.update({
-// 					address: null,
-// 				}, {
-// 					where: {
-// 						fb_id: session.userData.userid,
-// 					},
-// 					returning: true,
-// 				})
-// 					.then(() => {
-// 						session.send('Pronto! Você não receberá mais as mensagens.' +
-// 						'\n\nSe desejar se vincular novamente, vá para o menu de Informações.');
-// 						console.log('User address erased sucessfuly');
-// 					})
-// 					.catch((err) => {
-// 						session.send('Epa! Tive um problema técnico e não consegui te desvincular!' +
-// 						'\n\nVocê pode tentar se desvincular mais tarde no menu de Informações.');
-// 						console.log(err);
-// 						throw err;
-// 					});
-// 				break;
-// 			default: // keepMessage
-// 				session.send('Legal! Agradecemos seu interesse!');
-// 				break;
-// 			}
-// 			session.send('Vamos voltar pro fluxo normal...');
-// 			next();
-// 		}
-// 	},
-// 	(session) => {
-// 		console.log(`Estariamos indo para => ${userDialog}`);
-// 		session.replaceDialog(userDialog);
-// 		// session.endDialog();
-// 	},
-// ]);
 
 library.dialog('/', [
 	(session) => {
@@ -242,12 +176,8 @@ library.dialog('/sendingImage', [ // sends image and text message
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				if (!element.dataValues.session.match(/informationAccessRequest*/i)) {
-					console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-					startProactiveImage(element.dataValues, messageText, imageUrl);
-				} else {
-					messagePedido(element.dataValues, messageText);
-				}
+				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
+				startProactiveImage(element.dataValues, messageText, imageUrl);
 			});
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');

@@ -1,4 +1,4 @@
-/* global  builder:true */
+/* global  bot:true builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 /* eslint no-plusplus: 0 */
@@ -12,14 +12,18 @@ const emoji = require('node-emoji');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const custom = require('../misc/custom_intents');
 
+bot.library(require('./second_mission/conclusion'));
+
 const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
 const infoRequest = require('../server/schema/models').user_information_access_request;
+const Notification = require('../server/schema/models').notification;
 
 const library = new builder.Library('informationAccessRequest');
 
 const Generate = 'Gerar Pedido';
 const Denial = 'Ainda não';
+const Feedback = 'Responder';
 const Yes = 'Sim';
 const No = 'Não';
 const HappyYes = 'Vamos lá!';
@@ -27,8 +31,6 @@ const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser;
 
 // '' => no answer
 // 0 => portal has thing, nice!
@@ -66,28 +68,74 @@ const headers = {
 };
 
 library.dialog('/', [
-	(session, args) => {
-		if (args && args.user && args.user_mission) {
-			[user] = [args.user];
-			missionUser = args.user_mission; // eslint-disable-line prefer-destructuring
-			session.send('Esse é um processo bem extenso e tem bastante conteúdo.' +
-				`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
-			'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
-			session.send('Além disso, você pode a qualquer momento digitar \'cancelar\' e eu te levo para o início');
-		} else {
-			User.findOne({
-				attributes: ['id'],
-				where: {
-					fb_id: session.userData.userid,
+	(session) => {
+		User.findOne({
+			attributes: ['id'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			user = userData;
+
+			UserMission.findOrCreate({
+				where: { // checks if exists
+					user_id: user.id,
+					mission_id: 2,
 				},
-			}).then((userData) => {
-				user = userData;
+				defaults: {
+					user_id: user.id,
+					mission_id: 2,
+					metadata: { request_generated: 0 },
+				},
+				return: true,
+			}).spread((missionData, created) => {
+				console.log(`New mission 2 created? => ${created}`);
+				if (missionData.metadata.request_generated !== 0) {
+					session.beginDialog('/alreadyCreated');
+				}	else {
+					session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
+					'isto, irei lhe fazer diversas perguntas, e não se preocupe se não ' +
+					'souber. Caso você não encontrar ou não ter certeza, sua resposta deve ser NÃO, ok?');
+					session.send('Esse é um processo bem extenso e tem bastante conteúdo.' +
+					`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
+					'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
+					session.send('Além disso, você pode a qualquer momento digitar \'começar\' e eu te levo para o início.');
+
+					session.beginDialog('/askLAI');
+				}
+			}).catch((err) => {
+				console.log(`Error findind or creating UserMission => ${err}`);
 			});
-			session.send('Vamos gerar informações sobre orçamento público na sua cidade? Para ' +
-			'isto, irei lhe fazer diversas perguntas, e não se preocupe se não ' +
-			'souber. Caso você não encontrar ou não ter certeza, sua resposta deve ser NÃO, ok?');
+		});
+	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+});
+
+library.dialog('/alreadyCreated', [
+	(session) => {
+		builder.Prompts.choice(
+			session,
+			'Você já gerou um pedido de acesso a informação. Se quiser você poderá gerar outro ou contar-nos qual foi a resposta! ',
+			[Generate, Feedback, Denial],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choice,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+
+	(session, args) => {
+		switch (args.response.entity) {
+		case Generate:
+			session.beginDialog('/questionOne');
+			break;
+		case Feedback:
+			session.replaceDialog('secondMissionConclusion:/secondMissionQuestions', { user });
+			break;
+		default: // Denial
+			session.send(`Okay! Eu estarei aqui esperando para terminarmos! ${emoji.get('wave').repeat(2)}`);
+			session.beginDialog('*:/getStarted');
+			break;
 		}
-		session.beginDialog('/askLAI');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -111,9 +159,24 @@ library.dialog('/askLAI', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Generate:
+
+			Notification.findOrCreate({
+				where: { // checks if exists
+					missionID: 2,
+					userID: user.id,
+				},
+				defaults: {
+					missionID: 2, // mission 2 and lone request are beign treated the same way
+					userID: user.id,
+					msgSent: 'Percebemos que você ainda não terminou de gerar um pedido de acesso a informação.' +
+		'\n\nSe precisar de ajuda, entre em contato conosco ou visite nosso grupo de lideranças: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS',
+				},
+			}).catch((errNotification) => {
+				console.log(`Couldn't save notification 2 :( -> ${errNotification})`);
+			});
+
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)}`);
 			session.beginDialog('/questionOne');
-			// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
@@ -124,8 +187,6 @@ library.dialog('/askLAI', [
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
-// Start of testing comment ----------
-// Testing: Comment out line below and change dialog name up there
 library.dialog('/questionOne', [
 	(session) => {
 		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
@@ -155,10 +216,16 @@ library.dialog('/questionOne', [
 			break;
 		}
 		session.beginDialog('/questionTwo');
+		// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
+
+// Start of testing comment ----------
+// Testing: Comment line below and change dialog name down there
+// /*
+
 library.dialog('/questionTwo', [
 	(session) => {
 		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
@@ -288,8 +355,8 @@ library.dialog('/questionFive', [
 library.dialog('/questionSix', [
 	(session) => {
 		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
-		currentQuestion = `${answers.questionNumber} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, com indicação das ` +
-		'licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
+		currentQuestion = `${answers.questionNumber} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, ` +
+		'com indicação das licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
 		builder.Prompts.choice(
 			session, currentQuestion,
 			[Yes, No],
@@ -590,7 +657,8 @@ library.dialog('/askFullName', [
 library.dialog('/generateRequest', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
-		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em'; // style config that will be used for the html creation
+		// style config that will be used for the html creation
+		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em';
 		const html = `<p style="${styleDiv}">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011,` +
 		' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
 		' e na Lei Complementar 131, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em' +
@@ -670,83 +738,86 @@ library.dialog('/generateRequest', [
 				});
 				session.send(msg);
 
-				if (user && missionUser) {
-					UserMission.update(
-						{ metadata: { request_generated: 1 } },
-						{
-							where: {
-								user_id: user.id,
-								mission_id: 2,
-								completed: false,
-							},
-							returning: true,
-							raw: true,
-						} // eslint-disable-line comma-dangle
-					).then((missionData) => {
-						// creates request in user_information_acess_request
-						infoRequest.create({ // saves the request generated
+				UserMission.update(
+					{ metadata: { request_generated: 1 } },
+					{
+						where: {
 							user_id: user.id,
-							metadata: answers,
-							isMission: true,
-							missionID: missionData[1][0].id,
-						}).then(() => {
-							console.log('Mission/Request created successfully! :)');
-						}).catch((errRequest) => {
-							console.log(`Couldn't save request :( -> ${errRequest})`);
-						});
-						console.log(`Mission ${missionData[1][0].id} updated successfully`);
-						session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
-						session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
+							mission_id: 2,
+							completed: false,
+						},
+						returning: true,
+						raw: true,
+					} // eslint-disable-line comma-dangle
+				).then((missionData) => {
+					// TODO alinhas comportamento desejado (salvar todos os protocolos gerados?)
+					// creates request in user_information_acess_request
+					infoRequest.create({ // saves the request generated
+						user_id: user.id,
+						metadata: answers,
+						isMission: true,
+						missionID: missionData[1][0].id,
+					}).then(() => {
+						console.log('Mission/Request created successfully! :)');
+					}).catch((errRequest) => {
+						console.log(`Couldn't save request :( -> ${errRequest})`);
+					});
+					console.log(`Mission ${missionData[1][0].id} updated successfully`);
+					session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
+					session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
 						'ou levar esse pedido em formato físico e protocola-lo.' +
 						'\n\nNo entanto, o poder público tem um tempo limite de 20 dias para responder o seu pedido.');
-						session.send(`E precisamos dessa resposta para completar nossa segunda missão. ${emoji.get('page_facing_up')}`);
-						builder.Prompts.choice(
-							session,
-							`Então, pode ficar tranquilo que te chamo quando for liberada a conclusão. ${emoji.get('wink')}`,
-							[goBack],
-							{
-								listStyle: builder.ListStyle.button,
-								retryPrompt: retryPrompts.choice,
-							} // eslint-disable-line comma-dangle
-						);
-					})
-						.catch((err) => {
-							console.log(`Error updating mission${err}`);
-							session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
-							session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-							throw err;
-						});
-				} else {
-					User.findOne({ // finds current user, to get his id
-						attributes: ['id'],
-						where: { fb_id: session.userData.userid },
-					}).then((userData) => {
-						infoRequest.create({ // saves the request generated
-							user_id: userData.id, // isMission defaults to false
-							metadata: answers, // doesn't save missionID
-						}).then(() => {
-							console.log('Request saved successfully! :)');
-						}).catch((errRequest) => {
-							console.log(`Couldn't save request :( -> ${errRequest})`);
-						});
-					}).catch((errUser) => {
-						console.log(`Couldn't find user :( -> ${errUser})`);
-					});
+					session.send(`E precisamos dessa resposta para completar nossa ação. ${emoji.get('page_facing_up')}`);
 					builder.Prompts.choice(
 						session,
-						'Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
-						'ou levar esse pedido em formato físico e protocolizá-lo.',
+						`Quando puder concluir nosso processo, volte em 'Gerar Pedido'  e responda as questões. ${emoji.get('wink')}`,
 						[goBack],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
 						} // eslint-disable-line comma-dangle
 					);
-				}
+				}).catch((err) => {
+					console.log(`Error updating mission${err}`);
+					session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
+					session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+					throw err;
+				});
 			}
 		}
+
 		request(options, callback);
 		fs.unlink(file);
+
+		Notification.update({
+			// sentAlready == true and timeSent == null
+			// means that no message was sent, because there was no need to
+			sentAlready: true,
+		}, {
+			where: {
+				userID: user.id,
+				missionID: 2,
+			},
+		}).then(() => {
+			console.log('Notification Updated! This message will not be sent!');
+		}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
+
+		Notification.findOrCreate({
+			where: { // checks if exists
+				missionID: 3,
+				userID: user.id,
+			},
+			defaults: {
+				missionID: 3, // mission 2 and lone request are beign treated the same way
+				userID: user.id,
+				msgSent: 'Olá, parceiro! Detectei que você conseguiu gerar um pedido de acesso a informação.' +
+				'\nVocê poderia me responder algumas perguntinhas?',
+			},
+		}).then(() => {
+			console.log('Added a new notification 3 to be sent!');
+		}).catch((errNotification) => {
+			console.log(`Couldn't save notification 3 :( -> ${errNotification})`);
+		});
 	},
 
 	(session, args) => {
