@@ -22,7 +22,7 @@ let msgCount; // counts number of messages sent
 
 function startProactiveImage(user, customMessage, customImage) {
 	try {
-		msgCount = +1;
+		msgCount += 1;
 		const image = new builder.Message().address(user.address);
 		image.addAttachment({
 			contentType: 'image/jpeg',
@@ -42,7 +42,7 @@ function startProactiveImage(user, customMessage, customImage) {
 
 function startProactiveDialog(user, customMessage) {
 	try {
-		msgCount = +1;
+		msgCount += 1;
 		const textMessage = new builder.Message().address(user.address);
 		textMessage.text(customMessage);
 		textMessage.textLocale('pt-BR');
@@ -77,7 +77,8 @@ library.dialog('/', [
 	(session) => {
 		msgCount = 0;
 		builder.Prompts.choice(
-			session, 'Este é o menu para mandarmos mensagens aos usuários!\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem e confirme. Você não receberá a mensagem.',
+			session, 'Este é o menu para mandarmos mensagens aos usuários!\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), ' +
+			' vizualise como fica a mensagem e confirme. Você não receberá a mensagem.',
 			[writeMsg, imageMsg, testMessage, goBack],
 			{
 				listStyle: builder.ListStyle.button,
@@ -242,10 +243,8 @@ library.dialog('/sendingMessage', [ // sends text message
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				//				if (!element.dataValues.session.dialogName.match(/informationAccessRequest*/i)) {
 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
 				startProactiveDialog(element.dataValues, messageText);
-				//		messagePedido(element.dataValues, messageText);
 			});
 		}).catch((err) => {
 			session.send('Ocorreu um erro ao enviar mensagem');

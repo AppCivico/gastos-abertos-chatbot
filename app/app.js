@@ -138,6 +138,7 @@ bot.dialog('/', [
 				session.replaceDialog('/promptButtons');
 			})) // eslint-disable-line comma-dangle
 		);
+		session.replaceDialog('/getStarted');
 	},
 ]);
 
