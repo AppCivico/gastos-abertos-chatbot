@@ -19,6 +19,10 @@ module.exports = () => {
 		console.log('%s listening to %s', server.name, server.url);
 	});
 	server.post('/api/messages', connector.listen());
-	bot.use(builder.Middleware.dialogVersion({ version: 0.2, resetCommand: /^reset/i }));
+	bot.use(builder.Middleware.dialogVersion({
+		version: 0.4,
+		resetCommand: /^reset/i,
+		message: 'Nosso bot foi atualizado desde a última vez que nos vimos! Começe uma nova conversa ou mande um \'oi\' agora para recomeçarmos!',
+	}));
 	bot.set('persistConversationData', false);
 };

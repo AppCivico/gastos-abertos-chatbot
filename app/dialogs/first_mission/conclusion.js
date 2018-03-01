@@ -32,8 +32,6 @@ const nextMission = 'Ir para a próxima missão';
 const WelcomeBack = 'Beleza!';
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser;
 
 function reloadArgs(args) { // called after session updates to saves us some lines
 	if (!answers || !user) { // empty when dialog gets interrupted
@@ -46,7 +44,6 @@ library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
-		missionUser = args.user_mission;
 
 		session.sendTyping();
 		builder.Prompts.choice(
