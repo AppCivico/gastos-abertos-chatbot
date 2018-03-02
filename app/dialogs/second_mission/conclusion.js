@@ -14,7 +14,7 @@ const custom = require('../../misc/custom_intents');
 const Notification = require('../../server/schema/models').notification;
 
 
-// const User = require('../../server/schema/models').user;
+const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 
 const HappyYes = 'Vamos lá!';
@@ -34,7 +34,6 @@ library.dialog('/', [
 		}
 
 		[user] = [args.user];
-		//		missionUser = args.user_mission;
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -56,8 +55,9 @@ library.dialog('/', [
 });
 
 library.dialog('/secondMissionQuestions', [
-	(session) => {
+	(session, args) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		[user] = [args.user];
 		session.sendTyping();
 		// reloadArgs(args);
 		builder.Prompts.choice(
@@ -135,7 +135,17 @@ library.dialog('/secondMissionQuestions', [
 			}
 		}
 
-		session.replaceDialog('/conclusion');
+		User.findOne({
+			attributes: ['id'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			console.dir(userData);
+			user = userData.dataValues;
+		}).catch((errUser) => {
+			console.log(`Error finding user => ${errUser}`);
+		}).then(() => {
+			session.replaceDialog('/conclusion');
+		});
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -146,7 +156,7 @@ library.dialog('/conclusion', [
 	(session) => {
 		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		UserMission.update({
-			completed: true,
+			completed: false,
 			metadata: answers,
 		}, {
 			where: {
@@ -159,7 +169,7 @@ library.dialog('/conclusion', [
 			Notification.update({
 				// sentAlready == true and timeSent == null
 				// means that no message was sent, because there was no need to
-				sentAlready: true,
+				sentAlready: false,
 			}, {
 				where: {
 					userID: user.id,

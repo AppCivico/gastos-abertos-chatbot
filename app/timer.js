@@ -4,7 +4,7 @@
 
 // A class for adding a timer to the missions and sending warning messages
 
-// const Sequelize = require('sequelize');
+const Sequelize = require('sequelize');
 const Cron = require('cron');
 
 const Notification = require('./server/schema/models').notification;
@@ -13,7 +13,7 @@ const User = require('./server/schema/models').user;
 bot.library(require('./dialogs/second_mission/conclusion'));
 
 
-function sendWarning(user, text, missionID) {
+function missionWarning(user, text, missionID) {
 	Notification.update({
 		sentAlready: false, // TODO false for testing
 		timeSent: new Date(Date.now()),
@@ -82,7 +82,7 @@ const MissionTimer = new Cron.CronJob(
 						},
 					},
 				}).then((userData) => {
-					sendWarning(userData, element.msgSent, element.missionID);
+					missionWarning(userData, element.msgSent, element.missionID);
 				}).catch((errUser) => {
 					console.log(`Coundn't find User => ${errUser}`);
 				});
@@ -97,7 +97,7 @@ const MissionTimer = new Cron.CronJob(
 	'America/Sao_Paulo',
 	false, // context
 	// Below: runOnInit = true TODO useful only for tests
-	false // eslint-disable-line comma-dangle
+	true // eslint-disable-line comma-dangle
 );
 
 module.exports.MissionTimer = MissionTimer;
@@ -105,7 +105,7 @@ module.exports.MissionTimer = MissionTimer;
 function requestWarning(user, missionID) {
 	Notification.update({
 		timeSent: new Date(Date.now()), // last one sent
-		numberSent: 1, // Sequelize.literal('numberSent + 1'),
+		numberSent: Sequelize.literal('"numberSent" + 1'),
 	}, {
 		where: {
 			userID: user.id,
@@ -121,7 +121,7 @@ function requestWarning(user, missionID) {
 	msg.text('Olá, parceiro! Detectei que você conseguiu gerar um pedido de acesso a informação.' +
 	'\nVocê poderia me responder algumas perguntinhas?');
 	bot.send(msg);
-	bot.beginDialog(user.address, 'secondMissionConclusion:/secondMissionQuestions', { user });
+	bot.beginDialog(user.address, 'secondMissionConclusion:/secondMissionQuestions', { usefulData: user.session.usefulData });
 }
 
 // Cronjob for following the user after request generation
@@ -134,15 +134,15 @@ const RequestTimer = new Cron.CronJob(
 			attributes: ['userID', 'missionID', 'msgSent'],
 			where: {
 				sentAlready: false,
-				missionID: {
-					$eq: 3,
-				},
+				missionID: 3,
 				numberSent: {
-					$lte: 5,
+					$lte: 50,
 				},
-				createdAt: { $lte: limit }, // createdAt <= limit
+				// createdAt: { $lte: limit }, // createdAt <= limit
 			},
 		}).then((listNotification) => {
+			console.dir(listNotification);
+			console.log('\n\nsSending request notification to user}');
 			listNotification.forEach((element) => {
 				console.log(`Sending request notification to user ${element.userID}`);
 				console.log(`Time: ${new Date(Date.now())}`);
@@ -170,6 +170,6 @@ const RequestTimer = new Cron.CronJob(
 	'America/Sao_Paulo',
 	false, // context
 	// Below: runOnInit = true TODO useful only for tests
-	false // eslint-disable-line comma-dangle
+	true // eslint-disable-line comma-dangle
 );
 module.exports.RequestTimer = RequestTimer;
