@@ -24,5 +24,5 @@ module.exports = () => {
 		resetCommand: /^reset/i,
 		message: 'Nosso bot foi atualizado desde a última vez que nos vimos! Começe uma nova conversa ou mande um \'oi\' agora para recomeçarmos!',
 	}));
-	bot.set('persistConversationData', false);
+	bot.set('persistConversationData', true);
 };
