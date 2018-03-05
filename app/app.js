@@ -1,18 +1,22 @@
 /* global  bot:true builder:true */
-/* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor":
-["session"] }] */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 
 require('dotenv').config();
 require('./connectorSetup.js')();
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
+const Timer = require('./timer'); // eslint-disable-line no-unused-vars
 
-bot.library(require('./dialogs/send-message'));
+console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
+console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
+
+bot.library(require('./send-message'));
+bot.library(require('./add-admin'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
-
 
 const User = require('./server/schema/models').user;
 
@@ -20,12 +24,36 @@ const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
 const InformationAcessRequest = 'Gerar um pedido';
 const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos informações ou notícias sobre dados abertos e transparência orçamentária?';
-const sendMessage = 'Painel Administrativo';
+const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
+const addAdmin = 'Adicionar Administrador';
+const sendMessage = 'Mandar Mensagems';
+const comeBack = 'Voltar';
 
-let menuMessage;
+let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
+
+// fb-get-started-button add [page_token] --payload getStarted
+
+// curl -X POST -H "Content-Type: application/json" -d '{
+// 	"setting_type" : "call_to_actions",
+// 	"thread_state" : "existing_thread",
+// 	"call_to_actions":[
+// 		{
+// 			"type":"web_url",
+// 			"title":"Ver nosso site",
+// 			"url":"https://gastosabertos.org/"
+// 		},
+// 		{
+// 			"type":"postback",
+// 			"title":"Ir para o Início",
+// 			"payload":"reset2"
+// 		}
+// 	]
+// }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token=[page_token]"
+
+
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -43,28 +71,43 @@ const custom = require('./misc/custom_intents');
 // intents.matches('missoes', 'game:/');
 // intents.matches('pedido', 'gastosAbertosInformation:/');
 // intents.matches('Default Welcome Intent', '/getstarted');
-// intents.matches('Default Fallback Intent', '/welcomeBack');
+// intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
 const { pageToken } = process.env;
+const { emulatorUser } = process.env;
+const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
 
+bot.dialog('/reset', [
+	(session) => {
+		session.endDialog();
+		session.beginDialog('/');
+	},
+]);
+
 bot.dialog('/', [
 	(session) => {
-		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
-		// TODO teste sem ID
-		session.userData = {}; // for testing purposes
-		session.userData.userid = session.message.sourceEvent.sender.id;
-		// session.userData.pageid = session.message.sourceEvent.recipient.id;
-		// session.userData.pageToken = pageToken;
-
-		// hardcoded ids for testing purposes
-		// session.userData.userid = '100004770631443';
+		// TODO rever toda a estrura do 'cancelar'
+		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
+		if (session.message.address.channelId === 'facebook') {
+			session.userData.userid = session.message.sourceEvent.sender.id;
+			session.userData.pageid = session.message.sourceEvent.recipient.id;
+		} else {
+			// hardcoded ids for testing purposes
+			session.userData.userid = emulatorUser;
+		}
 		session.userData.pageToken = pageToken;
+
+		// checks if user should be an admin using the ID
+		let isItAdmin = false;
+		if (adminArray.includes(session.userData.userid)) {
+			isItAdmin = true;
+		}
 
 		// default value: 'undefined'. Yes, it's only a string.
 		custom.userFacebook(
@@ -83,18 +126,21 @@ bot.dialog('/', [
 					approved: true,
 					fb_id: result.id,
 					fb_name: `${result.first_name} ${result.last_name}`,
-					session: session.dialogStack()[session.dialogStack().length - 1].id,
+					admin: isItAdmin,
+					session: {
+						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
+					},
 				},
-			})
-				.spread((user, created) => {
-					console.log(user.get({
-						plain: true,
-					}));
-					if (user.get('admin') === true) { // shows hidden admin menu
-						menuOptions.push(sendMessage);
-					}
-					console.log(`Was created? => ${created}`);
-				})) // eslint-disable-line comma-dangle
+
+			}).spread((user, created) => {
+				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
+				console.log(user.get({ plain: true })); // prints user data
+				console.log(`Was created? => ${created}`);
+
+				session.replaceDialog('/getStarted');
+			}).catch(() => {
+				session.replaceDialog('/promptButtons');
+			})) // eslint-disable-line comma-dangle
 		);
 		session.replaceDialog('/getStarted');
 	},
@@ -103,13 +149,9 @@ bot.dialog('/', [
 bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
-
-
 		if (!session.userData.firstRun) { // first run
 			menuMessage = 'Vamos lá, como posso te ajudar?';
 			session.userData.firstRun = true;
-			session.sendTyping();
-
 			session.send({
 				attachments: [
 					{
@@ -123,26 +165,45 @@ bot.dialog('/getStarted', [
 			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
-			session.replaceDialog('/askPermission');
-		} else { // welcome back
-			menuMessage = 'Como posso te ajudar?';
-			User.findOne({
-				attributes: ['fb_name'],
+			User.findOne({ // checks if user has an address and asks permission if he doesn't
+				attributes: ['address'],
 				where: { fb_id: session.userData.userid },
 			}).then((user) => {
-				session.send(`Olá, ${user.get('fb_name').substr(0, user.get('fb_name').indexOf(' '))}! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
-				session.replaceDialog('/promptButtons');
+				if (user.address === null) {
+					session.replaceDialog('/askPermission');
+				} else {
+					session.replaceDialog('/promptButtons');
+				}
 			}).catch(() => {
-				session.send(`Olá, parceiro! Bem vindo de volta! ${emoji.get('hugging_face').repeat(2)}`);
 				session.replaceDialog('/promptButtons');
 			});
+		} else { // welcome back
+			menuMessage = 'Como posso te ajudar?';
+			session.send('Olá, parceiro! Bem vindo de volta!');
+			session.replaceDialog('/promptButtons');
 		}
 	},
 ]);
 
 bot.dialog('/promptButtons', [
-	(session) => {
+	(session, args, next) => { // adds admin menu to admin
 		custom.updateSession(session.userData.userid, session);
+		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
+		User.findOne({
+			attributes: ['admin', 'id'],
+			where: { fb_id: session.userData.userid },
+		}).then((user) => {
+			if (user.admin === true) {
+				menuOptions.push(adminPanel);
+			}
+		}).catch(() => {
+			session.replaceDialog('/promptButtons');
+		}).finally(() => {
+			next();
+		});
+	},
+
+	(session) => {
 		builder.Prompts.choice(
 			session, menuMessage, menuOptions,
 			{
@@ -160,9 +221,10 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('gastosAbertosInformation:/', {	User });
 				break;
 			case Missions:
-				session.beginDialog('game:/', { user: User });
+				session.beginDialog('game:/');
 				break;
-			case sendMessage:
+			case adminPanel:
+				// session.beginDialog('/painelChoice');
 				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
@@ -172,7 +234,7 @@ bot.dialog('/promptButtons', [
 		}
 	},
 	(session) => {
-		session.replaceDialog('/getStarted');
+		session.replaceDialog('/promptButtons');
 	},
 ]);
 // ]).customAction({
@@ -189,9 +251,41 @@ bot.dialog('/promptButtons', [
 // 	},
 // });
 
+bot.dialog('/painelChoice', [ // sub-menu for admin painel
+	(session) => {
+		builder.Prompts.choice(
+			session, 'Esse é o menu Administrativo. Escolha o que deseja fazer:', [sendMessage, addAdmin, comeBack],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choiceIntent,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case sendMessage:
+				session.beginDialog('sendMessage:/');
+				break;
+			case addAdmin:
+				session.beginDialog('addAdmin:/');
+				break;
+			default: // comeBack
+				session.endDialog();
+				break;
+			}
+		}
+	},
+	(session) => {
+		session.replaceDialog('/promptButtons');
+	},
+
+]);
+
 bot.dialog('/askPermission', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session, permissionQuestion,
 			[Yes, No],

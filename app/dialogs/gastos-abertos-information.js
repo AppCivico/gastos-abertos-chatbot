@@ -8,7 +8,7 @@ const emoji = require('node-emoji');
 
 const library = new builder.Library('gastosAbertosInformation');
 
-const accessLaw = 'Dados abertos?';
+const accessLaw = 'Saber mais';
 const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
 const receiveMessage = 'Receber Mensagens?';
@@ -35,7 +35,7 @@ library.dialog('/promptButtons', [
 		builder.Prompts.choice(
 			session,
 			`Como posso te ajudar? ${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[accessLaw, receiveMessage, contact, reset],
+			[accessLaw, receiveMessage, reset],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.about,
@@ -72,7 +72,6 @@ library.dialog('/promptButtons', [
 	},
 });
 
-
 library.dialog('/accessLaw', [
 	(session) => {
 		session.send('A LAI (Lei de Acesso à Informação, lei N.12.527) entrou em vigor no dia 16 de maio de 2012 e ' +
@@ -91,7 +90,7 @@ library.dialog('/receiveMessage', [
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
 			if (user.get('address') === null) {
-				receiveDialog = 'Você não está recebendo nenhum de nossas mensagens diretas.\n\nDeseja começar a recebê-las?';
+				receiveDialog = 'No momento, você não está recebendo nenhum de nossas mensagens diretas.\n\nDeseja começar a recebê-las?';
 				receiveYes = 'Sim, quero receber!';
 				receiveNo = 'Não quero receber';
 				newAddress = session.message.address;
@@ -125,8 +124,6 @@ library.dialog('/updateAddress', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case receiveYes:
-				session.send('Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre ' +
-				'dados abertos e transparência orçamentária na sua cidade ou em seu círculo de amizades!');
 				User.update({
 					address: newAddress,
 				}, {
@@ -136,33 +133,23 @@ library.dialog('/updateAddress', [
 					returning: true,
 				})
 					.then(() => {
+						session.send(`Suas preferências foram atualizadas! ${emoji.get('slightly_smiling_face').repeat(2)}`);
 						console.log('User address updated sucessfuly');
 					})
 					.catch((err) => {
+						session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)}. Estou com problemas técnicos no momento.` +
+						'\n\nTente novamente mais tarde.');
 						console.log(err);
 						throw err;
+					}).finally(() => {
+						session.replaceDialog('/promptButtons');
 					});
 				break;
 			default: // receiveNo
-				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
-				// User.update({
-				// 	address: null,
-				// }, {
-				// 	where: {
-				// 		fb_id: session.userData.userid,
-				// 	},
-				// 	returning: true,
-				// })
-				// 	.then(() => {
-				// 		console.log('User address erased sucessfuly');
-				// 	})
-				// 	.catch((err) => {
-				// 		console.log(err);
-				// 		throw err;
-				// 	});
+				session.send(`Ok! Suas preferências não foram atualizadas. ${emoji.get('slightly_smiling_face').repeat(2)}`);
+				session.replaceDialog('/promptButtons');
 				break;
 			}
-			session.replaceDialog('/promptButtons');
 		}
 	},
 ]);

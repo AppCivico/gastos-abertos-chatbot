@@ -1,9 +1,18 @@
 /* global bot:true builder:true */
-/* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor":
-["session"] }] */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 
 const library = new builder.Library('firstMissionConclusion');
 bot.library(require('../second_mission/assign'));
+
+const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
+const texts = require('../../misc/speeches_utils/big-texts');
+const emoji = require('node-emoji');
+const custom = require('../../misc/custom_intents');
+
+const User = require('../../server/schema/models').user;
+const UserMission = require('../../server/schema/models').user_mission;
+const Notification = require('../../server/schema/models').notification;
 
 const answers = {
 	transparencyPortalExists: '',
@@ -16,14 +25,6 @@ const answers = {
 	transparencyPortalHasBiddingProcessData: '',
 };
 
-const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
-const texts = require('../../misc/speeches_utils/big-texts');
-const emoji = require('node-emoji');
-const custom = require('../../misc/custom_intents');
-
-const User = require('../../server/schema/models').user;
-const UserMission = require('../../server/schema/models').user_mission;
-
 const Yes = 'Sim';
 const No = 'Não';
 const MoreInformations = 'Detalhes da missão';
@@ -31,14 +32,22 @@ const nextMission = 'Ir para a próxima missão';
 const WelcomeBack = 'Beleza!';
 
 let user;
-// antigo user_mission, mudou para se encaixar na regra 'camel-case' e UserMission já existia
-let missionUser;
+
+function reloadArgs(args) { // called after session updates to saves us some lines
+	if (!answers || !user) { // empty when dialog gets interrupted
+		// [answers] = args.usefulData.answers; // stores saved values from bd
+		// [user] = args.usefulData.User; // necessary => user.state
+	}
+}
 
 library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
-		missionUser = args.user_mission;
+
+		args.usefulData = { answers: null, User: null };
+		// args.usefulData.answers = '';
+		// args.usefulData.User = '';
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -110,7 +119,8 @@ library.dialog('/transparencyPortalExists', [
 	(session) => {
 		custom.updateSession(session.userData.userid, session);
 		session.sendTyping();
-		session.send("Caso você queira deixar para outra hora, basta digitar 'cancelar' e eu te levarei para o início.");
+		session.send(`Agora vamos avaliar o portal de transparêcia no seu município! ${emoji.get('slightly_smiling_face')}`);
+		session.send("Caso você queira deixar para outra hora, basta digitar 'começar' e eu te levarei para o início.");
 		builder.Prompts.choice(
 			session,
 			'Há um portal para transparência orçamentária na cidade, mantido oficialmente pela prefeitura? ',
@@ -145,7 +155,7 @@ library.dialog('/transparencyPortalExists', [
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
@@ -161,8 +171,9 @@ library.dialog('/transparencyPortalURL', [
 });
 
 library.dialog('/transparencyPortalHasFinancialData', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -192,8 +203,9 @@ library.dialog('/transparencyPortalHasFinancialData', [
 });
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		reloadArgs(args);
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -224,8 +236,9 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 });
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
 	},
@@ -238,8 +251,9 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 });
 
 library.dialog('/transparencyPortalHasContractsData', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -268,8 +282,9 @@ library.dialog('/transparencyPortalHasContractsData', [
 });
 
 library.dialog('/transparencyPortalHasBiddingsData', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -298,8 +313,9 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 });
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -328,8 +344,9 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 });
 
 library.dialog('/userUpdate', [
-	(session) => {
-		custom.updateSession(session.userData.userid, session);
+	(session, args) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, User });
+		reloadArgs(args);
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
 			facebook: {
@@ -392,12 +409,25 @@ library.dialog('/userUpdate', [
 				completed: false,
 			},
 			returning: true,
+			raw: true,
 		})
-			.then((result) => {
-				console.log(`${result}Mission updated sucessfuly`);
+			.then((missionData) => {
+				console.log(`Mission ${missionData[1][0].id} Updated!`);
+				Notification.update({
+					// sentAlready == true and timeSent == null or numberSent = 0
+					// means that no message was sent, because there was no need to
+				}, {
+					where: {
+						userID: missionData[1][0].user_id,
+						missionID: missionData[1][0].id,
+					},
+				}).then(() => {
+					console.log('Notification Updated! This message will not be sent!');
+				}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
+
 				builder.Prompts.choice(
 					session,
-					`Se quiser, você já pode começar a segunda missão.Ou fazer uma pausa e continuar mais tarde ${emoji.get('grinning').repeat(2)}`,
+					`Se quiser, você já pode começar a segunda missão. Ou fazer uma pausa e continuar mais tarde. ${emoji.get('grinning').repeat(2)}`,
 					[nextMission, WelcomeBack],
 					{
 						listStyle: builder.ListStyle.button,
@@ -407,8 +437,8 @@ library.dialog('/userUpdate', [
 			})
 			.catch((err) => {
 				console.log(`Error updating mission${err}`);
-				session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
-				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+				session.send('Oooops...Tive um problema ao atualizar seu estado. Tente novamente mais tarde.');
+				session.replaceDialog('*:/getStarted');
 				throw err;
 			});
 	},
@@ -420,12 +450,11 @@ library.dialog('/userUpdate', [
 				'secondMissionAssign:/assign',
 				{
 					user,
-					user_mission: missionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;
 		default: // WelcomeBack
-			session.endDialog();
+			session.replaceDialog('*:/getStarted');
 		}
 	},
 ]).cancelAction('cancelAction', '', {

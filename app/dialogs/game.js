@@ -18,7 +18,6 @@ const library = new builder.Library('game');
 
 const Yes = 'Sim';
 const No = 'Não';
-const Contact = 'Entrar em contato';
 const Restart = 'Voltar para o início';
 const Confirm = 'Por hoje, chega';
 
@@ -27,9 +26,7 @@ let user;
 let missionUser;
 
 library.dialog('/', [
-	(session, args) => {
-		[user] = [args.user];
-		session.send(`Vamos começar o processo de missões. ${emoji.get('slightly_smiling_face').repeat(2)}`);
+	(session) => {
 		User.findOne({
 			where: { fb_id: session.userData.userid },
 		}).then((UserData) => {
@@ -38,7 +35,7 @@ library.dialog('/', [
 				where: { user_id: UserData.dataValues.id },
 			}).then((count) => {
 				if (count === 0) {
-					session.beginDialog(
+					session.replaceDialog(
 						'firstMissionAssign:/',
 						{
 							user,
@@ -66,17 +63,17 @@ library.dialog('/currentMission', [
 			missionUser = UserMissionData[UserMissionData.length - 1].dataValues;
 
 			switch (missionUser.mission_id) {
+			// TODO Ele manda gerar um pedido mesmo se o pedido já estiver gerado.
 			case 1:
 				if (missionUser.completed) {
-					session.beginDialog(
+					session.replaceDialog(
 						'secondMissionAssign:/',
 						{
 							user,
-							user_mission: missionUser,
 						} // eslint-disable-line comma-dangle
 					);
 				} else {
-					session.beginDialog(
+					session.replaceDialog(
 						'firstMissionConclusion:/',
 						{
 							user,
@@ -95,7 +92,7 @@ library.dialog('/currentMission', [
 					builder.Prompts.choice(
 						session,
 						'Posso te ajudar com mais alguma coisa?',
-						[Contact, Restart, Confirm],
+						[Restart, Confirm],
 						{
 							listStyle: builder.ListStyle.button,
 							retryPrompt: retryPrompts.choice,
@@ -103,13 +100,12 @@ library.dialog('/currentMission', [
 					);
 				} else if (missionUser.metadata.request_generated === 0) {
 					session.send(`Você está na segunda missão, no entanto, não gerou um pedido de acesso à informação. ${emoji.get('thinking_face').repeat(2)}`);
-					session.replaceDialog('/sendToInformationAccessRequest');
+					session.replaceDialog('/sendToInformationAccessRequest', 	{ user });
 				} else {
 					session.replaceDialog(
 						'secondMissionConclusion:/',
 						{
 							user,
-							user_mission: missionUser,
 						} // eslint-disable-line comma-dangle
 					);
 				}
@@ -125,11 +121,9 @@ library.dialog('/currentMission', [
 			session.send(`Estarei te esperando. ${emoji.get('relaxed').repeat(2)}`);
 			session.endConversation();
 			break;
-		case Restart: // WelcomeBack
-			session.endDialog();
+		default: // WelcomeBack
+			session.replaceDialog('*:/getStarted');
 			break;
-		default: // Contact
-			session.beginDialog('contact:/');
 		}
 	},
 ]).cancelAction('cancelAction', '', {
@@ -156,7 +150,6 @@ library.dialog('/sendToInformationAccessRequest', [
 				'informationAccessRequest:/',
 				{
 					user,
-					user_mission: missionUser,
 				} // eslint-disable-line comma-dangle
 			);
 			break;
