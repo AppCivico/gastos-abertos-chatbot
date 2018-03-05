@@ -80,7 +80,7 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session, 'Este é o menu para mandarmos mensagens aos usuários!\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), ' +
 			' vizualise como fica a mensagem e confirme. Você não receberá a mensagem.',
-			[writeMsg, imageMsg, testMessage, goBack],
+			[writeMsg, imageMsg, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',
