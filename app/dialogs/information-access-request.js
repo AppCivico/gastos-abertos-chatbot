@@ -215,8 +215,8 @@ library.dialog('/questionOne', [
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
 		}
-		// session.beginDialog('/questionTwo');
-		session.beginDialog('/questionEleven'); // for time-saving testing purposes
+		session.beginDialog('/questionTwo');
+		// session.beginDialog('/questionEleven'); // for time-saving testing purposes
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -371,7 +371,8 @@ library.dialog('/questionSix', [
 		default: // No
 			answers.answer6 = 1;
 			itens.push('<p> - Disponibilização dos editais de licitação, dos procedimentos licitatórios, com indicação das licitações abertas,' +
-			' em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados</p>');			break;
+			' em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados</p>');
+			break;
 		}
 		session.beginDialog('/questionSeven');
 	},
