@@ -31,7 +31,7 @@ const userFacebook = (userID, pageToken, callback) => {
 	request(`https://graph.facebook.com/v2.12/${userID}?fields=first_name,last_name,email,birthday&access_token=${pageToken}`, (error, response, body) => {
 		console.log('error:', error);
 		console.log('statusCode:', response && response.statusCode);
-		console.log('body:', body);
+		console.log('body:', body, '\n');
 		callback(JSON.parse(body));
 	});
 };

@@ -216,15 +216,11 @@ library.dialog('/questionOne', [
 			break;
 		}
 		// session.beginDialog('/questionTwo');
-		session.beginDialog('/questionThirteen'); // for time-saving testing purposes
+		session.beginDialog('/questionEleven'); // for time-saving testing purposes
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
-
-// Start of testing comment ----------
-// Testing: Comment line below and change dialog name down there
-/*
 
 library.dialog('/questionTwo', [
 	(session) => {
@@ -577,8 +573,6 @@ library.dialog('/questionTwelve', [
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
-// */
-// End of testing comment ----------
 
 library.dialog('/questionThirteen', [
 	(session) => {

@@ -135,6 +135,17 @@ library.dialog('/secondMissionQuestions', [
 			}
 		}
 
+		session.replaceDialog('/conclusion');
+	},
+]).cancelAction('cancelAction', '', {
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+
+});
+
+library.dialog('/conclusion', [
+	(session, args, next) => {
+		custom.updateSessionData(session.userData.userid, session, { answers, user });
+
 		User.findOne({
 			attributes: ['id'],
 			where: { fb_id: session.userData.userid },
@@ -144,17 +155,11 @@ library.dialog('/secondMissionQuestions', [
 		}).catch((errUser) => {
 			console.log(`Error finding user => ${errUser}`);
 		}).then(() => {
-			session.replaceDialog('/conclusion');
+			next();
 		});
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 
-});
-
-library.dialog('/conclusion', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
 		UserMission.update({
 			completed: false,
 			metadata: answers,
@@ -169,7 +174,7 @@ library.dialog('/conclusion', [
 			Notification.update({
 				// sentAlready == true and timeSent == null
 				// means that no message was sent, because there was no need to
-				sentAlready: false,
+				sentAlready: true,
 			}, {
 				where: {
 					userID: user.id,

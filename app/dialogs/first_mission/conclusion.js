@@ -1,6 +1,6 @@
 /* global bot:true builder:true */
-/* eslint no-param-reassign: ["error", { "props": true, "ignorePropertyModificationsFor":
-["session"] }] */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 
 const library = new builder.Library('firstMissionConclusion');
 bot.library(require('../second_mission/assign'));
@@ -14,7 +14,7 @@ const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 const Notification = require('../../server/schema/models').notification;
 
-let answers = {
+const answers = {
 	transparencyPortalExists: '',
 	transparencyPortalURL: '',
 	transparencyPortalHasFinancialData: '',
@@ -35,8 +35,8 @@ let user;
 
 function reloadArgs(args) { // called after session updates to saves us some lines
 	if (!answers || !user) { // empty when dialog gets interrupted
-		[answers] = args.usefulData.answers; // stores saved values from bd
-		[user] = args.usefulData.User; // necessary => user.state
+		// [answers] = args.usefulData.answers; // stores saved values from bd
+		// [user] = args.usefulData.User; // necessary => user.state
 	}
 }
 
@@ -44,6 +44,10 @@ library.dialog('/', [
 	(session, args) => {
 		custom.updateSession(session.userData.userid, session);
 		[user] = [args.user];
+
+		args.usefulData = { answers: null, User: null };
+		// args.usefulData.answers = '';
+		// args.usefulData.User = '';
 
 		session.sendTyping();
 		builder.Prompts.choice(

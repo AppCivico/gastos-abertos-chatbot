@@ -15,7 +15,7 @@ bot.library(require('./dialogs/second_mission/conclusion'));
 
 function missionWarning(user, text, missionID) {
 	Notification.update({
-		sentAlready: false, // TODO false for testing
+		sentAlready: true, // TODO false for testing
 		timeSent: new Date(Date.now()),
 		numberSent: 1, // Sequelize.literal('numberSent + 1'),
 	}, {
@@ -126,7 +126,7 @@ function requestWarning(user, missionID) {
 
 // Cronjob for following the user after request generation
 const RequestTimer = new Cron.CronJob(
-	'00 20 9-23/3 * * 1-6', () => { // (Hopefully) On the 10th minute Every 3 hours from 9-23h except on sundays
+	'* 20 9-23/3 * * 1-6', () => { // (Hopefully) On the 10th minute Every 3 hours from 9-23h except on sundays
 		const d = new Date(Date.now());
 		const limit = new Date(d.setDate(d.getDate() - 1)); // limit = now - N day(s)
 
@@ -136,13 +136,11 @@ const RequestTimer = new Cron.CronJob(
 				sentAlready: false,
 				missionID: 3,
 				numberSent: {
-					$lte: 50,
+					$lte: 5,
 				},
-				// createdAt: { $lte: limit }, // createdAt <= limit
+				createdAt: { $lte: limit }, // createdAt <= limit
 			},
 		}).then((listNotification) => {
-			console.dir(listNotification);
-			console.log('\n\nsSending request notification to user}');
 			listNotification.forEach((element) => {
 				console.log(`Sending request notification to user ${element.userID}`);
 				console.log(`Time: ${new Date(Date.now())}`);

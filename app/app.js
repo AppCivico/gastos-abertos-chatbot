@@ -13,6 +13,7 @@ console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`)
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
 
 bot.library(require('./send-message'));
+bot.library(require('./add-admin'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
@@ -23,9 +24,12 @@ const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
 const InformationAcessRequest = 'Gerar um pedido';
 const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos informações ou notícias sobre dados abertos e transparência orçamentária?';
-const sendMessage = 'Painel Administrativo';
+const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
+const addAdmin = 'Adicionar Administrador';
+const sendMessage = 'Mandar Mensagems';
+const comeBack = 'Voltar';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
@@ -96,8 +100,8 @@ bot.dialog('/', [
 		} else {
 			// hardcoded ids for testing purposes
 			session.userData.userid = emulatorUser;
-			session.userData.pageToken = pageToken;
 		}
+		session.userData.pageToken = pageToken;
 
 		// checks if user should be an admin using the ID
 		let isItAdmin = false;
@@ -190,7 +194,7 @@ bot.dialog('/promptButtons', [
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
 			if (user.admin === true) {
-				menuOptions.push(sendMessage);
+				menuOptions.push(adminPanel);
 			}
 		}).catch(() => {
 			session.replaceDialog('/promptButtons');
@@ -219,7 +223,8 @@ bot.dialog('/promptButtons', [
 			case Missions:
 				session.beginDialog('game:/');
 				break;
-			case sendMessage:
+			case adminPanel:
+				// session.beginDialog('/painelChoice');
 				session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
@@ -245,6 +250,39 @@ bot.dialog('/promptButtons', [
 // 		}));
 // 	},
 // });
+
+bot.dialog('/painelChoice', [ // sub-menu for admin painel
+	(session) => {
+		builder.Prompts.choice(
+			session, 'Esse é o menu Administrativo. Escolha o que deseja fazer:', [sendMessage, addAdmin, comeBack],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choiceIntent,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case sendMessage:
+				session.beginDialog('sendMessage:/');
+				break;
+			case addAdmin:
+				session.beginDialog('addAdmin:/');
+				break;
+			default: // comeBack
+				session.endDialog();
+				break;
+			}
+		}
+	},
+	(session) => {
+		session.replaceDialog('/promptButtons');
+	},
+
+]);
 
 bot.dialog('/askPermission', [
 	(session) => {
