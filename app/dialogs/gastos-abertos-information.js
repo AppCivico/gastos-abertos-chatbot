@@ -1,95 +1,60 @@
 /* global  bot:true builder:true */
 
-bot.library(require('./game-sign-up'));
 bot.library(require('./contact'));
 
+const custom = require('../misc/custom_intents');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 
 const library = new builder.Library('gastosAbertosInformation');
 
-const gastosAbertosCicles = 'O que é um ciclo';
-const gameSignUp = 'Inscrever-se';
-const GastosAbertosCicleResults = 'Resultados';
+const accessLaw = 'Saber mais';
 const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
-const yes = 'Sim, vamos lá!';
-const no = 'Ainda não';
+const receiveMessage = 'Receber Mensagens?';
+let receiveDialog;
+let receiveYes;
+let receiveNo;
+let newAddress;
+
+let User;
 
 library.dialog('/', [
-	(session) => {
+	(session, args) => {
+		[User] = [args.User];
 		session.sendTyping();
-		builder.Prompts.choice(
-			session,
-			'A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
-			'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.' +
-			'\n\n\nVocê pode escolher um dos itens abaixo para saber mais. O que acha?',
-			[gastosAbertosCicles, GastosAbertosCicleResults,
-				gameSignUp, contact, reset],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case gastosAbertosCicles:
-				session.replaceDialog('/gastosAbertosCicles');
-				break;
-			case gameSignUp:
-				session.replaceDialog('/gameSignUpConfirmation');
-				break;
-			case GastosAbertosCicleResults:
-				session.replaceDialog('/GastosAbertosCicleResults');
-				break;
-			case contact:
-				session.beginDialog('contact:/');
-				break;
-			default: // reset
-				session.endDialog();
-				break;
-			}
-		}
-	},
-	(session) => {
+		session.send('A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
+		'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.');
 		session.replaceDialog('/promptButtons');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
-});
+]);
 
 library.dialog('/promptButtons', [
 	(session) => {
-		session.sendTyping();
+		custom.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
-			'Sobre o que deseja saber mais? ',
-			[gastosAbertosCicles, GastosAbertosCicleResults,
-				gameSignUp, contact, reset],
+			`Como posso te ajudar? ${emoji.get('slightly_smiling_face').repeat(2)}`,
+			[accessLaw, receiveMessage, reset],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: retryPrompts.about,
 			} // eslint-disable-line comma-dangle
 		);
 	},
+
 	(session, result) => {
 		session.sendTyping();
 		if (result.response) {
 			switch (result.response.entity) {
-			case gastosAbertosCicles:
-				session.replaceDialog('/gastosAbertosCicles');
+			case accessLaw:
+				session.replaceDialog('/accessLaw');
 				break;
-			case gameSignUp:
-				session.beginDialog('/gameSignUpConfirmation');
-				break;
-			case GastosAbertosCicleResults:
-				session.replaceDialog('/GastosAbertosCicleResults');
+			case receiveMessage:
+				session.replaceDialog('/receiveMessage');
 				break;
 			case contact:
-				session.beginDialog('contact:/');
+				session.replaceDialog('contact:/');
 				break;
 			default: // reset
 				session.endDialog();
@@ -100,63 +65,93 @@ library.dialog('/promptButtons', [
 	(session) => {
 		session.replaceDialog('/promptButtons');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
+]).customAction({
+	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+	onSelectAction: (session) => {
+		session.endDialog();
+	},
 });
 
-library.dialog('/gastosAbertosCicles', [
+library.dialog('/accessLaw', [
 	(session) => {
-		session.send('Um ciclo do Gastos Abertos é um período onde pessoas desenvolvem missões (avaliação de portal de transparência da cidade, ' +
-				'formulação de um pedido de acesso a informação e avaliação das respostas obtidas pelas prefeituras) para tornarem-se lideranças regionais.' +
-				'\n\nEssas missões impactarão a transparência no município que o líder representa.' +
-				'\n\nParticipe!');
+		session.send('A LAI (Lei de Acesso à Informação, lei N.12.527) entrou em vigor no dia 16 de maio de 2012 e ' +
+		'criou mecanismos que possibilitam, a qualquer pessoa, física ou jurídica, sem necessidade de apresentar motivo, ' +
+		'o recebimento de informações públicas dos órgãos e entidades.');
+		session.send('A Lei vale para os três Poderes da União, Estados, Distrito Federal e Municípios, inclusive aos Tribunais de Conta e Ministério Público.');
+		session.send('Para conheçer mais sobre a LAI, consulte o Guia Prático da Lei de Acesso à Informação disponibilizado pelo ARTIGO 19: ' +
+		'http://artigo19.org/wp-content/blogs.dir/24/files/2016/10/Guia-Pr%C3%A1tico-da-Lei-de-Acesso-%C3%A0-Informa%C3%A7%C3%A3o.pdf');
 		session.replaceDialog('/promptButtons');
 	},
 ]);
 
-library.dialog('/GastosAbertosCicleResults', [
+library.dialog('/receiveMessage', [
 	(session) => {
-		session.send('O Gastos Abertos (2016-2017), teve 356 lideranças inscritas, 216 municípios atendidos, 165 avaliações de portais ' +
-		'de transparência e 53 pedidos realizados. ' +
-		'\n\nContamos com você para atingir novas metas!');
-		session.replaceDialog('/promptButtons');
+		User.findOne({
+			where: { fb_id: session.userData.userid },
+		}).then((user) => {
+			if (user.get('address') === null) {
+				receiveDialog = 'No momento, você não está recebendo nenhum de nossas mensagens diretas.\n\nDeseja começar a recebê-las?';
+				receiveYes = 'Sim, quero receber!';
+				receiveNo = 'Não quero receber';
+				newAddress = session.message.address;
+			} else {
+				receiveDialog = 'Você já recebe nossas mensagens diretas. Deseja parar de recebê-las?';
+				receiveYes = 'Parar de receber';
+				receiveNo = 'Continuar recebendo';
+				newAddress = null;
+			}
+			session.replaceDialog('/updateAddress');
+		}).catch((err) => {
+			console.log(err);
+			session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)}. Estou com problemas técnicos no momento.`);
+			session.replaceDialog('/promptButtons');
+		});
 	},
 ]);
 
-library.dialog('/gameSignUpConfirmation', [
+library.dialog('/updateAddress', [
 	(session) => {
-		session.sendTyping();
 		builder.Prompts.choice(
-			session,
-			'Uhu! Seja bem vindo ao time.\n\n\nSerei seu agente virtual em todas as missões.' +
-			`\n\n\nCom Guaxi, missão dada é missão cumprida. ${emoji.get('sign_of_the_horns').repeat(2)}\n\nVamos começar?`,
-			[yes, no],
+			session, receiveDialog,	[receiveYes, receiveNo],
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choice,
+				retryPrompt: retryPrompts.about,
 			} // eslint-disable-line comma-dangle
 		);
 	},
+
 	(session, result) => {
-		session.sendTyping();
 		if (result.response) {
 			switch (result.response.entity) {
-			case yes: // Sign up accepted
-				session.beginDialog('gameSignUp:/');
+			case receiveYes:
+				User.update({
+					address: newAddress,
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+					},
+					returning: true,
+				})
+					.then(() => {
+						session.send(`Suas preferências foram atualizadas! ${emoji.get('slightly_smiling_face').repeat(2)}`);
+						console.log('User address updated sucessfuly');
+					})
+					.catch((err) => {
+						session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)}. Estou com problemas técnicos no momento.` +
+						'\n\nTente novamente mais tarde.');
+						console.log(err);
+						throw err;
+					}).finally(() => {
+						session.replaceDialog('/promptButtons');
+					});
 				break;
-			default: // no
-				session.send(`OK. Estarei aqui caso mudar de ideia. ${emoji.get('slightly_smiling_face')}` +
-				`${emoji.get('upside_down_face')}${emoji.get('slightly_smiling_face')}`);
-				session.endDialog();
+			default: // receiveNo
+				session.send(`Ok! Suas preferências não foram atualizadas. ${emoji.get('slightly_smiling_face').repeat(2)}`);
+				session.replaceDialog('/promptButtons');
 				break;
 			}
 		}
 	},
-	(session) => {
-		session.replaceDialog('/promptButtons');
-	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^desisto/i,
-});
+]);
 
 module.exports = library;

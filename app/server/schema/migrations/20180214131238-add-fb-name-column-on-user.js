@@ -2,7 +2,7 @@ module.exports = {
 	up(queryInterface, Sequelize) {
 		queryInterface.addColumn(
 			'"user"',
-			'fb_id',
+			'fb_name',
 			{
 				type: Sequelize.STRING,
 			} // eslint-disable-line comma-dangle
@@ -10,6 +10,6 @@ module.exports = {
 	},
 
 	down(queryInterface) {
-		queryInterface.removeColumn('"user"', 'fb_id');
+		queryInterface.removeColumn('"user"', 'fb_name');
 	},
 };

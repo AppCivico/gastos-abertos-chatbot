@@ -2,14 +2,16 @@ module.exports = {
 	up(queryInterface, Sequelize) {
 		queryInterface.addColumn(
 			'"user"',
-			'fb_id',
+			'admin',
 			{
-				type: Sequelize.STRING,
+				allowNull: false,
+				defaultValue: false,
+				type: Sequelize.BOOLEAN,
 			} // eslint-disable-line comma-dangle
 		);
 	},
 
 	down(queryInterface) {
-		queryInterface.removeColumn('"user"', 'fb_id');
+		queryInterface.removeColumn('"user"', 'admin');
 	},
 };
