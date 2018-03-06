@@ -48,7 +48,7 @@ let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 // 		{
 // 			"type":"postback",
 // 			"title":"Ir para o Início",
-// 			"payload":"reset2"
+// 			"payload":"reset"
 // 		}
 // 	]
 // }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token=[page_token]"
