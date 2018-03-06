@@ -31,6 +31,10 @@ const addAdmin = 'Adicionar Administrador';
 const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
 
+let isItAdmin = false;
+let userCreated = false;
+let userAddress = null;
+
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 
@@ -104,7 +108,6 @@ bot.dialog('/', [
 		session.userData.pageToken = pageToken;
 
 		// checks if user should be an admin using the ID
-		let isItAdmin = false;
 		if (adminArray.includes(session.userData.userid)) {
 			isItAdmin = true;
 		}
@@ -136,16 +139,10 @@ bot.dialog('/', [
 				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
 				console.log(user.get({ plain: true })); // prints user data
 				console.log(`Was created? => ${created}`);
-
-				if (!created) {
-					User.update({
-						admin: isItAdmin,
-						where: { fb_id: session.userData.userid },
-					});
-				}
-
-				session.replaceDialog('/getStarted');
-			}).catch(() => {
+				userAddress = user.get('address');
+				userCreated = created;
+			}).catch((err) => {
+				console.log(`\nerror: ${err}`);
 				session.replaceDialog('/promptButtons');
 			})) // eslint-disable-line comma-dangle
 		);
@@ -156,6 +153,16 @@ bot.dialog('/', [
 bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
+		if (userCreated === false) {
+			User.update({
+				admin: isItAdmin,
+			}, {
+				where: {
+					fb_id: session.userData.userid,
+				},
+			});
+		}
+
 		if (!session.userData.firstRun) { // first run
 			menuMessage = 'Vamos lá, como posso te ajudar?';
 			session.userData.firstRun = true;
@@ -172,18 +179,12 @@ bot.dialog('/getStarted', [
 			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
-			User.findOne({ // checks if user has an address and asks permission if he doesn't
-				attributes: ['address'],
-				where: { fb_id: session.userData.userid },
-			}).then((user) => {
-				if (user.address === null) {
-					session.replaceDialog('/askPermission');
-				} else {
-					session.replaceDialog('/promptButtons');
-				}
-			}).catch(() => {
+
+			if (userAddress === null) {
+				session.replaceDialog('/askPermission');
+			} else {
 				session.replaceDialog('/promptButtons');
-			});
+			}
 		} else { // welcome back
 			menuMessage = 'Como posso te ajudar?';
 			session.send('Olá, parceiro! Bem vindo de volta!');
