@@ -31,9 +31,9 @@ const addAdmin = 'Adicionar Administrador';
 const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
 
-let isItAdmin = false;
+const isItAdmin = false;
 let userAddress = null;
-let userMail = 'teste@asdf.com';
+const userMail = 'teste@asdf.com';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
@@ -86,24 +86,24 @@ bot.dialog('/', [
 		}
 		session.userData.pageToken = pageToken;
 
-		User.findOne({ // this only works if user is already on database and has an e-mail
-			attributes: ['fb_name', 'email'],
-			where: {
-				fb_id: session.userData.userid,
-			},
-		}).then((userData) => {
-			userMail = userData.email;
-			console.log(`Encontrei '${userData.fb_name}' com esse e-mail. `);
-		}).catch((err) => {
-			console.log(`Error finding user => ${err}`);
-			session.replaceDialog('/promptButtons');
-		});
-
-		// checks if user should be an admin using email
-		if (adminArray.includes(userMail)) {
-			// menuOptions.push(adminPanel);
-			isItAdmin = true;
-		}
+		// User.findOne({ // this only works if user is already on database and has an e-mail
+		// 	attributes: ['fb_name', 'email'],
+		// 	where: {
+		// 		fb_id: session.userData.userid,
+		// 	},
+		// }).then((userData) => {
+		// 	userMail = userData.email;
+		// 	console.log(`Encontrei '${userData.fb_name}' com esse e-mail. `);
+		// }).catch((err) => {
+		// 	console.log(`Error finding user => ${err}`);
+		// 	session.replaceDialog('/promptButtons');
+		// });
+		//
+		// // checks if user should be an admin using email
+		// if (adminArray.includes(userMail)) {
+		// 	// menuOptions.push(adminPanel);
+		// 	isItAdmin = true;
+		// }
 
 		// default value: 'undefined'. Yes, it's only a string.
 		custom.userFacebook(
