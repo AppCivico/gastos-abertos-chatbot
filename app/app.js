@@ -32,31 +32,11 @@ const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
 
 let isItAdmin = false;
-let userCreated = false;
 let userAddress = null;
+let userMail = 'teste@asdf.com';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
-
-// fb-get-started-button add [page_token] --payload getStarted
-
-// curl -X POST -H "Content-Type: application/json" -d '{
-// 	"setting_type" : "call_to_actions",
-// 	"thread_state" : "existing_thread",
-// 	"call_to_actions":[
-// 		{
-// 			"type":"web_url",
-// 			"title":"Ver nosso site",
-// 			"url":"https://gastosabertos.org/"
-// 		},
-// 		{
-// 			"type":"postback",
-// 			"title":"Ir para o Início",
-// 			"payload":"reset2"
-// 		}
-// 	]
-// }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token=[page_token]"
-
 
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
@@ -81,7 +61,6 @@ const custom = require('./misc/custom_intents');
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
 const { pageToken } = process.env;
-const { emulatorUser } = process.env;
 const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
@@ -103,19 +82,28 @@ bot.dialog('/', [
 			session.userData.pageid = session.message.sourceEvent.recipient.id;
 		} else {
 			// hardcoded ids for testing purposes
-			session.userData.userid = emulatorUser;
+			session.userData.userid = '000000000000001';
 		}
 		session.userData.pageToken = pageToken;
 
-		console.log(`\n my id: ${session.userData.userid}`);
+		User.findOne({ // this only works if user is already on database and has an e-mail
+			attributes: ['fb_name', 'email'],
+			where: {
+				fb_id: session.userData.userid,
+			},
+		}).then((userData) => {
+			userMail = userData.email;
+			console.log(`Encontrei '${userData.fb_name}' com esse e-mail. `);
+		}).catch((err) => {
+			console.log(`Error finding user => ${err}`);
+			session.replaceDialog('/promptButtons');
+		});
 
-		// checks if user should be an admin using the ID
-		if (adminArray.includes(session.userData.userid)) {
+		// checks if user should be an admin using email
+		if (adminArray.includes(userMail)) {
 			// menuOptions.push(adminPanel);
 			isItAdmin = true;
 		}
-
-		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 
 		// default value: 'undefined'. Yes, it's only a string.
 		custom.userFacebook(
@@ -144,8 +132,6 @@ bot.dialog('/', [
 				console.log(user.get({ plain: true })); // prints user data
 				console.log(`Was created? => ${created}`);
 				userAddress = user.get('address');
-				console.log(`\nfssdfsdf: ${userAddress}`);
-				userCreated = created;
 			}).catch((err) => {
 				console.log(`\nerror: ${err}`);
 				session.replaceDialog('/promptButtons');
@@ -155,7 +141,7 @@ bot.dialog('/', [
 						admin: isItAdmin,
 					}, {
 						where: {
-							fb_id: session.userData.userid,
+							email: userMail,
 						},
 					}).then(() => {
 						console.log('User/Admin created');
@@ -213,7 +199,7 @@ bot.dialog('/promptButtons', [
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
 			attributes: ['admin', 'id'],
-			where: { fb_id: session.userData.userid },
+			where: { email: userMail },
 		}).then((user) => {
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
