@@ -137,22 +137,7 @@ bot.dialog('/', [
 				session.replaceDialog('/promptButtons');
 			}).finally((err) => {
 				if (!err) {
-					User.update({
-						admin: isItAdmin,
-					}, {
-						where: {
-							email: userMail,
-						},
-					}).then(() => {
-						console.log('User/Admin created');
-					}).catch((errUpdate) => {
-						console.log(`User/Admin error => ${errUpdate}`);
-						session.replaceDialog('/promptButtons');
-					}).finally((err2) => {
-						if (!err2) {
-							session.replaceDialog('/getStarted');
-						}
-					});
+					session.replaceDialog('/getStarted');
 				}
 			})) // eslint-disable-line comma-dangle
 		);
