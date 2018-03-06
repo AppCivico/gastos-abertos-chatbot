@@ -107,6 +107,8 @@ bot.dialog('/', [
 		}
 		session.userData.pageToken = pageToken;
 
+		console.log(`\n my id: ${session.userData.userid}`);
+
 		// checks if user should be an admin using the ID
 		if (adminArray.includes(session.userData.userid)) {
 			isItAdmin = true;
@@ -134,34 +136,39 @@ bot.dialog('/', [
 						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 					},
 				},
-
 			}).spread((user, created) => {
 				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
 				console.log(user.get({ plain: true })); // prints user data
 				console.log(`Was created? => ${created}`);
 				userAddress = user.get('address');
+				console.log(`\nfssdfsdf: ${userAddress}`);
 				userCreated = created;
 			}).catch((err) => {
 				console.log(`\nerror: ${err}`);
 				session.replaceDialog('/promptButtons');
+			}).finally((err) => {
+				if (!err) {
+					User.update({
+						admin: isItAdmin,
+					}, {
+						where: {
+							fb_id: session.userData.userid,
+						},
+					}).then(() => {
+						console.log('User/Admin created');
+					}).catch((errUpdate) => {
+						console.log(`User/Admin error => ${errUpdate}`);
+					});
+					session.replaceDialog('/getStarted');
+				}
 			})) // eslint-disable-line comma-dangle
 		);
-		session.replaceDialog('/getStarted');
 	},
 ]);
 
 bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
-		if (userCreated === false) {
-			User.update({
-				admin: isItAdmin,
-			}, {
-				where: {
-					fb_id: session.userData.userid,
-				},
-			});
-		}
 
 		if (!session.userData.firstRun) { // first run
 			menuMessage = 'Vamos lá, como posso te ajudar?';
@@ -180,7 +187,7 @@ bot.dialog('/getStarted', [
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
 
-			if (userAddress === null) {
+			if (userAddress === '' || userAddress === null) {
 				session.replaceDialog('/askPermission');
 			} else {
 				session.replaceDialog('/promptButtons');
