@@ -32,8 +32,8 @@ const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
 
 let isItAdmin = false;
-let userCreated = false;
 let userAddress = null;
+let userMail = '';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
@@ -107,10 +107,21 @@ bot.dialog('/', [
 		}
 		session.userData.pageToken = pageToken;
 
-		console.log(`\n my id: ${session.userData.userid}`);
+		User.findOne({
+			attributes: ['email'],
+			where: {
+				fb_id: session.userData.userid,
+			},
+		}).then((userData) => {
+			userMail = userData.email;
+			console.log(`Encontrei '${userData.email}' com esse ID. `);
+		}).catch((err) => {
+			console.log(`Error finding user => ${err}`);
+			session.replaceDialog('*:/promptButtons');
+		});
 
-		// checks if user should be an admin using the ID
-		if (adminArray.includes(session.userData.userid)) {
+		// checks if user should be an admin using email
+		if (adminArray.includes(userMail)) {
 			// menuOptions.push(adminPanel);
 			isItAdmin = true;
 		}
@@ -144,8 +155,6 @@ bot.dialog('/', [
 				console.log(user.get({ plain: true })); // prints user data
 				console.log(`Was created? => ${created}`);
 				userAddress = user.get('address');
-				console.log(`\nfssdfsdf: ${userAddress}`);
-				userCreated = created;
 			}).catch((err) => {
 				console.log(`\nerror: ${err}`);
 				session.replaceDialog('/promptButtons');
@@ -155,7 +164,7 @@ bot.dialog('/', [
 						admin: isItAdmin,
 					}, {
 						where: {
-							fb_id: session.userData.userid,
+							email: userMail,
 						},
 					}).then(() => {
 						console.log('User/Admin created');
