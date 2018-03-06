@@ -111,8 +111,11 @@ bot.dialog('/', [
 
 		// checks if user should be an admin using the ID
 		if (adminArray.includes(session.userData.userid)) {
+			// menuOptions.push(adminPanel);
 			isItAdmin = true;
 		}
+
+		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 
 		// default value: 'undefined'. Yes, it's only a string.
 		custom.userFacebook(
@@ -158,8 +161,12 @@ bot.dialog('/', [
 						console.log('User/Admin created');
 					}).catch((errUpdate) => {
 						console.log(`User/Admin error => ${errUpdate}`);
+						session.replaceDialog('/promptButtons');
+					}).finally((err2) => {
+						if (!err2) {
+							session.replaceDialog('/getStarted');
+						}
 					});
-					session.replaceDialog('/getStarted');
 				}
 			})) // eslint-disable-line comma-dangle
 		);
@@ -211,7 +218,8 @@ bot.dialog('/promptButtons', [
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
 			}
-		}).catch(() => {
+		}).catch((err) => {
+			console.log(`deu erro: ${err}`);
 			session.replaceDialog('/promptButtons');
 		}).finally(() => {
 			next();
