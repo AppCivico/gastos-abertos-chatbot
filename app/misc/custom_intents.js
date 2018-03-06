@@ -1,5 +1,6 @@
 const User = require('../server/schema/models').user;
 // A class for attaching custom intents to dialogs and other random functions
+
 const request = require('request');
 
 const allIntents = (message, intents, callback) => {
