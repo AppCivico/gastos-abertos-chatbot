@@ -137,6 +137,13 @@ bot.dialog('/', [
 				console.log(user.get({ plain: true })); // prints user data
 				console.log(`Was created? => ${created}`);
 
+				if (!created) {
+					User.update({
+						admin: isItAdmin,
+						where: { fb_id: session.userData.userid },
+					});
+				}
+
 				session.replaceDialog('/getStarted');
 			}).catch(() => {
 				session.replaceDialog('/promptButtons');
