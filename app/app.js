@@ -16,6 +16,7 @@ bot.library(require('./panel/send-message'));
 bot.library(require('./panel/add-admin'));
 bot.library(require('./panel/remove-admin'));
 bot.library(require('./panel/add-group'));
+bot.library(require('./panel/remove-group'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
@@ -32,6 +33,7 @@ const No = 'Não';
 const addAdmin = 'Adicionar Administrador';
 const removeAdmin = 'Remover Administrador';
 const addGroup = 'Adicionar usuário em um grupo';
+const removeGroup = 'Remover usuário de grupo';
 const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
 
@@ -275,7 +277,7 @@ bot.dialog('/painelChoice', [ // sub-menu for admin painel
 	(session) => {
 		builder.Prompts.choice(
 			session, 'Esse é o menu administrativo. Muito cuidado por aqui! Escolha o que deseja fazer:',
-			[sendMessage, addAdmin, removeAdmin, addGroup, comeBack],
+			[sendMessage, addAdmin, removeAdmin, addGroup, removeGroup, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -298,6 +300,9 @@ bot.dialog('/painelChoice', [ // sub-menu for admin painel
 				break;
 			case addGroup:
 				session.beginDialog('addGroup:/');
+				break;
+			case removeGroup:
+				session.beginDialog('removeGroup:/');
 				break;
 			default: // comeBack
 				session.endDialog();

@@ -1,12 +1,12 @@
 /* global builder:true */
 // A menu for admins to add users to groups
 
-const library = new builder.Library('addGroup');
+const library = new builder.Library('removeGroup');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 
 const User = require('../server/schema/models').user;
 
-const Confirm = 'Atualizar';
+const Confirm = 'Remover';
 const Cancel = 'Cancelar/Voltar';
 
 let userName = ''; // fb_name to search for => later, this var stores selected user
@@ -18,9 +18,9 @@ const arrayGroup = []; // store groups from the users above
 library.dialog('/', [
 	(session) => {
 		arrayName.length = 0; // empty array
-		session.send('Esse é o menu para adicionar usuários que já interagiram com o bot a algum grupo, ' +
-		'dando-lhe permissão para mandar mensagems diretas para os usuários em nome do grupo! O usuário não se tornará administrador.');
-		builder.Prompts.text(session, 'Insira o nome do perfil, escolha na lista e confirme.');
+		session.send('Esse é o menu para remover usuários que pertencem a algum grupo especial, ' +
+		'tirando-lhes a permissão de mandar mensagens diretas. Seu grupo voltará a ser \'Cidadão\'.');
+		builder.Prompts.text(session, 'Digite o nome do usuario a ser adicionado para iniciarmos a pesquisa.');
 	},
 	(session, args, next) => {
 		userName = args.response;
@@ -77,34 +77,29 @@ library.dialog('/', [
 			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
 				session.replaceDialog('*:/painelChoice');
 			} else {
-				session.send(`Esse usuário pertence ao grupo: ${arrayGroup[result.response.index]}`);
-				builder.Prompts.text(session, `A qual grupo ${userName} pertencerá?`);
+				userGroup = arrayGroup[result.response.index];
+				builder.Prompts.choice(
+					session, `Deseja remover ${userName} do grupo ${userGroup}? Ele perderá o direito de mandar mensagens diretas para o usuário.`,
+					[Confirm, Cancel],
+					{
+						listStyle: builder.ListStyle.button,
+						retryPrompt: retryPrompts.addAdmin,
+						maxRetries: 10,
+					} // eslint-disable-line comma-dangle
+				);
 			}
 		} else {
 			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
 			session.replaceDialog('*:/painelChoice');
 		}
 	},
-	(session, results) => {
-		// Response => Lower Case => Capitalize only the first letter of each word
-		userGroup = results.response.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
-		builder.Prompts.choice(
-			session, `Deseja adicionar ${userName} no grupo ${userGroup}? Ele receberá o direito de mandar mensagens diretas para o usuário!`,
-			[Confirm, Cancel],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.addAdmin,
-				maxRetries: 10,
-			} // eslint-disable-line comma-dangle
-		);
-	},
 	(session, result) => {
 		if (result.response) {
 			switch (result.response.entity) {
 			case Confirm:
 				User.update({
-					group: userGroup,
-					sendMessage: true,
+					group: 'Cidadão',
+					sendMessage: false,
 				}, {
 					where: {
 						fb_name: {
@@ -112,9 +107,9 @@ library.dialog('/', [
 						},
 					},
 				}).then(() => {
-					session.send(`${userName} foi adicionado ao grupo ${userGroup}!`);
+					session.send(`${userName} foi removido do grupo ${userGroup}!`);
 				}).catch((err) => {
-					session.send(`Não foi possível adicionar ${result.response.entity} em ${userGroup} => ${err}`);
+					session.send(`Não foi possível remover ${result.response.entity} de ${userGroup} => ${err}`);
 				}).finally(() => {
 					session.replaceDialog('*:/painelChoice');
 				});

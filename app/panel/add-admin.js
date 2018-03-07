@@ -73,7 +73,7 @@ library.dialog('/', [
 	(session, result) => {
 		session.sendTyping();
 		if (result.response) {
-			if (result.response.index === (lastIndex - 1)) { // check if user choose 'Cancel'
+			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
 				session.replaceDialog('*:/painelChoice');
 			} else {
 				User.update({
@@ -86,7 +86,7 @@ library.dialog('/', [
 						},
 					},
 				}).then(() => {
-					session.send(`${result.response.entity} foi adicionado como administrador!`);
+					session.send(`${result.response.entity} foi adicionado como administrador! Seu grupo agora é 'AppCívico'`);
 				}).catch((err) => {
 					session.send(`Não foi possível adicionar ${result.response.entity} em administrador => ${err}`);
 				}).finally(() => {

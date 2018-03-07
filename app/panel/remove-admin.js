@@ -15,7 +15,8 @@ library.dialog('/', [
 	(session, args, next) => {
 		arrayData.length = 0; // empty array
 		session.send('Esse é o menu para removermos usuários que são adiministradores do seu papel de adiministrador , ' +
-		'tirando-lhes as permissões para adicionar mais administradores, grupos e mandar mensagems. Você não está listado.');
+		'tirando-lhes as permissões para adicionar mais administradores e grupos.' +
+		'\n\nEles ainda poderão mandar mensagem direta aos usuários! Você não está listado.');
 		User.findAndCountAll({ // list all users with desired like = fb_name
 			attributes: ['fb_name'],
 			order: [['updatedAt', 'DESC']], // order by last recorded interation with bot
@@ -62,7 +63,7 @@ library.dialog('/', [
 	(session, result) => {
 		session.sendTyping();
 		if (result.response) {
-			if (result.response.index === (lastIndex - 1)) { // check if user choose 'Cancel'
+			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
 				session.replaceDialog('*:/painelChoice');
 			} else {
 				User.update({
@@ -74,7 +75,7 @@ library.dialog('/', [
 						},
 					},
 				}).then(() => {
-					session.send(`${result.response.entity} foi removidodo seu papel de administrador!`);
+					session.send(`${result.response.entity} foi removido de seu papel de administrador!`);
 				}).catch((err) => {
 					session.send(`Não foi possível remover ${result.response.entity} de seu papel de administrador => ${err}`);
 				}).finally(() => {

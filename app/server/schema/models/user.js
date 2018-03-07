@@ -17,6 +17,7 @@ module.exports = (sequelize, DataTypes) => {
 			session: DataTypes.JSON,
 			receiveMessage: DataTypes.BOOLEAN,
 			group: DataTypes.STRING,
+			sendMessage: DataTypes.BOOLEAN,
 		},
 		{
 			classMethods: {
