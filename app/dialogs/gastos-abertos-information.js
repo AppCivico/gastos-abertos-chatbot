@@ -1,6 +1,4 @@
-/* global  bot:true builder:true */
-
-bot.library(require('./contact'));
+/* global builder:true */
 
 const custom = require('../misc/custom_intents');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
@@ -9,7 +7,6 @@ const emoji = require('node-emoji');
 const library = new builder.Library('gastosAbertosInformation');
 
 const accessLaw = 'Saber mais';
-const contact = 'Entrar em contato';
 const reset = 'Voltar ao início';
 const receiveMessage = 'Receber Mensagens?';
 let receiveDialog;
@@ -53,9 +50,6 @@ library.dialog('/promptButtons', [
 				break;
 			case receiveMessage:
 				session.replaceDialog('/receiveMessage');
-				break;
-			case contact:
-				session.replaceDialog('contact:/');
 				break;
 			default: // reset
 				session.endDialog();

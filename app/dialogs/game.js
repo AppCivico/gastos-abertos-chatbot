@@ -1,6 +1,5 @@
 /* global bot:true builder:true */
 
-bot.library(require('./contact'));
 bot.library(require('./information-access-request'));
 bot.library(require('./first_mission/conclusion'));
 bot.library(require('./first_mission/assign'));
