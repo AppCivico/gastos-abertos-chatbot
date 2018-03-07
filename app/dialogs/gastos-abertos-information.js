@@ -16,6 +16,7 @@ let receiveDialog;
 let receiveYes;
 let receiveNo;
 let newAddress;
+let booleanMessage;
 
 let User;
 
@@ -94,11 +95,13 @@ library.dialog('/receiveMessage', [
 				receiveYes = 'Sim, quero receber!';
 				receiveNo = 'Não quero receber';
 				newAddress = session.message.address;
+				booleanMessage = true;
 			} else {
 				receiveDialog = 'Você já recebe nossas mensagens diretas. Deseja parar de recebê-las?';
 				receiveYes = 'Parar de receber';
 				receiveNo = 'Continuar recebendo';
 				newAddress = null;
+				booleanMessage = false;
 			}
 			session.replaceDialog('/updateAddress');
 		}).catch((err) => {
@@ -109,6 +112,7 @@ library.dialog('/receiveMessage', [
 	},
 ]);
 
+// updates address and receiveMessage
 library.dialog('/updateAddress', [
 	(session) => {
 		builder.Prompts.choice(
@@ -126,6 +130,7 @@ library.dialog('/updateAddress', [
 			case receiveYes:
 				User.update({
 					address: newAddress,
+					receiveMessage: booleanMessage,
 				}, {
 					where: {
 						fb_id: session.userData.userid,

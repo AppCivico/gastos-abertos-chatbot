@@ -218,8 +218,14 @@ library.dialog('/sendingImage', [ // sends image and text message
 		[messageText] = [args.messageText];
 		[imageUrl] = [args.imageUrl];
 		User.findAll({
-			attributes: ['address', 'session', 'fb_id'],
+			attributes: ['name', 'address', 'session', 'fb_id'],
 			where: {
+				$or: [
+					// null means we couldn't ask the user yet but we'll send the message anyway
+					{ receiveMessage: null },
+					// null means the user accepted receiving messages
+					{ receiveMessage: true },
+				],
 				fb_id: { // excludes whoever is sending the direct message
 					$ne: session.userData.userid,
 				},
@@ -342,6 +348,12 @@ library.dialog('/sendingMessage', [ // sends text message
 		User.findAll({
 			attributes: ['name', 'address', 'session', 'fb_id'],
 			where: {
+				$or: [
+					// null means we couldn't ask the user yet but we'll send the message anyway
+					{ receiveMessage: null },
+					// null means the user accepted receiving messages
+					{ receiveMessage: true },
+				],
 				fb_id: { // excludes whoever is sending the direct message
 					$ne: session.userData.userid,
 				},

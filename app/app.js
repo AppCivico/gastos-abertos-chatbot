@@ -110,7 +110,6 @@ bot.dialog('/', [
 						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 					},
 				},
-
 			}).spread((user, created) => {
 				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
 				console.log(user.get({ plain: true })); // prints user data
@@ -126,7 +125,6 @@ bot.dialog('/', [
 							fb_id: session.userData.userid,
 							// isItAdmin: false, // Stops turning admins to non-admins
 						},
-
 					}).then(() => {
 						console.log('\nUpdated Admin status!');
 					}).catch((err) => {
@@ -284,7 +282,6 @@ bot.dialog('/painelChoice', [ // sub-menu for admin painel
 	(session) => {
 		session.replaceDialog('/promptButtons');
 	},
-
 ]);
 
 bot.dialog('/askPermission', [
@@ -308,6 +305,7 @@ bot.dialog('/askPermission', [
 				'dados abertos e transparência orçamentária na sua cidade ou em seu círculo de amizades!');
 				User.update({
 					address: session.message.address,
+					receiveMessage: true,
 				}, {
 					where: {
 						fb_id: session.userData.userid,
@@ -326,6 +324,7 @@ bot.dialog('/askPermission', [
 				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
 				User.update({
 					address: null,
+					receiveMessage: false,
 				}, {
 					where: {
 						fb_id: session.userData.userid,
