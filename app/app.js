@@ -12,8 +12,9 @@ const Timer = require('./timer'); // eslint-disable-line no-unused-vars
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
 
-bot.library(require('./send-message'));
-bot.library(require('./add-admin'));
+bot.library(require('./panel/send-message'));
+bot.library(require('./panel/add-admin'));
+bot.library(require('./panel/remove-admin'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
@@ -28,6 +29,7 @@ const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
 const addAdmin = 'Adicionar Administrador';
+const removeAdmin = 'Remover Administrador';
 const addGroup = 'Adicionar usuário em um grupo';
 const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
@@ -266,11 +268,11 @@ bot.dialog('/promptButtons', [
 // 	},
 // });
 
-// TODO
 bot.dialog('/painelChoice', [ // sub-menu for admin painel
 	(session) => {
 		builder.Prompts.choice(
-			session, 'Esse é o menu Administrativo. Escolha o que deseja fazer:', [sendMessage, addAdmin, comeBack],
+			session, 'Esse é o menu administrativo. Muito cuidado por aqui! Escolha o que deseja fazer:',
+			[sendMessage, addAdmin, removeAdmin, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -287,6 +289,9 @@ bot.dialog('/painelChoice', [ // sub-menu for admin painel
 				break;
 			case addAdmin:
 				session.beginDialog('addAdmin:/');
+				break;
+			case removeAdmin:
+				session.beginDialog('removeAdmin:/');
 				break;
 			case addGroup:
 				session.beginDialog('addGroup:/');

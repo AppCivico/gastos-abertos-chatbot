@@ -4,7 +4,7 @@
 
 const library = new builder.Library('sendMessage');
 
-const User = require('./server/schema/models').user;
+const User = require('../server/schema/models').user;
 const Request = require('request');
 
 const writeMsg = 'Escrever Mensagem';
