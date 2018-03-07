@@ -15,6 +15,7 @@ console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`)
 bot.library(require('./panel/send-message'));
 bot.library(require('./panel/add-admin'));
 bot.library(require('./panel/remove-admin'));
+bot.library(require('./panel/add-group'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
@@ -37,6 +38,7 @@ const comeBack = 'Voltar';
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 
+let isItAdmin = false;
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -86,7 +88,7 @@ bot.dialog('/', [
 		session.userData.pageToken = pageToken;
 
 		// checks if user should be an admin using the ID
-		let isItAdmin = false;
+
 		if (adminArray.includes(session.userData.userid)) {
 			isItAdmin = true;
 		}
@@ -138,6 +140,7 @@ bot.dialog('/', [
 			if (!created && isItAdmin === true) {
 				User.update({
 					admin: isItAdmin,
+					group: process.env.adminGroup, // add user to default admin group
 				}, {
 					where: {
 						fb_id: session.userData.userid,
@@ -272,7 +275,7 @@ bot.dialog('/painelChoice', [ // sub-menu for admin painel
 	(session) => {
 		builder.Prompts.choice(
 			session, 'Esse é o menu administrativo. Muito cuidado por aqui! Escolha o que deseja fazer:',
-			[sendMessage, addAdmin, removeAdmin, comeBack],
+			[sendMessage, addAdmin, removeAdmin, addGroup, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
