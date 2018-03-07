@@ -1,79 +1,100 @@
-/* global bot:true builder:true */
+/* global builder:true */
 
 const library = new builder.Library('addAdmin');
+const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 
 const User = require('./server/schema/models').user;
 
-const Confirm = 'Adicionar';
-const Negate = 'Não adicionar/Voltar';
+const Cancel = 'Cancelar/Voltar';
 
-let userName = '';
-let userGroup;
-let FacebookId;
+let userName = ''; // fb_name to search for
+const arrayData = []; // data from users found using userName
+let lastIndex = 0;
 
 library.dialog('/', [
 	(session) => {
-		session.send('Esse é o menu para adicionar usuários que ' +
-		'já interagiram com o bot como administrador e adicionar/mudar o grupo.' +
-		'\nAdicione os dados e depois confirme os dados.');
-		builder.Prompts.text(session, 'Digite o ID do usuario a ser adicionado.\n\n' +
-		'Você pode descobrir o id usando essa ferramenta: https://findmyfbid.com/, ' +
-		'basta copiar e colar a url do perfil da pessoa.');
+		arrayData.length = 0; // empty array
+		session.send('Esse é o menu para adicionar usuários que já interagiram com o bot ao grupo de administradores, ' +
+		'dando-lhe permissão para adicionar mais administradores, grupos e mandar ensagems.' +
+		'\nInsira o nome no perfil, escolha na lista e confirme. Por padrão, a pessoa será inserida no grupo AppCívico.');
+		builder.Prompts.text(session, 'Digite o nome do usuario a ser adicionado para iniciarmos a pesquisa. ' +
+		'Quem já é administrador não será listado!');
 	},
-	(session, args) => {
-		FacebookId = args.response;
-		User.findOne({
+	(session, args, next) => {
+		userName = args.response;
+
+		User.findAndCountAll({ // list all users with desired like = fb_name
 			attributes: ['fb_name'],
+			order: [['updatedAt', 'DESC']], // order by last recorded interation with bot
+			limit: 7,
 			where: {
-				fb_id: FacebookId,
+				fb_name: {
+					$iLike: `%${userName}%`, // case insensitive
+				},
+				admin: {
+					$eq: false,
+				},
+				fb_id: { // excludes whoever is adding admin
+					$ne: session.userData.userid,
+				},
 			},
-		}).then((userData) => {
-			userName = userData.fb_name;
-			builder.Prompts.text(session, `Encontrei '${userData.fb_name}' com esse ID. ` +
-		'\n\nDigite a que grupo esse usuário irá pertencer.');
+		}).then((listUser) => {
+			if (listUser.count === 0) {
+				session.send('Não foi encontrado nenhum usuário com esse nome!');
+				session.replaceDialog('*:/painelChoice');
+			} else {
+				session.send(`Encontrei ${listUser.count} usuário(s).`);
+				listUser.rows.forEach((element) => {
+					arrayData.push(element.dataValues.fb_name);
+				});
+				next();
+			}
 		}).catch((err) => {
-			session.send('Não consegui encontrar nenhum usuário com esse ID! ' +
-			'Ou talvez aconteceu um erro mais grave, que seria bom reportar para os responsáveis.');
-			console.log(`Error finding user => ${err}`);
-			session.replaceDialog('*:/promptButtons');
+			session.send(`Ocorreu um erro ao pesquisar usuários => ${err}`);
+			session.replaceDialog('*:/painelChoice');
 		});
 	},
-	(session, args) => {
-		// Response => Lower Case => Capitalize only the first letter of each word
-		userGroup = args.response.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+	(session) => {
+		console.log(arrayData);
+		arrayData.push(Cancel); // adds Cancel button
+		lastIndex = arrayData.length;
 		builder.Prompts.choice(
-			session, `Deseja adicionar ${userName} como administrador no grupo ${userGroup}?`,
-			[Confirm, Negate],
+			session, 'Clique no nome completo desejado abaixo. Os nomes estão ordenados na ordem de ' +
+			'quem interagiu com o bot mais recentemente(limitando a 7 opções). Você poderá cancelar com a última opção. ', arrayData,
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: 'Por favor, utilize os botões',
+				retryPrompt: retryPrompts.addAdmin,
+				maxRetries: 10,
 			} // eslint-disable-line comma-dangle
 		);
 	},
 
 	(session, result) => {
+		session.sendTyping();
 		if (result.response) {
-			switch (result.response.entity) {
-			case Confirm:
+			if (result.response.index === (lastIndex - 1)) { // check if user choose 'Cancel'
+				session.replaceDialog('*:/painelChoice');
+			} else {
 				User.update({
 					admin: true,
-					// group : userGroup, // TODO
+					group: 'AppCívico',
 				}, {
 					where: {
-						fb_id: FacebookId,
+						fb_name: {
+							$eq: result.response.entity,
+						},
 					},
 				}).then(() => {
-					session.send('Usuário adicionado com sucesso!');
-				}).catch(() => {
-					session.send('Ops. Ocorreu um erro. Tente novamente mais tarde ou reporte esse erro.');
+					session.send(`${result.response.entity} foi adicionado como administrador!`);
+				}).catch((err) => {
+					session.send(`Não foi possível adicionar ${result.response.entity} em administrador => ${err}`);
 				}).finally(() => {
-					session.replaceDialog('*:/promptButtons');
+					session.replaceDialog('*:/painelChoice');
 				});
-				break;
-			default: // Negate
-				session.endDialog();
-				break;
 			}
+		} else {
+			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
+			session.replaceDialog('*:/painelChoice');
 		}
 	},
 ]);

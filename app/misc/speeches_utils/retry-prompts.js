@@ -45,5 +45,10 @@ module.exports = {
 					`${emoji.get('thinking_face').repeat(2)} Hummm. Não entendi a sua dúvida. Escolha um dos tópicos abaixo ` +
 					'para maiores informações ou digite \'cancelar\' para voltar',
 				],
+	addAdmin:
+				[
+					`Por favor, tome muito cuidado pois esse é um procedimento importante. Escolha uma das opções utilizando '+
+					'os botões. O último botão cancela o processo.`,
+				],
 
 };

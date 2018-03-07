@@ -28,6 +28,7 @@ const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
 const addAdmin = 'Adicionar Administrador';
+const addGroup = 'Adicionar usuário em um grupo';
 const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
 
@@ -89,60 +90,74 @@ bot.dialog('/', [
 		}
 
 		// default value: 'undefined'. Yes, it's only a string.
-		custom.userFacebook(
-			session.userData.userid, session.userData.pageToken,
-			(result => User.findOrCreate({
-				where: { fb_id: session.userData.userid },
-				defaults: {
-					name: 'undefined',
-					occupation: 'undefined',
-					email: 'undefined',
-					birth_date: 'undefined',
-					state: 'undefined',
-					city: 'undefined',
-					cellphone_number: 'undefined',
-					active: true,
-					approved: true,
-					fb_id: result.id,
-					fb_name: `${result.first_name} ${result.last_name}`,
-					admin: isItAdmin,
-					session: {
-						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
-					},
+		User.findOrCreate({
+			where: { fb_id: session.userData.userid },
+			defaults: {
+				name: 'undefined',
+				occupation: 'undefined',
+				email: 'undefined',
+				birth_date: 'undefined',
+				state: 'undefined',
+				city: 'undefined',
+				cellphone_number: 'undefined',
+				active: true,
+				approved: true,
+				fb_id: session.userData.userid,
+				admin: isItAdmin,
+				session: {
+					dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
-			}).spread((user, created) => {
-				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
-				console.log(user.get({ plain: true })); // prints user data
-				console.log(`Was created? => ${created}`);
+			},
+		}).spread((user, created) => {
+			console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
+			console.log(user.get({ plain: true })); // prints user data
+			console.log(`Was created? => ${created}`);
 
-				// if user was created, there's no point in updating
-				// isItAdmin === true => avoid turning admins into non-admins
-				if (!created && isItAdmin === true) {
-					User.update({
-						admin: isItAdmin,
-					}, {
-						where: {
-							fb_id: session.userData.userid,
-							// isItAdmin: false, // Stops turning admins to non-admins
+			// it's better to always update fb_name to follow any changes the user may do
+			custom.userFacebook(
+				session.userData.userid, session.userData.pageToken,
+				(result => User.update({
+					fb_name: `${result.first_name} ${result.last_name}`,
+					fb_id: result.id,
+				}, {
+					where: {
+						fb_id: {
+							$eq: session.userData.userid,
 						},
-					}).then(() => {
-						console.log('\nUpdated Admin status!');
-					}).catch((err) => {
-						console.log(`Error creating user => ${err}`);
-						session.replaceDialog('/promptButtons');
-					}).finally((err) => {
-						if (!err) {
-							session.replaceDialog('/getStarted');
-						}
-					});
-				} else {
-					session.replaceDialog('/getStarted');
-				}
-			}).catch((err) => {
-				console.log(`Error creating user => ${err}`);
-				session.replaceDialog('/promptButtons');
-			})) // eslint-disable-line comma-dangle
-		);
+					},
+				}).then(() => {
+					console.log('Facebook Name atualizado com sucesso!');
+				}).catch((err) => {
+					console.log(`Não foi possível atualizar Facebook Name => ${err}`);
+				})) // eslint-disable-line comma-dangle
+			);
+			// if user was created, there's no point in updating
+			// isItAdmin === true => avoid turning admins into non-admins
+			if (!created && isItAdmin === true) {
+				User.update({
+					admin: isItAdmin,
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+						// isItAdmin: false, // Stops turning admins to non-admins
+					},
+				}).then(() => {
+					console.log('\nUpdated Admin status!');
+				}).catch((err) => {
+					console.log(`Error creating user => ${err}`);
+					session.replaceDialog('/promptButtons');
+				}).finally((err) => {
+					if (!err) {
+						session.replaceDialog('/getStarted');
+					}
+				});
+			} else {
+				session.replaceDialog('/getStarted');
+			}
+		}).catch((err) => {
+			console.log(`Error creating user => ${err}`);
+			session.replaceDialog('/promptButtons');
+		}); // eslint-disable-line comma-dangle
 	},
 ]);
 
@@ -224,8 +239,8 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/');
 				break;
 			case adminPanel:
-				// session.beginDialog('/painelChoice');
-				session.beginDialog('sendMessage:/');
+				session.beginDialog('/painelChoice');
+				// session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -272,6 +287,9 @@ bot.dialog('/painelChoice', [ // sub-menu for admin painel
 				break;
 			case addAdmin:
 				session.beginDialog('addAdmin:/');
+				break;
+			case addGroup:
+				session.beginDialog('addGroup:/');
 				break;
 			default: // comeBack
 				session.endDialog();
