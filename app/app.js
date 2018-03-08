@@ -40,7 +40,6 @@ const comeBack = 'Voltar';
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 
-let isItAdmin = false;
 // const DialogFlowReconizer = require('./dialogflow_recognizer');
 // const intents = new builder.IntentDialog({
 // 	recognizers: [
@@ -80,6 +79,8 @@ bot.dialog('/', [
 	(session) => {
 		// TODO rever toda a estrura do 'cancelar'
 		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
+		// TODO ver quem é admin e quem pode mandar imagem
+		// TODO mundar como o crontab manda mensagem
 		if (session.message.address.channelId === 'facebook') {
 			session.userData.userid = session.message.sourceEvent.sender.id;
 			session.userData.pageid = session.message.sourceEvent.recipient.id;
@@ -88,11 +89,11 @@ bot.dialog('/', [
 			session.userData.userid = '000000000000001';
 		}
 		session.userData.pageToken = pageToken;
-
+		session.userData.isItAdmin = false;
 		// checks if user should be an admin using the ID
 
 		if (adminArray.includes(session.userData.userid)) {
-			isItAdmin = true;
+			session.userData.isItAdmin = true;
 		}
 
 		// default value: 'undefined'. Yes, it's only a string.
@@ -109,7 +110,7 @@ bot.dialog('/', [
 				active: true,
 				approved: true,
 				fb_id: session.userData.userid,
-				admin: isItAdmin,
+				admin: session.userData.isItAdmin,
 				session: {
 					dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
@@ -138,15 +139,14 @@ bot.dialog('/', [
 				})) // eslint-disable-line comma-dangle
 			);
 			// if user was created, there's no point in updating
-			// isItAdmin === true => avoid turning admins into non-admins
-			if (!created && isItAdmin === true) {
+			// session.userData.isItAdmin === true => avoid turning admins into non-admins
+			if (!created && session.userData.isItAdmin === true) {
 				User.update({
-					admin: isItAdmin,
+					admin: session.userData.isItAdmin,
 					group: process.env.adminGroup, // add user to default admin group
 				}, {
 					where: {
 						fb_id: session.userData.userid,
-						// isItAdmin: false, // Stops turning admins to non-admins
 					},
 				}).then(() => {
 					console.log('\nUpdated Admin status!');
@@ -212,11 +212,13 @@ bot.dialog('/promptButtons', [
 		custom.updateSession(session.userData.userid, session);
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
-			attributes: ['admin', 'id'],
+			attributes: ['admin', 'sendMessage'],
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
+			} else if (user.sendMessage === true) {
+				menuOptions.push(sendMessage);
 			}
 		}).catch(() => {
 			session.replaceDialog('/promptButtons');
@@ -245,9 +247,11 @@ bot.dialog('/promptButtons', [
 			case Missions:
 				session.beginDialog('game:/');
 				break;
+			case sendMessage:
+				session.beginDialog('sendMessage:/');
+				break;
 			case adminPanel:
 				session.beginDialog('/painelChoice');
-				// session.beginDialog('sendMessage:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
