@@ -16,6 +16,7 @@ bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
 bot.library(require('./panel/admin-panel'));
+bot.library(require('./panel/send-message-menu'));
 
 const User = require('./server/schema/models').user;
 
@@ -26,7 +27,7 @@ const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos inform
 const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
-const sendMessage = 'Mandar Mensagems';
+const messageMenu = 'Mandar Mensagems';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
@@ -209,7 +210,7 @@ bot.dialog('/promptButtons', [
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
 			} else if (user.sendMessage === true) {
-				menuOptions.push(sendMessage);
+				menuOptions.push(messageMenu);
 			}
 		}).catch(() => {
 			session.replaceDialog('/promptButtons');
@@ -238,8 +239,8 @@ bot.dialog('/promptButtons', [
 			case Missions:
 				session.beginDialog('game:/');
 				break;
-			case sendMessage:
-				session.beginDialog('sendMessage:/');
+			case messageMenu:
+				session.beginDialog('messageMenu:/');
 				break;
 			case adminPanel:
 				session.beginDialog('panelAdmin:/');
