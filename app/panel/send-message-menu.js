@@ -50,7 +50,7 @@ library.dialog('/', [
 	(session) => {
 		builder.Prompts.choice(
 			session, 'Este é o menu para mandarmos mensagens aos usuários!\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), ' +
-			'visualize como fica a mensagem e confirme. A mensagem será mandada em nome do seu grupo. Você não receberá a mensagem.' +
+			`visualize como fica a mensagem e confirme. A mensagem será mandada em nome do ${session.userData.group}. Você não receberá a mensagem.` +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com \'Começar\'',
 			[writeMsg, imageMsg, testMessage, goBack],
 			{
@@ -154,7 +154,11 @@ library.dialog('/sendingImage', [ // sends image and text message
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				Send.sendImageByFbId(element.dataValues, messageText, imageUrl, session.userData.pageToken);
+				Send.sendImageByFbId(
+					element.dataValues, messageText, imageUrl,
+					session.userData.pageToken,
+					messageFrom + session.userData.group // eslint-disable-line comma-dangle
+				);
 				msgCount += 1;
 			});
 		}).catch((err) => {
@@ -225,7 +229,10 @@ library.dialog('/sendingMessage', [ // sends text message
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				Send.sendMessageByFbId(element.dataValues, messageText, session.userData.pageToken);
+				Send.sendMessageByFbId(
+					element.dataValues, messageText, session.userData.pageToken,
+					messageFrom + session.userData.group // eslint-disable-line comma-dangle
+				);
 				msgCount += 1;
 			});
 		}).catch((err) => {

@@ -13,8 +13,8 @@ const library = new builder.Library('panelAdmin');
 
 const addAdmin = 'Adicionar Administrador';
 const removeAdmin = 'Remover Administrador';
-const addGroup = 'Adicionar usuário à um grupo';
-const removeGroup = 'Remover usuário de grupo';
+const addGroup = 'Adicionar à um grupo';
+const removeGroup = 'Remover de grupo';
 const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
 
