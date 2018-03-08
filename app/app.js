@@ -32,7 +32,7 @@ const Yes = 'Sim!';
 const No = 'Não';
 const addAdmin = 'Adicionar Administrador';
 const removeAdmin = 'Remover Administrador';
-const addGroup = 'Adicionar usuário em um grupo';
+const addGroup = 'Adicionar usuário à um grupo';
 const removeGroup = 'Remover usuário de grupo';
 const sendMessage = 'Mandar Mensagems';
 const comeBack = 'Voltar';
@@ -280,7 +280,7 @@ bot.dialog('/promptButtons', [
 bot.dialog('/painelChoice', [ // sub-menu for admin painel
 	(session) => {
 		builder.Prompts.choice(
-			session, 'Esse é o menu administrativo. Muito cuidado por aqui! Escolha o que deseja fazer:',
+			session, 'Esse é o menu administrativo. Muito cuidado por aqui!\n\nEscolha o que deseja fazer:',
 			[sendMessage, addAdmin, removeAdmin, addGroup, removeGroup, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
