@@ -32,7 +32,7 @@ library.dialog('/', [
 		}).then((listAdmin) => {
 			if (listAdmin.count === 0) {
 				session.send('Não foi encontrado nenhum outro administrador, além de você!');
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 			} else {
 				session.send(`Encontrei ${listAdmin.count} administrador(es).`);
 				listAdmin.rows.forEach((element) => {
@@ -42,7 +42,7 @@ library.dialog('/', [
 			}
 		}).catch((err) => {
 			session.send(`Ocorreu um erro ao pesquisar usuários => ${err}`);
-			session.replaceDialog('*:/painelChoice');
+			session.endDialog();
 		});
 	},
 	(session) => {
@@ -64,7 +64,7 @@ library.dialog('/', [
 		session.sendTyping();
 		if (result.response) {
 			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 			} else {
 				User.update({
 					admin: false,
@@ -79,12 +79,12 @@ library.dialog('/', [
 				}).catch((err) => {
 					session.send(`Não foi possível remover ${result.response.entity} de seu papel de administrador => ${err}`);
 				}).finally(() => {
-					session.replaceDialog('*:/painelChoice');
+					session.endDialog();
 				});
 			}
 		} else {
 			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
-			session.replaceDialog('*:/painelChoice');
+			session.endDialog();
 		}
 	},
 ]);

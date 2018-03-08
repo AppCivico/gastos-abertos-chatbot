@@ -20,7 +20,7 @@ library.dialog('/', [
 		arrayName.length = 0; // empty array
 		session.send('Esse é o menu para remover usuários que pertencem a algum grupo especial, ' +
 		'tirando-lhes a permissão de mandar mensagens diretas. Seu grupo voltará a ser \'Cidadão\'.');
-		builder.Prompts.text(session, 'Digite o nome do usuario a ser adicionado para iniciarmos a pesquisa.');
+		builder.Prompts.text(session, 'Digite o nome do usuario a ser removido para iniciarmos a pesquisa.');
 	},
 	(session, args, next) => {
 		userName = args.response;
@@ -40,7 +40,7 @@ library.dialog('/', [
 		}).then((listUser) => {
 			if (listUser.count === 0) {
 				session.send('Não foi encontrado nenhum usuário com esse nome!');
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 			} else {
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
@@ -51,7 +51,7 @@ library.dialog('/', [
 			}
 		}).catch((err) => {
 			session.send(`Ocorreu um erro ao pesquisar usuários => ${err}`);
-			session.replaceDialog('*:/painelChoice');
+			session.endDialog();
 		});
 	},
 	(session) => {
@@ -75,7 +75,7 @@ library.dialog('/', [
 		userName = result.response.entity;
 		if (result.response) {
 			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 			} else {
 				userGroup = arrayGroup[result.response.index];
 				builder.Prompts.choice(
@@ -90,7 +90,7 @@ library.dialog('/', [
 			}
 		} else {
 			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
-			session.replaceDialog('*:/painelChoice');
+			session.endDialog();
 		}
 	},
 	(session, result) => {
@@ -111,11 +111,11 @@ library.dialog('/', [
 				}).catch((err) => {
 					session.send(`Não foi possível remover ${result.response.entity} de ${userGroup} => ${err}`);
 				}).finally(() => {
-					session.replaceDialog('*:/painelChoice');
+					session.endDialog();
 				});
 				break;
 			default: // Cancel
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 				break;
 			}
 		}

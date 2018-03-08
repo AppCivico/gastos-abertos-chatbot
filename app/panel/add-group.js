@@ -40,7 +40,7 @@ library.dialog('/', [
 		}).then((listUser) => {
 			if (listUser.count === 0) {
 				session.send('Não foi encontrado nenhum usuário com esse nome!');
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 			} else {
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
@@ -51,7 +51,7 @@ library.dialog('/', [
 			}
 		}).catch((err) => {
 			session.send(`Ocorreu um erro ao pesquisar usuários => ${err}`);
-			session.replaceDialog('*:/painelChoice');
+			session.endDialog();
 		});
 	},
 	(session) => {
@@ -75,14 +75,14 @@ library.dialog('/', [
 		userName = result.response.entity;
 		if (result.response) {
 			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 			} else {
 				session.send(`Esse usuário pertence ao grupo: ${arrayGroup[result.response.index]}`);
 				builder.Prompts.text(session, `A qual grupo ${userName} pertencerá?`);
 			}
 		} else {
 			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
-			session.replaceDialog('*:/painelChoice');
+			session.endDialog();
 		}
 	},
 	(session, results) => {
@@ -116,11 +116,11 @@ library.dialog('/', [
 				}).catch((err) => {
 					session.send(`Não foi possível adicionar ${result.response.entity} em ${userGroup} => ${err}`);
 				}).finally(() => {
-					session.replaceDialog('*:/painelChoice');
+					session.endDialog();
 				});
 				break;
 			default: // Cancel
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 				break;
 			}
 		}

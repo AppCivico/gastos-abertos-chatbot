@@ -19,7 +19,7 @@ library.dialog('/', [
 		'dando-lhe permissão para adicionar mais administradores, grupos e mandar mensagems.' +
 		'\nInsira o nome do perfil, escolha na lista e confirme. Por padrão, a pessoa será inserida no grupo AppCívico.');
 		builder.Prompts.text(session, 'Digite o nome do usuario a ser adicionado para iniciarmos a pesquisa. ' +
-		'Quem já é administrador não será listado!');
+		'\n\nQuem já é administrador não será listado!');
 	},
 	(session, args, next) => {
 		userName = args.response;
@@ -42,7 +42,7 @@ library.dialog('/', [
 		}).then((listUser) => {
 			if (listUser.count === 0) {
 				session.send('Não foi encontrado nenhum usuário com esse nome! Será que ele já é administrador?');
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 			} else {
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
@@ -52,7 +52,7 @@ library.dialog('/', [
 			}
 		}).catch((err) => {
 			session.send(`Ocorreu um erro ao pesquisar usuários => ${err}`);
-			session.replaceDialog('*:/painelChoice');
+			session.endDialog();
 		});
 	},
 	(session) => {
@@ -74,7 +74,7 @@ library.dialog('/', [
 		session.sendTyping();
 		if (result.response) {
 			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
-				session.replaceDialog('*:/painelChoice');
+				session.endDialog();
 			} else {
 				User.update({
 					admin: true,
@@ -90,12 +90,12 @@ library.dialog('/', [
 				}).catch((err) => {
 					session.send(`Não foi possível adicionar ${result.response.entity} em administrador => ${err}`);
 				}).finally(() => {
-					session.replaceDialog('*:/painelChoice');
+					session.endDialog();
 				});
 			}
 		} else {
 			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
-			session.replaceDialog('*:/painelChoice');
+			session.endDialog();
 		}
 	},
 ]);

@@ -326,7 +326,7 @@ function sendMessageByFbId(userData, textMsg, pageToken) {
 					{
 						content_type: 'text',
 						title: 'Voltar para o início',
-						payload: '*:/',
+						payload: 'reset',
 					},
 				],
 			},

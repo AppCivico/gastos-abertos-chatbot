@@ -12,14 +12,10 @@ const Timer = require('./timer'); // eslint-disable-line no-unused-vars
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
 
-bot.library(require('./panel/send-message'));
-bot.library(require('./panel/add-admin'));
-bot.library(require('./panel/remove-admin'));
-bot.library(require('./panel/add-group'));
-bot.library(require('./panel/remove-group'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
+bot.library(require('./panel/admin-panel'));
 
 const User = require('./server/schema/models').user;
 
@@ -30,12 +26,7 @@ const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos inform
 const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
-const addAdmin = 'Adicionar Administrador';
-const removeAdmin = 'Remover Administrador';
-const addGroup = 'Adicionar usuário à um grupo';
-const removeGroup = 'Remover usuário de grupo';
 const sendMessage = 'Mandar Mensagems';
-const comeBack = 'Voltar';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
@@ -251,7 +242,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('sendMessage:/');
 				break;
 			case adminPanel:
-				session.beginDialog('/painelChoice');
+				session.beginDialog('panelAdmin:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -276,48 +267,6 @@ bot.dialog('/promptButtons', [
 // 		}));
 // 	},
 // });
-
-bot.dialog('/painelChoice', [ // sub-menu for admin painel
-	(session) => {
-		builder.Prompts.choice(
-			session, 'Esse é o menu administrativo. Muito cuidado por aqui!\n\nEscolha o que deseja fazer:',
-			[sendMessage, addAdmin, removeAdmin, addGroup, removeGroup, comeBack],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choiceIntent,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case sendMessage:
-				session.beginDialog('sendMessage:/');
-				break;
-			case addAdmin:
-				session.beginDialog('addAdmin:/');
-				break;
-			case removeAdmin:
-				session.beginDialog('removeAdmin:/');
-				break;
-			case addGroup:
-				session.beginDialog('addGroup:/');
-				break;
-			case removeGroup:
-				session.beginDialog('removeGroup:/');
-				break;
-			default: // comeBack
-				session.endDialog();
-				break;
-			}
-		}
-	},
-	(session) => {
-		session.replaceDialog('/promptButtons');
-	},
-]);
 
 bot.dialog('/askPermission', [
 	(session) => {
