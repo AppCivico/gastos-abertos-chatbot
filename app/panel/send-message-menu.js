@@ -1,11 +1,13 @@
-/* global bot:true builder:true */
+/* global  builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
-const library = new builder.Library('sendMessage');
+// the menu to send direct messages to user
+const Send = require('./send-message');
 
-const User = require('./server/schema/models').user;
-const Request = require('request');
+const library = new builder.Library('messageMenu');
+
+const User = require('../server/schema/models').user;
 
 const writeMsg = 'Escrever Mensagem';
 const imageMsg = 'Mensagem com Imagem';
@@ -13,6 +15,7 @@ const testMessage = 'Mensagem Teste(Temporário)';
 const goBack = 'Voltar para o menu';
 const Confirm = 'Enviar';
 const Negate = 'Não enviar/Voltar';
+const messageFrom = 'Essa é uma mensagem de ';
 // const keepMessage = 'Continue mandando';
 // const stopMessage = 'Parar';
 
@@ -21,66 +24,35 @@ let imageUrl; // desired image url
 let msgCount; // counts number of messages sent
 // let userDialog; // user's last active dialog
 
-// function startProactiveImage(user, customMessage, customImage) {
-// 	try {
-// 		msgCount += 1;
-// 		const image = new builder.Message().address(user.address);
-// 		image.addAttachment({
-// 			contentType: 'image/jpeg',
-// 			contentUrl: customImage,
-// 		});
-// 		const textMessage = new builder.Message().address(user.address);
-// 		textMessage.text(customMessage);
-// 		textMessage.textLocale('pt-BR');
-// 		bot.send(image);
-// 		bot.send(textMessage);
-// 	} catch (err) {
-// 		console.log(`Erro ao enviar mensagem: ${err}`);
-// 	} finally {
-// 		bot.beginDialog(user.address, '*:/confirm', { userDialogo: user.session.dialogName, usefulData: user.session.usefulData });
-// 	}
-// }
-//
-// function startProactiveDialog(user, customMessage) {
-// 	try {
-// 		msgCount += 1;
-// 		const textMessage = new builder.Message().address(user.address);
-// 		textMessage.text(customMessage);
-// 		textMessage.textLocale('pt-BR');
-// 		bot.send(textMessage);
-// 	} catch (err) {
-// 		console.log(`Erro ao enviar mensagem: ${err}`);
-// 	}
-// 	console.log(`${user.name} vai para ${user.session.dialogName}\n\n`);
-// 	bot.beginDialog(user.address, '*:/confirm', { userDialogo: user.session.dialogName, usefulData: user.session.usefulData });
-// }
-//
-// bot.dialog('/confirm', [
-// 	(session, args) => {
-// 		session.userData.dialogName = args.userDialogo;
-// 		session.userData.usefulData = args.usefulData;
-// 		builder.Prompts.choice(
-// 			session, 'Você pode desativar mensagens automáticas como a de cima no menu de Informações.', 'Ok',
-// 			{
-// 				listStyle: builder.ListStyle.button,
-// 			} // eslint-disable-line comma-dangle
-// 		);
-// 	},
-// 	(session) => {
-// 		const { dialogName } = session.userData; // it seems that doing this is necessary because
-// 		const { usefulData } = session.userData; // session.dialogName adds '*:' at replaceDialog
-// 		session.send('Voltando pro fluxo normal...');
-// 		session.replaceDialog(dialogName, { usefulData });
-// 	},
-// ]);
-
 library.dialog('/', [
-	(session) => {
+	(session, args, next) => {
 		msgCount = 0;
+		User.findOne({
+			attributes: ['group'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			if (userData.group === '' || userData.group === 'Cidadão') {
+				session.send(`Você parece é do grupo ${session.userData.group}. Desse jeito não poderá enviar mensagem.` +
+				'\n\nPor favor, entre em contato com nossa equipe imediatamente.');
+				session.endDialog();
+			} else {
+				session.userData.group = userData.group;
+				next();
+			}
+		}).catch((err) => {
+			console.log(`Couldn't find user => ${err}`);
+			session.send('Não consegui encontrar seu grupo. Não poderemos mandar mensagems.' +
+			'\n\nPor favor, entre em contato com nossa equipe imediatamente.');
+			session.endDialog();
+		});
+	},
+
+	(session) => {
 		builder.Prompts.choice(
 			session, 'Este é o menu para mandarmos mensagens aos usuários!\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), ' +
-			' vizualise como fica a mensagem e confirme. Você não receberá a mensagem.',
-			[writeMsg, imageMsg, goBack],
+			`visualize como fica a mensagem e confirme. A mensagem será mandada em nome do ${session.userData.group}. Você não receberá a mensagem.` +
+			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com \'Começar\'',
+			[writeMsg, imageMsg, testMessage, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',
@@ -112,7 +84,7 @@ library.dialog('/', [
 	},
 ]);
 
-
+// ----------------Image----------------
 library.dialog('/askImage', [ // asks user for text and image URL
 	(session) => {
 		builder.Prompts.text(session, 'Aqui enviaremos uma imagem seguida de uma mensagem de texto logo abaixo.' +
@@ -126,8 +98,9 @@ library.dialog('/askImage', [ // asks user for text and image URL
 	},
 
 	(session, args) => {
-		session.send('Sua mensagem aparecerá da seguinte forma para os usuários:');
 		imageUrl = args.response;
+		session.send('Sua mensagem aparecerá da seguinte forma para os usuários:');
+		session.send(messageFrom + session.userData.group);
 		session.send({
 			attachments: [
 				{
@@ -162,71 +135,30 @@ library.dialog('/askImage', [ // asks user for text and image URL
 	},
 ]);
 
-function sendImageByFbId(userData, textMsg, UrlImage, pageToken) {
-	Request.post({
-		uri: `https://graph.facebook.com/v2.6/me/messages?access_token=${pageToken}`,
-		'content-type': 'application/json',
-		form: {
-			messaging_type: 'UPDATE',
-			recipient: {
-				id: userData.fb_id,
-			},
-			message: {
-				attachment: {
-					type: 'image',
-					payload: {
-						url: UrlImage,
-						is_reusable: true,
-					},
-				},
-			},
-		},
-	}, (error, response, body) => {
-		console.log('error:', error);
-		console.log('statusCode:', response && response.statusCode);
-		console.log('body:', body);
-
-		Request.post({
-			uri: `https://graph.facebook.com/v2.6/me/messages?access_token=${pageToken}`,
-			'content-type': 'application/json',
-			form: {
-				messaging_type: 'UPDATE',
-				recipient: {
-					id: userData.fb_id,
-				},
-				message: {
-					text: textMsg,
-					quick_replies: [
-						{
-							content_type: 'text',
-							title: 'Voltar para o início',
-							payload: 'reset',
-						},
-					],
-				},
-			},
-		}, (error2, response2, body2) => {
-			console.log('error:', error2);
-			console.log('statusCode:', response2 && response2.statusCode);
-			console.log('body:', body2);
-		});
-	});
-}
-
 library.dialog('/sendingImage', [ // sends image and text message
 	(session, args) => {
 		[messageText] = [args.messageText];
 		[imageUrl] = [args.imageUrl];
 		User.findAll({
-			attributes: ['address', 'session', 'fb_id'],
+			attributes: ['name', 'address', 'session', 'fb_id'],
 			where: {
+				$or: [
+					// null means we couldn't ask the user yet but we'll send the message anyway
+					{ receiveMessage: null },
+					// true means the user accepted receiving messages
+					{ receiveMessage: true },
+				],
 				fb_id: { // excludes whoever is sending the direct message
 					$ne: session.userData.userid,
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				sendImageByFbId(element.dataValues, messageText, imageUrl, session.userData.pageToken);
+				Send.sendImageByFbId(
+					element.dataValues, messageText, imageUrl,
+					session.userData.pageToken,
+					messageFrom + session.userData.group // eslint-disable-line comma-dangle
+				);
 				msgCount += 1;
 			});
 		}).catch((err) => {
@@ -239,14 +171,16 @@ library.dialog('/sendingImage', [ // sends image and text message
 	},
 ]);
 
+// ----------------Text----------------
 library.dialog('/askText', [ // asks user for text message
 	(session) => {
 		builder.Prompts.text(session, 'Digite a sua mensagem. Ela será enviada a todos os usuários que ' +
 		'concordaram em receber mensagens pelo Guaxi.');
 	},
 	(session, args) => {
-		session.send('Sua mensagem aparecerá da seguinte forma para os usuários:');
 		messageText = args.response;
+		session.send('Sua mensagem aparecerá da seguinte forma para os usuários:');
+		session.send(messageFrom + session.userData.group);
 		session.send(messageText);
 		builder.Prompts.choice(
 			session, 'Deseja enviar essa mensagem?',
@@ -272,6 +206,46 @@ library.dialog('/askText', [ // asks user for text message
 		}
 	},
 ]);
+
+library.dialog('/sendingMessage', [ // sends text message
+	(session, args) => {
+		if (!args) { // Test Message options happens here
+			messageText = '<<Mensagem proativa de teste>>';
+		} else {
+			[messageText] = [args.messageText];
+		}
+		User.findAll({
+			attributes: ['name', 'address', 'session', 'fb_id'],
+			where: {
+				$or: [
+					// null means we couldn't ask the user yet but we'll send the message anyway
+					{ receiveMessage: null },
+					// true means the user accepted receiving messages
+					{ receiveMessage: true },
+				],
+				fb_id: { // excludes whoever is sending the direct message
+					$ne: session.userData.userid,
+				},
+			},
+		}).then((user) => {
+			user.forEach((element) => {
+				Send.sendMessageByFbId(
+					element.dataValues, messageText, session.userData.pageToken,
+					messageFrom + session.userData.group // eslint-disable-line comma-dangle
+				);
+				msgCount += 1;
+			});
+		}).catch((err) => {
+			session.send('Ocorreu um erro ao enviar mensagem');
+			console.log(`Erro ao enviar mensagem: ${err}`);
+		}).finally(() => {
+			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
+			session.replaceDialog('/');
+		});
+	},
+]);
+
+module.exports = library;
 
 // library.dialog('/sendingMessage', [ // sends text message
 // 	(session, args) => {
@@ -304,61 +278,3 @@ library.dialog('/askText', [ // asks user for text message
 // 		});
 // 	},
 // ]);
-
-function sendMessageByFbId(userData, textMsg, pageToken) {
-	Request.post({
-		uri: `https://graph.facebook.com/v2.6/me/messages?access_token=${pageToken}`,
-		'content-type': 'application/json',
-		form: {
-			messaging_type: 'UPDATE',
-			recipient: {
-				id: userData.fb_id,
-			},
-			message: {
-				text: textMsg,
-				quick_replies: [
-					{
-						content_type: 'text',
-						title: 'Voltar para o início',
-						payload: 'reset',
-					},
-				],
-			},
-		},
-	}, (error, response, body) => {
-		console.log('error:', error);
-		console.log('statusCode:', response && response.statusCode);
-		console.log('body:', body);
-	});
-}
-
-library.dialog('/sendingMessage', [ // sends text message
-	(session, args) => {
-		if (!args) {
-			messageText = '<<Mensagem proativa de teste>>';
-		} else {
-			[messageText] = [args.messageText];
-		}
-		User.findAll({
-			attributes: ['name', 'address', 'session', 'fb_id'],
-			where: {
-				fb_id: { // excludes whoever is sending the direct message
-					$ne: session.userData.userid,
-				},
-			},
-		}).then((user) => {
-			user.forEach((element) => {
-				sendMessageByFbId(element.dataValues, messageText, session.userData.pageToken);
-				msgCount += 1;
-			});
-		}).catch((err) => {
-			session.send('Ocorreu um erro ao enviar mensagem');
-			console.log(`Erro ao enviar mensagem: ${err}`);
-		}).finally(() => {
-			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
-			session.replaceDialog('/');
-		});
-	},
-]);
-
-module.exports = library;

@@ -12,11 +12,11 @@ const Timer = require('./timer'); // eslint-disable-line no-unused-vars
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
 
-bot.library(require('./send-message'));
-bot.library(require('./add-admin'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
+bot.library(require('./panel/admin-panel'));
+bot.library(require('./panel/send-message-menu'));
 
 const User = require('./server/schema/models').user;
 
@@ -27,13 +27,7 @@ const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos inform
 const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
-const addAdmin = 'Adicionar Administrador';
-const sendMessage = 'Mandar Mensagems';
-const comeBack = 'Voltar';
-
-const isItAdmin = false;
-let userAddress = null;
-const userMail = 'teste@asdf.com';
+const messageMenu = 'Mandar Mensagems';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
@@ -77,6 +71,8 @@ bot.dialog('/', [
 	(session) => {
 		// TODO rever toda a estrura do 'cancelar'
 		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
+		// TODO ver quem é admin e quem pode mandar imagem
+		// TODO mundar como o crontab manda mensagem
 		if (session.message.address.channelId === 'facebook') {
 			session.userData.userid = session.message.sourceEvent.sender.id;
 			session.userData.pageid = session.message.sourceEvent.recipient.id;
@@ -85,69 +81,88 @@ bot.dialog('/', [
 			session.userData.userid = '000000000000001';
 		}
 		session.userData.pageToken = pageToken;
+		session.userData.isItAdmin = false;
+		// checks if user should be an admin using the ID
 
-		// User.findOne({ // this only works if user is already on database and has an e-mail
-		// 	attributes: ['fb_name', 'email'],
-		// 	where: {
-		// 		fb_id: session.userData.userid,
-		// 	},
-		// }).then((userData) => {
-		// 	userMail = userData.email;
-		// 	console.log(`Encontrei '${userData.fb_name}' com esse e-mail. `);
-		// }).catch((err) => {
-		// 	console.log(`Error finding user => ${err}`);
-		// 	session.replaceDialog('/promptButtons');
-		// });
-		//
-		// // checks if user should be an admin using email
-		// if (adminArray.includes(userMail)) {
-		// 	// menuOptions.push(adminPanel);
-		// 	isItAdmin = true;
-		// }
+		if (adminArray.includes(session.userData.userid)) {
+			session.userData.isItAdmin = true;
+		}
 
 		// default value: 'undefined'. Yes, it's only a string.
-		custom.userFacebook(
-			session.userData.userid, session.userData.pageToken,
-			(result => User.findOrCreate({
-				where: { fb_id: session.userData.userid },
-				defaults: {
-					name: 'undefined',
-					occupation: 'undefined',
-					email: 'undefined',
-					birth_date: 'undefined',
-					state: 'undefined',
-					city: 'undefined',
-					cellphone_number: 'undefined',
-					active: true,
-					approved: true,
-					fb_id: result.id,
-					fb_name: `${result.first_name} ${result.last_name}`,
-					admin: isItAdmin,
-					session: {
-						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
-					},
+		User.findOrCreate({
+			where: { fb_id: session.userData.userid },
+			defaults: {
+				name: 'undefined',
+				occupation: 'undefined',
+				email: 'undefined',
+				birth_date: 'undefined',
+				state: 'undefined',
+				city: 'undefined',
+				cellphone_number: 'undefined',
+				active: true,
+				approved: true,
+				fb_id: session.userData.userid,
+				admin: session.userData.isItAdmin,
+				session: {
+					dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
-			}).spread((user, created) => {
-				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
-				console.log(user.get({ plain: true })); // prints user data
-				console.log(`Was created? => ${created}`);
-				userAddress = user.get('address');
-			}).catch((err) => {
-				console.log(`\nerror: ${err}`);
-				session.replaceDialog('/promptButtons');
-			}).finally((err) => {
-				if (!err) {
-					session.replaceDialog('/getStarted');
-				}
-			})) // eslint-disable-line comma-dangle
-		);
+			},
+		}).spread((user, created) => {
+			console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
+			console.log(user.get({ plain: true })); // prints user data
+			console.log(`Was created? => ${created}`);
+
+			// it's better to always update fb_name to follow any changes the user may do
+			custom.userFacebook(
+				session.userData.userid, session.userData.pageToken,
+				(result => User.update({
+					fb_name: `${result.first_name} ${result.last_name}`,
+					fb_id: result.id,
+				}, {
+					where: {
+						fb_id: {
+							$eq: session.userData.userid,
+						},
+					},
+				}).then(() => {
+					console.log('Facebook Name atualizado com sucesso!');
+				}).catch((err) => {
+					console.log(`Não foi possível atualizar Facebook Name => ${err}`);
+				})) // eslint-disable-line comma-dangle
+			);
+			// if user was created, there's no point in updating
+			// session.userData.isItAdmin === true => avoid turning admins into non-admins
+			if (!created && session.userData.isItAdmin === true) {
+				User.update({
+					admin: session.userData.isItAdmin,
+					group: process.env.adminGroup, // add user to default admin group
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+					},
+				}).then(() => {
+					console.log('\nUpdated Admin status!');
+				}).catch((err) => {
+					console.log(`Error creating user => ${err}`);
+					session.replaceDialog('/promptButtons');
+				}).finally((err) => {
+					if (!err) {
+						session.replaceDialog('/getStarted');
+					}
+				});
+			} else {
+				session.replaceDialog('/getStarted');
+			}
+		}).catch((err) => {
+			console.log(`Error creating user => ${err}`);
+			session.replaceDialog('/promptButtons');
+		}); // eslint-disable-line comma-dangle
 	},
 ]);
 
 bot.dialog('/getStarted', [
 	(session) => {
 		session.sendTyping();
-
 		if (!session.userData.firstRun) { // first run
 			menuMessage = 'Vamos lá, como posso te ajudar?';
 			session.userData.firstRun = true;
@@ -164,12 +179,18 @@ bot.dialog('/getStarted', [
 			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
-
-			if (userAddress === '' || userAddress === null) {
-				session.replaceDialog('/askPermission');
-			} else {
+			User.findOne({ // checks if user has an address and asks permission if he doesn't
+				attributes: ['address'],
+				where: { fb_id: session.userData.userid },
+			}).then((user) => {
+				if (user.address === null) {
+					session.replaceDialog('/askPermission');
+				} else {
+					session.replaceDialog('/promptButtons');
+				}
+			}).catch(() => {
 				session.replaceDialog('/promptButtons');
-			}
+			});
 		} else { // welcome back
 			menuMessage = 'Como posso te ajudar?';
 			session.send('Olá, parceiro! Bem vindo de volta!');
@@ -183,14 +204,15 @@ bot.dialog('/promptButtons', [
 		custom.updateSession(session.userData.userid, session);
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
-			attributes: ['admin', 'id'],
-			where: { email: userMail },
+			attributes: ['admin', 'sendMessage'],
+			where: { fb_id: session.userData.userid },
 		}).then((user) => {
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
+			} else if (user.sendMessage === true) {
+				menuOptions.push(messageMenu);
 			}
-		}).catch((err) => {
-			console.log(`deu erro: ${err}`);
+		}).catch(() => {
 			session.replaceDialog('/promptButtons');
 		}).finally(() => {
 			next();
@@ -217,9 +239,11 @@ bot.dialog('/promptButtons', [
 			case Missions:
 				session.beginDialog('game:/');
 				break;
+			case messageMenu:
+				session.beginDialog('messageMenu:/');
+				break;
 			case adminPanel:
-				// session.beginDialog('/painelChoice');
-				session.beginDialog('sendMessage:/');
+				session.beginDialog('panelAdmin:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -245,39 +269,6 @@ bot.dialog('/promptButtons', [
 // 	},
 // });
 
-bot.dialog('/painelChoice', [ // sub-menu for admin painel
-	(session) => {
-		builder.Prompts.choice(
-			session, 'Esse é o menu Administrativo. Escolha o que deseja fazer:', [sendMessage, addAdmin, comeBack],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choiceIntent,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case sendMessage:
-				session.beginDialog('sendMessage:/');
-				break;
-			case addAdmin:
-				session.beginDialog('addAdmin:/');
-				break;
-			default: // comeBack
-				session.endDialog();
-				break;
-			}
-		}
-	},
-	(session) => {
-		session.replaceDialog('/promptButtons');
-	},
-
-]);
-
 bot.dialog('/askPermission', [
 	(session) => {
 		builder.Prompts.choice(
@@ -299,6 +290,7 @@ bot.dialog('/askPermission', [
 				'dados abertos e transparência orçamentária na sua cidade ou em seu círculo de amizades!');
 				User.update({
 					address: session.message.address,
+					receiveMessage: true,
 				}, {
 					where: {
 						fb_id: session.userData.userid,
@@ -317,6 +309,7 @@ bot.dialog('/askPermission', [
 				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
 				User.update({
 					address: null,
+					receiveMessage: false,
 				}, {
 					where: {
 						fb_id: session.userData.userid,
