@@ -33,7 +33,7 @@ const WelcomeBack = 'Beleza!';
 
 let user;
 
-function reloadArgs(args) { // called after session updates to saves us some lines
+function reloadArgs() { // called after session updates to saves us some lines
 	if (!answers || !user) { // empty when dialog gets interrupted
 		// [answers] = args.usefulData.answers; // stores saved values from bd
 		// [user] = args.usefulData.User; // necessary => user.state
@@ -392,10 +392,9 @@ library.dialog('/userUpdate', [
 						session.send(msg);
 					}
 				}
-			})
-			.catch((e) => {
+			}).catch((e) => {
 				console.log(`Error${e}`);
-				session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde e entre em contato conosco.');
+				session.send('Oooops, tive um problema ao finalizar suas missões, tente novamente mais tarde.');
 				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
 				throw e;
 			});
@@ -410,37 +409,39 @@ library.dialog('/userUpdate', [
 			},
 			returning: true,
 			raw: true,
-		})
-			.then((missionData) => {
-				console.log(`Mission ${missionData[1][0].id} Updated!`);
-				Notification.update({
-					// sentAlready == true and timeSent == null or numberSent = 0
-					// means that no message was sent, because there was no need to
-				}, {
-					where: {
-						userID: missionData[1][0].user_id,
-						missionID: missionData[1][0].id,
-					},
-				}).then(() => {
-					console.log('Notification Updated! This message will not be sent!');
-				}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
-
-				builder.Prompts.choice(
-					session,
-					`Se quiser, você já pode começar a segunda missão. Ou fazer uma pausa e continuar mais tarde. ${emoji.get('grinning').repeat(2)}`,
-					[nextMission, WelcomeBack],
-					{
-						listStyle: builder.ListStyle.button,
-						retryPrompt: retryPrompts.choice,
-					} // eslint-disable-line comma-dangle
-				);
-			})
-			.catch((err) => {
-				console.log(`Error updating mission${err}`);
-				session.send('Oooops...Tive um problema ao atualizar seu estado. Tente novamente mais tarde.');
-				session.replaceDialog('*:/getStarted');
-				throw err;
+		}).then((missionData) => {
+			console.log(`Mission ${missionData[1][0].id} Updated!`);
+			Notification.update({
+				// sentAlready == true and timeSent == null or numberSent = 0
+				// means that no message was sent, because there was no need to
+			}, {
+				where: {
+					userID: missionData[1][0].user_id,
+					missionID: missionData[1][0].id,
+				},
+			}).then(() => {
+				console.log('Notification Updated! This message will not be sent!');
+			}).catch((err) => {
+				console.log(`Couldn\t update Notification => ${err}! This message will be sent!`);
+				session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
+				session.replaceDialog('*:/promptButtons');
 			});
+
+			builder.Prompts.choice(
+				session,
+				`Se quiser, você já pode começar a segunda missão. Ou fazer uma pausa e continuar mais tarde. ${emoji.get('grinning').repeat(2)}`,
+				[nextMission, WelcomeBack],
+				{
+					listStyle: builder.ListStyle.button,
+					retryPrompt: retryPrompts.choice,
+				} // eslint-disable-line comma-dangle
+			);
+		}).catch((err) => {
+			console.log(`Error updating mission${err}`);
+			session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
+			session.replaceDialog('*:/promptButtons');
+			throw err;
+		});
 	},
 
 	(session, args) => {
