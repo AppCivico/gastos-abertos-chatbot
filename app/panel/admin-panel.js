@@ -3,7 +3,7 @@
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 
-bot.library(require('./send-message-menu'));
+bot.library(require('./admin-message-menu'));
 bot.library(require('./add-admin'));
 bot.library(require('./remove-admin'));
 bot.library(require('./add-group'));
@@ -15,7 +15,7 @@ const addAdmin = 'Adicionar Administrador';
 const removeAdmin = 'Remover Administrador';
 const addGroup = 'Adicionar à um grupo';
 const removeGroup = 'Remover de grupo';
-const sendMessage = 'Mandar Mensagems';
+const sendMessage = 'Mensagems pra todos';
 const comeBack = 'Voltar';
 
 library.dialog('/', [
@@ -36,7 +36,7 @@ library.dialog('/', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case sendMessage:
-				session.beginDialog('messageMenu:/');
+				session.beginDialog('adminMessageMenu:/');
 				break;
 			case addAdmin:
 				session.beginDialog('addAdmin:/');

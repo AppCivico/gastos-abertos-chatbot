@@ -16,7 +16,7 @@ bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
 bot.library(require('./panel/admin-panel'));
-bot.library(require('./panel/send-message-menu'));
+bot.library(require('./send-message-menu'));
 
 const User = require('./server/schema/models').user;
 
@@ -136,6 +136,7 @@ bot.dialog('/', [
 				User.update({
 					admin: session.userData.isItAdmin,
 					group: process.env.adminGroup, // add user to default admin group
+					sendMessage: true,
 				}, {
 					where: {
 						fb_id: session.userData.userid,
@@ -207,10 +208,11 @@ bot.dialog('/promptButtons', [
 			attributes: ['admin', 'sendMessage'],
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
+			if (user.sendMessage === true) {
+				menuOptions.push(messageMenu);
+			}
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
-			} else if (user.sendMessage === true) {
-				menuOptions.push(messageMenu);
 			}
 		}).catch(() => {
 			session.replaceDialog('/promptButtons');
@@ -240,7 +242,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/');
 				break;
 			case messageMenu:
-				session.beginDialog('messageMenu:/');
+				session.beginDialog('sendMessageMenu:/');
 				break;
 			case adminPanel:
 				session.beginDialog('panelAdmin:/');

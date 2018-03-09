@@ -5,9 +5,9 @@
 // the menu to send direct messages to user
 const Send = require('./send-message');
 
-const library = new builder.Library('messageMenu');
+const library = new builder.Library('sendMessageMenu');
 
-const User = require('../server/schema/models').user;
+const User = require('./server/schema/models').user;
 
 const writeMsg = 'Escrever Mensagem';
 const imageMsg = 'Mensagem com Imagem';
@@ -16,8 +16,6 @@ const goBack = 'Voltar para o menu';
 const Confirm = 'Enviar';
 const Negate = 'Não enviar/Voltar';
 const messageFrom = 'Essa é uma mensagem de ';
-// const keepMessage = 'Continue mandando';
-// const stopMessage = 'Parar';
 
 let messageText; // custom message text
 let imageUrl; // desired image url
@@ -49,9 +47,11 @@ library.dialog('/', [
 
 	(session) => {
 		builder.Prompts.choice(
-			session, 'Este é o menu para mandarmos mensagens aos usuários!\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), ' +
-			`visualize como fica a mensagem e confirme. A mensagem será mandada em nome do ${session.userData.group}. Você não receberá a mensagem.` +
-			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com \'Começar\'',
+			session, 'Este é o menu para mandarmos mensagens aos usuários! Apenas usuários que aceitaram receber essas mensagens irão recebê-las.' +
+			'\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), visualize como fica a mensagem e confirme. ' +
+			`A mensagem será mandada em nome do grupo ${session.userData.group}. Você não receberá a mensagem. ` +
+			'Com essas mensagens, o fluxo do usuário não será interrompido, continuando de onde parou.' +
+			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o menu ao lado. Tome cuidado!',
 			[writeMsg, imageMsg, testMessage, goBack],
 			{
 				listStyle: builder.ListStyle.button,
@@ -140,23 +140,19 @@ library.dialog('/sendingImage', [ // sends image and text message
 		[messageText] = [args.messageText];
 		[imageUrl] = [args.imageUrl];
 		User.findAll({
-			attributes: ['name', 'address', 'session', 'fb_id'],
+			attributes: ['name', 'address', 'session'],
 			where: {
-				$or: [
-					// null means we couldn't ask the user yet but we'll send the message anyway
-					{ receiveMessage: null },
-					// true means the user accepted receiving messages
-					{ receiveMessage: true },
-				],
+				receiveMessage: { // search for people that accepted receiving messages
+					$eq: true,
+				},
 				fb_id: { // excludes whoever is sending the direct message
 					$ne: session.userData.userid,
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				Send.sendImageByFbId(
+				Send.startProactiveImage(
 					element.dataValues, messageText, imageUrl,
-					session.userData.pageToken,
 					messageFrom + session.userData.group // eslint-disable-line comma-dangle
 				);
 				msgCount += 1;
@@ -209,28 +205,26 @@ library.dialog('/askText', [ // asks user for text message
 
 library.dialog('/sendingMessage', [ // sends text message
 	(session, args) => {
-		if (!args) { // Test Message options happens here
+		if (!args) {
 			messageText = '<<Mensagem proativa de teste>>';
 		} else {
 			[messageText] = [args.messageText];
 		}
 		User.findAll({
-			attributes: ['name', 'address', 'session', 'fb_id'],
+			attributes: ['name', 'address', 'session'],
 			where: {
-				$or: [
-					// null means we couldn't ask the user yet but we'll send the message anyway
-					{ receiveMessage: null },
-					// true means the user accepted receiving messages
-					{ receiveMessage: true },
-				],
+				receiveMessage: { // search for people that accepted receiving messages
+					$eq: true,
+				},
 				fb_id: { // excludes whoever is sending the direct message
 					$ne: session.userData.userid,
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				Send.sendMessageByFbId(
-					element.dataValues, messageText, session.userData.pageToken,
+				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
+				Send.startProactiveDialog(
+					element.dataValues, messageText,
 					messageFrom + session.userData.group // eslint-disable-line comma-dangle
 				);
 				msgCount += 1;
@@ -246,35 +240,3 @@ library.dialog('/sendingMessage', [ // sends text message
 ]);
 
 module.exports = library;
-
-// library.dialog('/sendingMessage', [ // sends text message
-// 	(session, args) => {
-// 		if (!args) {
-// 			messageText = '<<Mensagem proativa de teste>>';
-// 		} else {
-// 			[messageText] = [args.messageText];
-// 		}
-// 		User.findAll({
-// 			attributes: ['name', 'address', 'session'],
-// 			where: {
-// 				address: { // search for people that accepted receiving messages(address = not null)
-// 					$ne: null,
-// 				},
-// 				fb_id: { // excludes whoever is sending the direct message
-// 					$ne: session.userData.userid,
-// 				},
-// 			},
-// 		}).then((user) => {
-// 			user.forEach((element) => {
-// 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-// 				startProactiveDialog(element.dataValues, messageText);
-// 			});
-// 		}).catch((err) => {
-// 			session.send('Ocorreu um erro ao enviar mensagem');
-// 			console.log(`Erro ao enviar mensagem: ${err}`);
-// 		}).finally(() => {
-// 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
-// 			session.replaceDialog('/');
-// 		});
-// 	},
-// ]);
