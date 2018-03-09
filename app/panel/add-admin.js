@@ -57,7 +57,6 @@ library.dialog('/', [
 		});
 	},
 	(session) => {
-		console.log(arrayData);
 		arrayData.push(Cancel); // adds Cancel button
 		lastIndex = arrayData.length;
 		builder.Prompts.choice(
