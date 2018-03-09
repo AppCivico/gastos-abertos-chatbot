@@ -39,7 +39,7 @@ library.dialog('/', [
 			}
 		}).catch((err) => {
 			console.log(`Couldn't find user => ${err}`);
-			session.send('Não consegui encontrar seu grupo. Não poderemos mandar mensagems.' +
+			session.send('Não consegui encontrar seu grupo. Não poderemos mandar mensagens.' +
 			'\n\nPor favor, entre em contato com nossa equipe imediatamente.');
 			session.endDialog();
 		});

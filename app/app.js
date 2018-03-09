@@ -27,7 +27,7 @@ const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos inform
 const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
-const messageMenu = 'Mandar Mensagems';
+const messageMenu = 'Mandar mensagens';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
