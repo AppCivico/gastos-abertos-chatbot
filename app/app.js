@@ -189,10 +189,10 @@ bot.dialog('/getStarted', [
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
 			User.findOne({ // checks if user has an address and asks permission if he doesn't
-				attributes: ['address'],
+				attributes: ['receiveMessage'],
 				where: { fb_id: session.userData.userid },
 			}).then((user) => {
-				if (user.address === null) {
+				if (user.receiveMessage === null) {
 					session.replaceDialog('/askPermission');
 				} else {
 					session.replaceDialog('/promptButtons');
@@ -318,7 +318,7 @@ bot.dialog('/askPermission', [
 			default: // No
 				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
 				User.update({
-					address: null,
+					address: session.message.address,
 					receiveMessage: false,
 				}, {
 					where: {
