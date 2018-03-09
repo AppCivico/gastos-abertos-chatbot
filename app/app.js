@@ -16,7 +16,7 @@ bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
 bot.library(require('./panel/admin-panel'));
-bot.library(require('./panel/send-message-menu'));
+bot.library(require('./send-message-menu'));
 
 const User = require('./server/schema/models').user;
 
@@ -82,10 +82,12 @@ bot.dialog('/', [
 		}
 		session.userData.pageToken = pageToken;
 		session.userData.isItAdmin = false;
-		// checks if user should be an admin using the ID
+		session.userData.userGroup = 'Cidadão'; // default group
 
+		// checks if user should be an admin using fb_id
 		if (adminArray.includes(session.userData.userid)) {
 			session.userData.isItAdmin = true;
+			session.userData.userGroup = process.env.adminGroup; // default admin group
 		}
 
 		// default value: 'undefined'. Yes, it's only a string.
@@ -106,11 +108,17 @@ bot.dialog('/', [
 				session: {
 					dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
+				group: session.userData.userGroup,
 			},
 		}).spread((user, created) => {
 			console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
 			console.log(user.get({ plain: true })); // prints user data
 			console.log(`Was created? => ${created}`);
+
+			// Don't reset admin group to normal default nor admin deault
+			if (user.get('group') !== 'Cidadão' && user.get('group') !== process.env.adminGroup) {
+				session.userData.userGroup = user.get('group');
+			}
 
 			// it's better to always update fb_name to follow any changes the user may do
 			custom.userFacebook(
@@ -135,7 +143,8 @@ bot.dialog('/', [
 			if (!created && session.userData.isItAdmin === true) {
 				User.update({
 					admin: session.userData.isItAdmin,
-					group: process.env.adminGroup, // add user to default admin group
+					group: session.userData.userGroup,
+					sendMessage: true,
 				}, {
 					where: {
 						fb_id: session.userData.userid,
@@ -180,10 +189,10 @@ bot.dialog('/getStarted', [
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
 			User.findOne({ // checks if user has an address and asks permission if he doesn't
-				attributes: ['address'],
+				attributes: ['receiveMessage'],
 				where: { fb_id: session.userData.userid },
 			}).then((user) => {
-				if (user.address === null) {
+				if (user.receiveMessage === null) {
 					session.replaceDialog('/askPermission');
 				} else {
 					session.replaceDialog('/promptButtons');
@@ -207,10 +216,11 @@ bot.dialog('/promptButtons', [
 			attributes: ['admin', 'sendMessage'],
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
+			if (user.sendMessage === true) {
+				menuOptions.push(messageMenu);
+			}
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
-			} else if (user.sendMessage === true) {
-				menuOptions.push(messageMenu);
 			}
 		}).catch(() => {
 			session.replaceDialog('/promptButtons');
@@ -240,7 +250,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/');
 				break;
 			case messageMenu:
-				session.beginDialog('messageMenu:/');
+				session.beginDialog('sendMessageMenu:/');
 				break;
 			case adminPanel:
 				session.beginDialog('panelAdmin:/');
@@ -308,7 +318,7 @@ bot.dialog('/askPermission', [
 			default: // No
 				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
 				User.update({
-					address: null,
+					address: session.message.address,
 					receiveMessage: false,
 				}, {
 					where: {
