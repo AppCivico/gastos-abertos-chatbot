@@ -211,7 +211,7 @@ library.dialog('/askText', [ // asks user for text message
 library.dialog('/sendingMessage', [ // sends text message
 	(session, args) => {
 		if (!args) { // Test Message options happens here
-			messageText = '<<Mensagem proativa de teste>>';
+			messageText = '<<Mensagem administrativa de teste>>';
 		} else {
 			[messageText] = [args.messageText];
 		}
@@ -247,35 +247,3 @@ library.dialog('/sendingMessage', [ // sends text message
 ]);
 
 module.exports = library;
-
-// library.dialog('/sendingMessage', [ // sends text message
-// 	(session, args) => {
-// 		if (!args) {
-// 			messageText = '<<Mensagem proativa de teste>>';
-// 		} else {
-// 			[messageText] = [args.messageText];
-// 		}
-// 		User.findAll({
-// 			attributes: ['name', 'address', 'session'],
-// 			where: {
-// 				address: { // search for people that accepted receiving messages(address = not null)
-// 					$ne: null,
-// 				},
-// 				fb_id: { // excludes whoever is sending the direct message
-// 					$ne: session.userData.userid,
-// 				},
-// 			},
-// 		}).then((user) => {
-// 			user.forEach((element) => {
-// 				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-// 				startProactiveDialog(element.dataValues, messageText);
-// 			});
-// 		}).catch((err) => {
-// 			session.send('Ocorreu um erro ao enviar mensagem');
-// 			console.log(`Erro ao enviar mensagem: ${err}`);
-// 		}).finally(() => {
-// 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
-// 			session.replaceDialog('/');
-// 		});
-// 	},
-// ]);

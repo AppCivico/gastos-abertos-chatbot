@@ -82,10 +82,12 @@ bot.dialog('/', [
 		}
 		session.userData.pageToken = pageToken;
 		session.userData.isItAdmin = false;
-		// checks if user should be an admin using the ID
+		session.userData.userGroup = 'Cidadão'; // default group
 
+		// checks if user should be an admin using fb_id
 		if (adminArray.includes(session.userData.userid)) {
 			session.userData.isItAdmin = true;
+			session.userData.userGroup = process.env.adminGroup; // default admin group
 		}
 
 		// default value: 'undefined'. Yes, it's only a string.
@@ -106,11 +108,17 @@ bot.dialog('/', [
 				session: {
 					dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
+				group: session.userData.userGroup,
 			},
 		}).spread((user, created) => {
 			console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
 			console.log(user.get({ plain: true })); // prints user data
 			console.log(`Was created? => ${created}`);
+
+			// Don't reset admin group to normal default nor admin deault
+			if (user.get('group') !== 'Cidadão' && user.get('group') !== process.env.adminGroup) {
+				session.userData.userGroup = user.get('group');
+			}
 
 			// it's better to always update fb_name to follow any changes the user may do
 			custom.userFacebook(
@@ -135,7 +143,7 @@ bot.dialog('/', [
 			if (!created && session.userData.isItAdmin === true) {
 				User.update({
 					admin: session.userData.isItAdmin,
-					group: process.env.adminGroup, // add user to default admin group
+					group: session.userData.userGroup,
 					sendMessage: true,
 				}, {
 					where: {
