@@ -53,7 +53,7 @@ library.dialog('/', [
 			'e serão mandados para o início do fluxo do bot, interronpendo o fluxo do usuário. ' +
 			'Essas mensagens tem caráter ADMINISTRATIVO para anunciar novas versões, por exemplo. Não devendo ser muito frequentes.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o botão no menu ao lado.',
-			[writeMsg, imageMsg, testMessage, goBack],
+			[writeMsg, imageMsg, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',
