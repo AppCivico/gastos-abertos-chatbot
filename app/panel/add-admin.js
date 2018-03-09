@@ -16,7 +16,7 @@ library.dialog('/', [
 	(session) => {
 		arrayData.length = 0; // empty array
 		session.send('Esse é o menu para adicionar usuários que já interagiram com o bot ao grupo de administradores, ' +
-		'dando-lhe permissão para adicionar mais administradores, grupos e mandar mensagems.' +
+		'dando-lhe permissão para adicionar mais administradores, grupos e mandar mensagens.' +
 		'\nInsira o nome do perfil, escolha na lista e confirme. Por padrão, a pessoa será inserida no grupo AppCívico.');
 		// TODO admin que volta pro menu inicial volta pro grupo AppCívico
 		builder.Prompts.text(session, 'Digite o nome do usuario a ser adicionado para iniciarmos a pesquisa. ' +

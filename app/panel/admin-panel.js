@@ -15,7 +15,7 @@ const addAdmin = 'Adicionar Administrador';
 const removeAdmin = 'Remover Administrador';
 const addGroup = 'Adicionar à um grupo';
 const removeGroup = 'Remover de grupo';
-const sendMessage = 'Mensagems pra todos';
+const sendMessage = 'mensagens pra todos';
 const comeBack = 'Voltar';
 
 library.dialog('/', [

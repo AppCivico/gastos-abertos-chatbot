@@ -19,7 +19,7 @@ library.dialog('/', [
 	(session) => {
 		arrayName.length = 0; // empty array
 		session.send('Esse é o menu para adicionar usuários que já interagiram com o bot a algum grupo, ' +
-		'dando-lhe permissão para mandar mensagems diretas para os usuários em nome do grupo! O usuário não se tornará administrador.');
+		'dando-lhe permissão para mandar mensagens diretas para os usuários em nome do grupo! O usuário não se tornará administrador.');
 		builder.Prompts.text(session, 'Insira o nome do perfil, escolha na lista e confirme.');
 	},
 	(session, args, next) => {
