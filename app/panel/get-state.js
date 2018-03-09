@@ -4,49 +4,44 @@
 const library = new builder.Library('byState');
 
 const fs = require('fs');
+const request = require('request');
 const csvWriter = require('csv-write-stream');
+const Base64File = require('js-base64-file');
 
 const writer = csvWriter();
+const generatedRequest = new Base64File();
+const path = '';
+const file = 'guaxi_usuarios_by_estado.csv';
 
-const retryPrompts = require('../misc/speeches_utils/retry-prompts');
+const apiUri = process.env.MAILCHIMP_API_URI;
+const apiUser = process.env.MAILCHIMP_API_USER;
+const apiKey = process.env.MAILCHIMP_API_KEY;
+
+const headers = {
+	'content-type': 'application/json',
+};
+
 const User = require('../server/schema/models').user;
 
-const Cancel = 'Cancelar/Voltar';
-
-let userState = ''; // fb_name to search for
 const arrayData = []; // data from users found using userState
 
 library.dialog('/', [
-	(session) => {
-		arrayData.length = 0; // empty array
-		session.beginDialog('validators:state', {
-			prompt: 'Digite as iniciais de um estado para podermos pesquisar quantas pessoas existem nele.',
-			retryPrompt: retryPrompts.state,
-			maxRetries: 10,
-		});
-	},
 	(session, args, next) => {
-		userState = args.response.toUpperCase();
-
-		User.findAndCountAll({ // list all users from state
+		User.findAndCountAll({
 			attributes: ['fb_name', 'state', 'city', 'receiveMessage', 'group'],
 			order: [['createdAt', 'DESC']], // order by last recorded interation with bot
-			where: {
-				state: {
-					$eq: userState,
-				},
-				// admin: {
-				// 	$eq: false, // we're not counting admins as users
-				// },
-			},
+			// admin: {
+			// 	$eq: false, // we're not counting admins as users
+			// },
+			// },
 		}).then((listUser) => {
 			if (listUser.count === 0) {
-				session.send(`Não encontramos nenhum usuário em ${userState}.`);
+				session.send('Não temos ninguém salvo? Melhor entrar em contato com o suporte!');
 				session.endDialog();
 			} else {
 				let count = 1;
-				writer.pipe(fs.createWriteStream('guaxi_usuarios_by_estado.csv'));
-				session.send(`Encontrei ${listUser.count} usuário(s) em ${userState}.`);
+				writer.pipe(fs.createWriteStream(file));
+				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
 					arrayData.push(element.dataValues.fb_name);
 					writer.write({
@@ -66,22 +61,60 @@ library.dialog('/', [
 		});
 	},
 	(session) => {
-		writer.end();
-		arrayData.push(Cancel); // adds Cancel button
-		builder.Prompts.choice(
-			session, 'São eles:', arrayData,
-			{
-				listStyle: builder.ListStyle.list,
-				retryPrompt: retryPrompts.addAdmin,
-				maxRetries: 10,
-			} // eslint-disable-line comma-dangle
-		);
-	},
+		let data = generatedRequest.loadSync(file);
+		data = JSON.stringify(data);
+		const dataString = `{"name":"guaxi_usuarios_by_estado.csv", "file_data":${data}}`;
 
+		const options = {
+			url: apiUri,
+			method: 'POST',
+			headers,
+			body: dataString,
+			auth: {
+				user: apiUser,
+				pass: apiKey,
+			},
+		};
+
+		function callback(error, response, body) {
+			if (!error || response.statusCode === 200) {
+				const obj = JSON.parse(body);
+				console.dir(body);
+				console.log(obj.full_size_url);
+				const msg = new builder.Message(session);
+				msg.sourceEvent({
+					facebook: {
+						attachment: {
+							type: 'template',
+							payload: {
+								template_type: 'generic',
+								elements: [
+									{
+										title: 'Arquivo gerado com os dados dos usuários',
+										buttons: [{
+											type: 'web_url',
+											url: obj.full_size_url,
+											title: 'Baixar seu CSV',
+										}],
+									},
+								],
+							},
+						},
+					},
+				});
+				session.send(msg);
+			} else {
+				session.send('Tive um problema. Contate a equipe!');
+				session.endDialog();
+			}
+		}
+
+		writer.end();
+		request(options, callback);
+		fs.unlink(file);
+	},
 	(session) => {
-		session.sendTyping();
-		session.send('Beleza, então!');
-		session.endDialog();
+		session.send('sdfsd');
 	},
 ]);
 
