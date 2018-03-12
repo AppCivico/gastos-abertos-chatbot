@@ -8,10 +8,9 @@ const request = require('request');
 const csvWriter = require('csv-write-stream');
 const Base64File = require('js-base64-file');
 
-const writer = csvWriter();
-const generatedRequest = new Base64File();
-const path = '';
-const file = 'guaxi_usuarios_by_estado.csv';
+const usersFile = new Base64File();
+let file = '';
+let writer;
 
 const apiUri = process.env.MAILCHIMP_API_URI;
 const apiUser = process.env.MAILCHIMP_API_USER;
@@ -27,43 +26,57 @@ const arrayData = []; // data from users found using userState
 
 library.dialog('/', [
 	(session, args, next) => {
+		writer = csvWriter();
+		file = `${Math.floor(Date.now() / 1000)}_guaxi_usuarios_by_estado.csv`;
 		User.findAndCountAll({
-			attributes: ['fb_name', 'state', 'city', 'receiveMessage', 'group'],
+			attributes: ['fb_name', 'name', 'state', 'city', 'receiveMessage', 'group'],
 			order: [['createdAt', 'DESC']], // order by last recorded interation with bot
 			// admin: {
 			// 	$eq: false, // we're not counting admins as users
 			// },
-			// },
 		}).then((listUser) => {
 			if (listUser.count === 0) {
-				session.send('Não temos ninguém salvo? Melhor entrar em contato com o suporte!');
+				session.send('Não encontrei ninguém. Não temos ninguém salvo? Melhor entrar em contato com o suporte!');
 				session.endDialog();
 			} else {
-				let count = 1;
+				let count = 0;
 				writer.pipe(fs.createWriteStream(file));
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
 					arrayData.push(element.dataValues.fb_name);
+					session.send('aaa');
 					writer.write({
-						Número: count++, // eslint-disable-line no-plusplus
+						Número: ++count, // eslint-disable-line no-plusplus
 						'Nome no Facebook': element.dataValues.fb_name,
+						'Nome cadastrado': element.dataValues.name,
 						Estado: element.dataValues.state,
 						Município: element.dataValues.city,
 						'Recebe Mensagem': element.dataValues.receiveMessage,
 						Grupo: element.dataValues.group,
 					});
+
+					// block will be executed last
+					if (count === listUser.rows.length) {
+						writer.end();
+						session.send('fim');
+						next();
+					}
 				});
-				next();
 			}
 		}).catch((err) => {
 			session.send(`Ocorreu um erro ao pesquisar usuários => ${err}`);
 			session.endDialog();
 		});
 	},
-	(session) => {
-		let data = generatedRequest.loadSync(file);
+	(session, args, next) => {
+		let data = usersFile.loadSync('', file);
+		console.log('\n');
+		console.log(Object.entries(data));
+
 		data = JSON.stringify(data);
-		const dataString = `{"name":"guaxi_usuarios_by_estado.csv", "file_data":${data}}`;
+		console.log('\n');
+		console.dir(data);
+		const dataString = `{"name":${file}, "file_data":${data}}`;
 
 		const options = {
 			url: apiUri,
@@ -80,7 +93,7 @@ library.dialog('/', [
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
 				console.dir(body);
-				console.log(obj.full_size_url);
+				console.log(`full_size_url: ${obj.full_size_url}`);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
 					facebook: {
@@ -102,19 +115,22 @@ library.dialog('/', [
 						},
 					},
 				});
-				session.send(msg);
+				session.send(`:) ${msg}`);
+				next();
 			} else {
 				session.send('Tive um problema. Contate a equipe!');
 				session.endDialog();
 			}
 		}
 
-		writer.end();
 		request(options, callback);
-		fs.unlink(file);
 	},
 	(session) => {
-		session.send('sdfsd');
+		// fs.unlink(path + file, (err) => {
+		// 	if (err) throw err;
+		// 	console.log('File deleted');
+		// });
+		session.endDialog();
 	},
 ]);
 
