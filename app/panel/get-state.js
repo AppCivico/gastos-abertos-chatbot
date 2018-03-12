@@ -11,8 +11,8 @@ const Base64File = require('js-base64-file');
 
 const usersFile = new Base64File();
 let file = '';
-const path = `${__dirname}/`;
 let writer;
+let data;
 
 const apiUri = process.env.MAILCHIMP_API_URI;
 const apiUser = process.env.MAILCHIMP_API_USER;
@@ -42,7 +42,7 @@ library.dialog('/', [
 				session.endDialog();
 			} else {
 				let count = 0;
-				writer.pipe(fs.createWriteStream(path + file));
+				writer.pipe(fs.createWriteStream(file));
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
 					arrayData.push(element.dataValues.fb_name);
@@ -59,7 +59,7 @@ library.dialog('/', [
 
 					// this block will be executed last
 					if (count === listUser.rows.length) {
-						// writer.end();
+						writer.end();
 						session.send('fim');
 						next();
 					}
@@ -71,7 +71,8 @@ library.dialog('/', [
 		});
 	},
 	(session, args, next) => {
-		let data = usersFile.loadSync(path, file);
+		data = usersFile.loadSync('', file);
+		session.send(`dssdds:${data}`);
 		console.log(`Data: ${data}`);
 		data = JSON.stringify(data);
 		console.log(`Data: ${data}`);
@@ -126,7 +127,7 @@ library.dialog('/', [
 		request(options, callback);
 	},
 	(session) => {
-		fs.unlink(path + file, (err) => {
+		fs.unlink(file, (err) => {
 			if (err) throw err;
 			console.log('File deleted');
 		});
