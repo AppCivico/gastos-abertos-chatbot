@@ -6,10 +6,12 @@ const library = new builder.Library('byState');
 const fs = require('fs');
 const request = require('request');
 const csvWriter = require('csv-write-stream');
+
 const Base64File = require('js-base64-file');
 
 const usersFile = new Base64File();
 let file = '';
+const path = `${__dirname}/`;
 let writer;
 
 const apiUri = process.env.MAILCHIMP_API_URI;
@@ -27,7 +29,7 @@ const arrayData = []; // data from users found using userState
 library.dialog('/', [
 	(session, args, next) => {
 		writer = csvWriter();
-		file = `${Math.floor(Date.now() / 1000)}_guaxi_usuarios_by_estado.csv`;
+		file = 'guaxi_usuario.csv';
 		User.findAndCountAll({
 			attributes: ['fb_name', 'name', 'state', 'city', 'receiveMessage', 'group'],
 			order: [['createdAt', 'DESC']], // order by last recorded interation with bot
@@ -40,7 +42,7 @@ library.dialog('/', [
 				session.endDialog();
 			} else {
 				let count = 0;
-				writer.pipe(fs.createWriteStream(file));
+				writer.pipe(fs.createWriteStream(path + file));
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
 					arrayData.push(element.dataValues.fb_name);
@@ -55,9 +57,9 @@ library.dialog('/', [
 						Grupo: element.dataValues.group,
 					});
 
-					// block will be executed last
+					// this block will be executed last
 					if (count === listUser.rows.length) {
-						writer.end();
+						// writer.end();
 						session.send('fim');
 						next();
 					}
@@ -69,14 +71,13 @@ library.dialog('/', [
 		});
 	},
 	(session, args, next) => {
-		let data = usersFile.loadSync('', file);
-		console.log('\n');
-		console.log(Object.entries(data));
-
+		let data = usersFile.loadSync(path, file);
+		console.log(`Data: ${data}`);
 		data = JSON.stringify(data);
-		console.log('\n');
-		console.dir(data);
+		console.log(`Data: ${data}`);
+
 		const dataString = `{"name":${file}, "file_data":${data}}`;
+		console.log(`dataString: ${dataString}`);
 
 		const options = {
 			url: apiUri,
@@ -115,21 +116,20 @@ library.dialog('/', [
 						},
 					},
 				});
-				session.send(`:) ${msg}`);
+				session.send(msg);
 				next();
 			} else {
 				session.send('Tive um problema. Contate a equipe!');
 				session.endDialog();
 			}
 		}
-
 		request(options, callback);
 	},
 	(session) => {
-		// fs.unlink(path + file, (err) => {
-		// 	if (err) throw err;
-		// 	console.log('File deleted');
-		// });
+		fs.unlink(path + file, (err) => {
+			if (err) throw err;
+			console.log('File deleted');
+		});
 		session.endDialog();
 	},
 ]);
