@@ -1,7 +1,7 @@
 /* global builder:true */
 // Check how many users are in a state
 
-const library = new builder.Library('byState');
+const library = new builder.Library('csvUser');
 
 const fs = require('fs');
 const request = require('request');
@@ -9,10 +9,10 @@ const csvWriter = require('csv-write-stream');
 
 const Base64File = require('js-base64-file');
 
-const usersFile = new Base64File();
+const generatedRequest = new Base64File();
+const path = '/tmp/';
 let file = '';
 let writer;
-let data;
 
 const apiUri = process.env.MAILCHIMP_API_URI;
 const apiUser = process.env.MAILCHIMP_API_USER;
@@ -23,8 +23,6 @@ const headers = {
 };
 
 const User = require('../server/schema/models').user;
-
-const arrayData = []; // data from users found using userState
 
 library.dialog('/', [
 	(session, args, next) => {
@@ -42,11 +40,9 @@ library.dialog('/', [
 				session.endDialog();
 			} else {
 				let count = 0;
-				writer.pipe(fs.createWriteStream(file));
+				writer.pipe(fs.createWriteStream(path + file));
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
-					arrayData.push(element.dataValues.fb_name);
-					session.send('aaa');
 					writer.write({
 						Número: ++count, // eslint-disable-line no-plusplus
 						'Nome no Facebook': element.dataValues.fb_name,
@@ -60,7 +56,6 @@ library.dialog('/', [
 					// this block will be executed last
 					if (count === listUser.rows.length) {
 						writer.end();
-						session.send('fim');
 						next();
 					}
 				});
@@ -71,14 +66,9 @@ library.dialog('/', [
 		});
 	},
 	(session, args, next) => {
-		data = usersFile.loadSync('', file);
-		session.send(`dssdds:${data}`);
-		console.log(`Data: ${data}`);
+		let data = generatedRequest.loadSync('', file);
 		data = JSON.stringify(data);
-		console.log(`Data: ${data}`);
-
-		const dataString = `{"name":${file}, "file_data":${data}}`;
-		console.log(`dataString: ${dataString}`);
+		const dataString = `{"name":"user_guaxi.csv" , "file_data":${data}}`;
 
 		const options = {
 			url: apiUri,
@@ -94,8 +84,7 @@ library.dialog('/', [
 		function callback(error, response, body) {
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
-				console.dir(body);
-				console.log(`full_size_url: ${obj.full_size_url}`);
+				console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
 					facebook: {
@@ -105,11 +94,11 @@ library.dialog('/', [
 								template_type: 'generic',
 								elements: [
 									{
-										title: 'Arquivo gerado com os dados dos usuários',
+										title: 'ghdhdgh',
 										buttons: [{
 											type: 'web_url',
 											url: obj.full_size_url,
-											title: 'Baixar seu CSV',
+											title: 'Ver seu pedido',
 										}],
 									},
 								],
@@ -119,19 +108,10 @@ library.dialog('/', [
 				});
 				session.send(msg);
 				next();
-			} else {
-				session.send('Tive um problema. Contate a equipe!');
-				session.endDialog();
 			}
 		}
 		request(options, callback);
-	},
-	(session) => {
-		fs.unlink(file, (err) => {
-			if (err) throw err;
-			console.log('File deleted');
-		});
-		session.endDialog();
+		fs.unlink(path + file);
 	},
 ]);
 

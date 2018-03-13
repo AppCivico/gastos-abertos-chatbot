@@ -32,24 +32,25 @@ const messageMenu = 'Mandar mensagens';
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 
-// const DialogFlowReconizer = require('./dialogflow_recognizer');
-// const intents = new builder.IntentDialog({
-// 	recognizers: [
-// 		DialogFlowReconizer,
-// 	],
-// 	intentThreshold: 0.2,
-// 	recognizeOrder: builder.RecognizeOrder.series,
-// });
-//
+const DialogFlowReconizer = require('./dialogflow_recognizer');
+
+const intents = new builder.IntentDialog({
+	recognizers: [
+		DialogFlowReconizer,
+	],
+	intentThreshold: 0.2,
+	recognizeOrder: builder.RecognizeOrder.series,
+});
+
 const custom = require('./misc/custom_intents');
-//
-// bot.recognizer(intents);
-//
+
+bot.recognizer(intents);
+
 // intents.matches('ajuda', 'gastosAbertosInformation:/');
 // intents.matches('missoes', 'game:/');
 // intents.matches('pedido', 'gastosAbertosInformation:/');
-// intents.matches('Default Welcome Intent', '/getstarted');
-// intents.matches('Default Fallback Intent', '/');
+intents.matches('Default Welcome Intent', '/reset');
+intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);

@@ -8,7 +8,7 @@ bot.library(require('./add-admin'));
 bot.library(require('./remove-admin'));
 bot.library(require('./add-group'));
 bot.library(require('./remove-group'));
-bot.library(require('./get-state'));
+bot.library(require('./get-users'));
 
 const library = new builder.Library('panelAdmin');
 
@@ -17,7 +17,7 @@ const removeAdmin = 'Remover Administrador';
 const addGroup = 'Adicionar à um grupo';
 const removeGroup = 'Remover de grupo';
 const sendMessage = 'Mensagens pra todos';
-const byState = 'Baixar usuários';
+const userCSV = 'Baixar usuários';
 const comeBack = 'Voltar';
 
 library.dialog('/', [
@@ -25,7 +25,7 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session, 'Esse é o menu administrativo. Muito cuidado por aqui!' +
 			'\n\nEscolha o que deseja fazer:',
-			[sendMessage, addAdmin, removeAdmin, addGroup, removeGroup, byState, comeBack],
+			[sendMessage, userCSV, addAdmin, removeAdmin, addGroup, removeGroup, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -40,6 +40,9 @@ library.dialog('/', [
 			case sendMessage:
 				session.beginDialog('adminMessageMenu:/');
 				break;
+			case userCSV:
+				session.beginDialog('csvUser:/');
+				break;
 			case addAdmin:
 				session.beginDialog('addAdmin:/');
 				break;
@@ -51,9 +54,6 @@ library.dialog('/', [
 				break;
 			case removeGroup:
 				session.beginDialog('removeGroup:/');
-				break;
-			case byState:
-				session.beginDialog('byState:/');
 				break;
 			default: // comeBack
 				session.replaceDialog('*:/promptButtons');
