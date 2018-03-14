@@ -33,6 +33,7 @@
     "date-fns": "^1.28.5",
     "dotenv": "^4.0.0",
     "email-validator": "^1.1.1",
+    "fast-csv": "^2.4.1",
     "file-base64": "^1.0.0",
     "fs": "0.0.1-security",
     "google-spreadsheet": "^2.0.4",
