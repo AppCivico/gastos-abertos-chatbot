@@ -68,7 +68,7 @@ library.dialog('/', [
 	(session, args, next) => {
 		let data = generatedRequest.loadSync('', file);
 		data = JSON.stringify(data);
-		const dataString = `{"name":"user_guaxi.csv" , "file_data":${data}}`;
+		const dataString = `{"name":"${Math.floor(Date.now() / 1000)}_user_guaxi.csv" , "file_data":${data}}`;
 
 		const options = {
 			url: apiUri,
@@ -94,11 +94,11 @@ library.dialog('/', [
 								template_type: 'generic',
 								elements: [
 									{
-										title: 'ghdhdgh',
+										title: 'CSV com informações dos usuários',
 										buttons: [{
 											type: 'web_url',
 											url: obj.full_size_url,
-											title: 'Ver seu pedido',
+											title: 'Baixar CSV',
 										}],
 									},
 								],
