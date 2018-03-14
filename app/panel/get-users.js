@@ -27,7 +27,7 @@ const User = require('../server/schema/models').user;
 library.dialog('/', [
 	(session, args, next) => {
 		writer = csvWriter();
-		file = 'guaxi_usuario.csv';
+		file = 'guaxi_usuario2.csv';
 		User.findAndCountAll({
 			attributes: ['fb_name', 'name', 'state', 'city', 'receiveMessage', 'group'],
 			order: [['createdAt', 'DESC']], // order by last recorded interation with bot
@@ -40,7 +40,7 @@ library.dialog('/', [
 				session.endDialog();
 			} else {
 				let count = 0;
-				writer.pipe(fs.createWriteStream(path + file));
+				writer.pipe(fs.createWriteStream(file));
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
 					writer.write({
@@ -111,7 +111,7 @@ library.dialog('/', [
 			}
 		}
 		request(options, callback);
-		fs.unlink(path + file);
+		// fs.unlink(file);
 	},
 ]);
 
