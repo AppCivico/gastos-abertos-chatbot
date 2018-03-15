@@ -12,11 +12,11 @@ const Timer = require('./timer'); // eslint-disable-line no-unused-vars
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
 
-bot.library(require('./send-message'));
-bot.library(require('./add-admin'));
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
+bot.library(require('./panel/admin-panel'));
+bot.library(require('./send-message-menu'));
 
 const User = require('./server/schema/models').user;
 
@@ -27,57 +27,35 @@ const permissionQuestion = 'Ah, tudo bem eu te enviar de tempos em tempos inform
 const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
-const addAdmin = 'Adicionar Administrador';
-const sendMessage = 'Mandar Mensagems';
-const comeBack = 'Voltar';
+const messageMenu = 'Mandar mensagens';
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 
-// fb-get-started-button add [page_token] --payload getStarted
+const DialogFlowReconizer = require('./dialogflow_recognizer');
 
-// curl -X POST -H "Content-Type: application/json" -d '{
-// 	"setting_type" : "call_to_actions",
-// 	"thread_state" : "existing_thread",
-// 	"call_to_actions":[
-// 		{
-// 			"type":"web_url",
-// 			"title":"Ver nosso site",
-// 			"url":"https://gastosabertos.org/"
-// 		},
-// 		{
-// 			"type":"postback",
-// 			"title":"Ir para o Início",
-// 			"payload":"reset2"
-// 		}
-// 	]
-// }' "https://graph.facebook.com/v2.6/me/thread_settings?access_token=[page_token]"
+const intents = new builder.IntentDialog({
+	recognizers: [
+		DialogFlowReconizer,
+	],
+	intentThreshold: 0.2,
+	recognizeOrder: builder.RecognizeOrder.series,
+});
 
-
-// const DialogFlowReconizer = require('./dialogflow_recognizer');
-// const intents = new builder.IntentDialog({
-// 	recognizers: [
-// 		DialogFlowReconizer,
-// 	],
-// 	intentThreshold: 0.2,
-// 	recognizeOrder: builder.RecognizeOrder.series,
-// });
-//
 const custom = require('./misc/custom_intents');
-//
-// bot.recognizer(intents);
-//
+
+bot.recognizer(intents);
+
 // intents.matches('ajuda', 'gastosAbertosInformation:/');
 // intents.matches('missoes', 'game:/');
 // intents.matches('pedido', 'gastosAbertosInformation:/');
-// intents.matches('Default Welcome Intent', '/getstarted');
-// intents.matches('Default Fallback Intent', '/');
+intents.matches('Default Welcome Intent', '/reset');
+intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
 const { pageToken } = process.env;
-const { emulatorUser } = process.env;
 const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
@@ -94,62 +72,101 @@ bot.dialog('/', [
 	(session) => {
 		// TODO rever toda a estrura do 'cancelar'
 		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
+		// TODO ver quem é admin e quem pode mandar imagem
+		// TODO mundar como o crontab manda mensagem
 		if (session.message.address.channelId === 'facebook') {
 			session.userData.userid = session.message.sourceEvent.sender.id;
 			session.userData.pageid = session.message.sourceEvent.recipient.id;
 		} else {
 			// hardcoded ids for testing purposes
-			session.userData.userid = emulatorUser;
+			session.userData.userid = '000000000000001';
 		}
 		session.userData.pageToken = pageToken;
+		session.userData.isItAdmin = false;
+		session.userData.userGroup = 'Cidadão'; // default group
 
-		// checks if user should be an admin using the ID
-		let isItAdmin = false;
+		// checks if user should be an admin using fb_id
 		if (adminArray.includes(session.userData.userid)) {
-			isItAdmin = true;
+			session.userData.isItAdmin = true;
+			session.userData.userGroup = process.env.adminGroup; // default admin group
 		}
 
 		// default value: 'undefined'. Yes, it's only a string.
-		custom.userFacebook(
-			session.userData.userid, session.userData.pageToken,
-			(result => User.findOrCreate({
-				where: { fb_id: session.userData.userid },
-				defaults: {
-					name: 'undefined',
-					occupation: 'undefined',
-					email: 'undefined',
-					birth_date: 'undefined',
-					state: 'undefined',
-					city: 'undefined',
-					cellphone_number: 'undefined',
-					active: true,
-					approved: true,
-					fb_id: result.id,
-					fb_name: `${result.first_name} ${result.last_name}`,
-					admin: isItAdmin,
-					session: {
-						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
-					},
+		User.findOrCreate({
+			where: { fb_id: session.userData.userid },
+			defaults: {
+				name: 'undefined',
+				occupation: 'undefined',
+				email: 'undefined',
+				birth_date: 'undefined',
+				state: 'undefined',
+				city: 'undefined',
+				cellphone_number: 'undefined',
+				active: true,
+				approved: true,
+				fb_id: session.userData.userid,
+				admin: session.userData.isItAdmin,
+				session: {
+					dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
 				},
+				group: session.userData.userGroup,
+			},
+		}).spread((user, created) => {
+			console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
+			console.log(user.get({ plain: true })); // prints user data
+			console.log(`Was created? => ${created}`);
 
-			}).spread((user, created) => {
-				console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
-				console.log(user.get({ plain: true })); // prints user data
-				console.log(`Was created? => ${created}`);
+			// Don't reset admin group to normal default nor admin deault
+			if (user.get('group') !== 'Cidadão' && user.get('group') !== process.env.adminGroup) {
+				session.userData.userGroup = user.get('group');
+			}
 
-				if (!created) {
-					User.update({
-						admin: isItAdmin,
-						where: { fb_id: session.userData.userid },
-					});
-				}
-
+			// it's better to always update fb_name to follow any changes the user may do
+			custom.userFacebook(
+				session.userData.userid, session.userData.pageToken,
+				(result => User.update({
+					fb_name: `${result.first_name} ${result.last_name}`,
+					fb_id: result.id,
+				}, {
+					where: {
+						fb_id: {
+							$eq: session.userData.userid,
+						},
+					},
+				}).then(() => {
+					console.log('Facebook Name atualizado com sucesso!');
+				}).catch((err) => {
+					console.log(`Não foi possível atualizar Facebook Name => ${err}`);
+				})) // eslint-disable-line comma-dangle
+			);
+			// if user was created, there's no point in updating
+			// session.userData.isItAdmin === true => avoid turning admins into non-admins
+			if (!created && session.userData.isItAdmin === true) {
+				User.update({
+					admin: session.userData.isItAdmin,
+					group: session.userData.userGroup,
+					sendMessage: true,
+				}, {
+					where: {
+						fb_id: session.userData.userid,
+					},
+				}).then(() => {
+					console.log('\nUpdated Admin status!');
+				}).catch((err) => {
+					console.log(`Error creating user => ${err}`);
+					session.replaceDialog('/promptButtons');
+				}).finally((err) => {
+					if (!err) {
+						session.replaceDialog('/getStarted');
+					}
+				});
+			} else {
 				session.replaceDialog('/getStarted');
-			}).catch(() => {
-				session.replaceDialog('/promptButtons');
-			})) // eslint-disable-line comma-dangle
-		);
-		session.replaceDialog('/getStarted');
+			}
+		}).catch((err) => {
+			console.log(`Error creating user => ${err}`);
+			session.replaceDialog('/promptButtons');
+		}); // eslint-disable-line comma-dangle
 	},
 ]);
 
@@ -173,10 +190,10 @@ bot.dialog('/getStarted', [
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
 			User.findOne({ // checks if user has an address and asks permission if he doesn't
-				attributes: ['address'],
+				attributes: ['receiveMessage'],
 				where: { fb_id: session.userData.userid },
 			}).then((user) => {
-				if (user.address === null) {
+				if (user.receiveMessage === null) {
 					session.replaceDialog('/askPermission');
 				} else {
 					session.replaceDialog('/promptButtons');
@@ -197,9 +214,12 @@ bot.dialog('/promptButtons', [
 		custom.updateSession(session.userData.userid, session);
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
-			attributes: ['admin', 'id'],
+			attributes: ['admin', 'sendMessage'],
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
+			if (user.sendMessage === true) {
+				menuOptions.push(messageMenu);
+			}
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
 			}
@@ -230,9 +250,11 @@ bot.dialog('/promptButtons', [
 			case Missions:
 				session.beginDialog('game:/');
 				break;
+			case messageMenu:
+				session.beginDialog('sendMessageMenu:/');
+				break;
 			case adminPanel:
-				// session.beginDialog('/painelChoice');
-				session.beginDialog('sendMessage:/');
+				session.beginDialog('panelAdmin:/');
 				break;
 			default: // InformationAcessRequest
 				session.beginDialog('informationAccessRequest:/');
@@ -258,39 +280,6 @@ bot.dialog('/promptButtons', [
 // 	},
 // });
 
-bot.dialog('/painelChoice', [ // sub-menu for admin painel
-	(session) => {
-		builder.Prompts.choice(
-			session, 'Esse é o menu Administrativo. Escolha o que deseja fazer:', [sendMessage, addAdmin, comeBack],
-			{
-				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choiceIntent,
-			} // eslint-disable-line comma-dangle
-		);
-	},
-
-	(session, result) => {
-		session.sendTyping();
-		if (result.response) {
-			switch (result.response.entity) {
-			case sendMessage:
-				session.beginDialog('sendMessage:/');
-				break;
-			case addAdmin:
-				session.beginDialog('addAdmin:/');
-				break;
-			default: // comeBack
-				session.endDialog();
-				break;
-			}
-		}
-	},
-	(session) => {
-		session.replaceDialog('/promptButtons');
-	},
-
-]);
-
 bot.dialog('/askPermission', [
 	(session) => {
 		builder.Prompts.choice(
@@ -312,6 +301,7 @@ bot.dialog('/askPermission', [
 				'dados abertos e transparência orçamentária na sua cidade ou em seu círculo de amizades!');
 				User.update({
 					address: session.message.address,
+					receiveMessage: true,
 				}, {
 					where: {
 						fb_id: session.userData.userid,
@@ -329,7 +319,8 @@ bot.dialog('/askPermission', [
 			default: // No
 				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
 				User.update({
-					address: null,
+					address: session.message.address,
+					receiveMessage: false,
 				}, {
 					where: {
 						fb_id: session.userData.userid,

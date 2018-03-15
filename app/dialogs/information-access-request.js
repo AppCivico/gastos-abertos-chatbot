@@ -825,5 +825,4 @@ library.dialog('/generateRequest', [
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
-
 module.exports = library;

@@ -97,7 +97,7 @@ const MissionTimer = new Cron.CronJob(
 	'America/Sao_Paulo',
 	false, // context
 	// Below: runOnInit = true TODO useful only for tests
-	true // eslint-disable-line comma-dangle
+	false // eslint-disable-line comma-dangle
 );
 
 module.exports.MissionTimer = MissionTimer;
@@ -126,7 +126,7 @@ function requestWarning(user, missionID) {
 
 // Cronjob for following the user after request generation
 const RequestTimer = new Cron.CronJob(
-	'* 20 9-23/3 * * 1-6', () => { // (Hopefully) On the 10th minute Every 3 hours from 9-23h except on sundays
+	'00 20 9-23/3 * * 1-6', () => { // (Hopefully) On the 10th minute Every 3 hours from 9-23h except on sundays
 		const d = new Date(Date.now());
 		const limit = new Date(d.setDate(d.getDate() - 1)); // limit = now - N day(s)
 
@@ -168,6 +168,6 @@ const RequestTimer = new Cron.CronJob(
 	'America/Sao_Paulo',
 	false, // context
 	// Below: runOnInit = true TODO useful only for tests
-	true // eslint-disable-line comma-dangle
+	false // eslint-disable-line comma-dangle
 );
 module.exports.RequestTimer = RequestTimer;
