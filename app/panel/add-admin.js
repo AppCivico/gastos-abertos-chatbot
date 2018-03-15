@@ -79,6 +79,7 @@ library.dialog('/', [
 				User.update({
 					admin: true,
 					group: 'AppCívico',
+					sendMessage: true,
 				}, {
 					where: {
 						fb_name: {
