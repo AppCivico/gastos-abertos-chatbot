@@ -57,7 +57,6 @@ library.dialog('/', [
 		});
 	},
 	(session) => {
-		console.log(arrayData);
 		arrayData.push(Cancel); // adds Cancel button
 		lastIndex = arrayData.length;
 		builder.Prompts.choice(
@@ -80,6 +79,7 @@ library.dialog('/', [
 				User.update({
 					admin: true,
 					group: 'AppCívico',
+					sendMessage: true,
 				}, {
 					where: {
 						fb_name: {

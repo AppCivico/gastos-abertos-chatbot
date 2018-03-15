@@ -32,30 +32,31 @@ const messageMenu = 'Mandar mensagens';
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 
-// const DialogFlowReconizer = require('./dialogflow_recognizer');
-// const intents = new builder.IntentDialog({
-// 	recognizers: [
-// 		DialogFlowReconizer,
-// 	],
-// 	intentThreshold: 0.2,
-// 	recognizeOrder: builder.RecognizeOrder.series,
-// });
-//
+const DialogFlowReconizer = require('./dialogflow_recognizer');
+
+const intents = new builder.IntentDialog({
+	recognizers: [
+		DialogFlowReconizer,
+	],
+	intentThreshold: 0.2,
+	recognizeOrder: builder.RecognizeOrder.series,
+});
+
 const custom = require('./misc/custom_intents');
-//
-// bot.recognizer(intents);
-//
+
+bot.recognizer(intents);
+
 // intents.matches('ajuda', 'gastosAbertosInformation:/');
 // intents.matches('missoes', 'game:/');
 // intents.matches('pedido', 'gastosAbertosInformation:/');
-// intents.matches('Default Welcome Intent', '/getstarted');
-// intents.matches('Default Fallback Intent', '/');
+intents.matches('Default Welcome Intent', '/reset');
+intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
 const { pageToken } = process.env;
-const adminArray = process.env.adminArray.split(',');
+// const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
@@ -84,11 +85,11 @@ bot.dialog('/', [
 		session.userData.isItAdmin = false;
 		session.userData.userGroup = 'Cidadão'; // default group
 
-		// checks if user should be an admin using fb_id
-		if (adminArray.includes(session.userData.userid)) {
-			session.userData.isItAdmin = true;
-			session.userData.userGroup = process.env.adminGroup; // default admin group
-		}
+		// // checks if user should be an admin using fb_id
+		// if (adminArray.includes(session.userData.userid)) {
+		// 	session.userData.isItAdmin = true;
+		// 	session.userData.userGroup = process.env.adminGroup; // default admin group
+		// }
 
 		// default value: 'undefined'. Yes, it's only a string.
 		User.findOrCreate({
