@@ -17,7 +17,7 @@ const removeAdmin = 'Remover Administrador';
 const addGroup = 'Adicionar à um grupo';
 const removeGroup = 'Remover de grupo';
 const sendMessage = 'Mensagens pra todos';
-const userCSV = 'Info Usuários';
+const userCSV = 'Usuários CSV';
 const comeBack = 'Voltar';
 
 library.dialog('/', [
@@ -25,7 +25,7 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session, 'Esse é o menu administrativo. Muito cuidado por aqui!' +
 			'\n\nEscolha o que deseja fazer:',
-			[sendMessage, userCSV, addAdmin, removeAdmin, addGroup, removeGroup, comeBack],
+			[sendMessage, addAdmin, removeAdmin, addGroup, removeGroup, userCSV, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -40,9 +40,6 @@ library.dialog('/', [
 			case sendMessage:
 				session.beginDialog('adminMessageMenu:/');
 				break;
-			case userCSV:
-				session.beginDialog('csvUser:/');
-				break;
 			case addAdmin:
 				session.beginDialog('addAdmin:/');
 				break;
@@ -54,6 +51,9 @@ library.dialog('/', [
 				break;
 			case removeGroup:
 				session.beginDialog('removeGroup:/');
+				break;
+			case userCSV:
+				session.beginDialog('csvUser:/');
 				break;
 			default: // comeBack
 				session.replaceDialog('*:/promptButtons');

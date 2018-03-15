@@ -97,7 +97,7 @@ const MissionTimer = new Cron.CronJob(
 	'America/Sao_Paulo',
 	false, // context
 	// Below: runOnInit = true TODO useful only for tests
-	true // eslint-disable-line comma-dangle
+	false // eslint-disable-line comma-dangle
 );
 
 module.exports.MissionTimer = MissionTimer;
