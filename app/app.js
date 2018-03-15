@@ -56,7 +56,7 @@ intents.matches('Default Fallback Intent', '/');
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
 const { pageToken } = process.env;
-const adminArray = process.env.adminArray.split(',');
+// const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
@@ -85,11 +85,11 @@ bot.dialog('/', [
 		session.userData.isItAdmin = false;
 		session.userData.userGroup = 'Cidadão'; // default group
 
-		// checks if user should be an admin using fb_id
-		if (adminArray.includes(session.userData.userid)) {
-			session.userData.isItAdmin = true;
-			session.userData.userGroup = process.env.adminGroup; // default admin group
-		}
+		// // checks if user should be an admin using fb_id
+		// if (adminArray.includes(session.userData.userid)) {
+		// 	session.userData.isItAdmin = true;
+		// 	session.userData.userGroup = process.env.adminGroup; // default admin group
+		// }
 
 		// default value: 'undefined'. Yes, it's only a string.
 		User.findOrCreate({
