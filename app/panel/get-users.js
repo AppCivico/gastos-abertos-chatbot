@@ -1,5 +1,5 @@
 /* global builder:true */
-// Check how many users are in a state
+// Generate a CSV with user information
 
 const library = new builder.Library('csvUser');
 
@@ -52,11 +52,10 @@ library.dialog('/', [
 						'É administrador': element.dataValues.admin,
 					});
 
-					console.log(count);
 					// this block will be executed last
 					if (count === listUser.rows.length) {
 						writableStream.on('finish', () => {
-							console.log('DONE!');
+							console.log('Done writing file.');
 							next();
 						});
 						csvStream.end();
@@ -71,7 +70,6 @@ library.dialog('/', [
 	(session) => {
 		let data = generatedRequest.loadSync('', file);
 		data = JSON.stringify(data);
-		// const dataString = `{"name":"${Date.now()}_guaxi_users.csv" , "file_data":${data}}`;
 		const dataString = `{"name":"${timestamp('YYYYMMDDmmss')}_guaxi_users.csv" , "file_data":${data}}`;
 		console.log(dataString);
 		const options = {

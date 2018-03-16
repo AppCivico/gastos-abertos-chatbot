@@ -8,6 +8,8 @@ require('./connectorSetup.js')();
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const Timer = require('./timer'); // eslint-disable-line no-unused-vars
+const csv = require('fast-csv');
+const fs = require('fs');
 
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
@@ -72,14 +74,12 @@ bot.dialog('/', [
 	(session) => {
 		// TODO rever toda a estrura do 'cancelar'
 		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
-		// TODO ver quem é admin e quem pode mandar imagem
-		// TODO mundar como o crontab manda mensagem
 		if (session.message.address.channelId === 'facebook') {
 			session.userData.userid = session.message.sourceEvent.sender.id;
 			session.userData.pageid = session.message.sourceEvent.recipient.id;
 		} else {
 			// hardcoded ids for testing purposes
-			session.userData.userid = '000000000000001';
+			session.userData.userid = '000000000000002';
 		}
 		session.userData.pageToken = pageToken;
 		session.userData.isItAdmin = false;
@@ -214,10 +214,10 @@ bot.dialog('/promptButtons', [
 		custom.updateSession(session.userData.userid, session);
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
-			attributes: ['admin', 'sendMessage'],
+			attributes: ['admin', 'sendMessage', 'group'],
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
-			if (user.sendMessage === true) {
+			if (user.sendMessage === true && user.group !== 'Cidadão') {
 				menuOptions.push(messageMenu);
 			}
 			if (user.admin === true) {
@@ -251,6 +251,7 @@ bot.dialog('/promptButtons', [
 				session.beginDialog('game:/');
 				break;
 			case messageMenu:
+				// session.beginDialog('/csv');
 				session.beginDialog('sendMessageMenu:/');
 				break;
 			case adminPanel:
@@ -340,3 +341,40 @@ bot.dialog('/askPermission', [
 		}
 	},
 ]);
+
+// bot.dialog('/csv', [
+// 	(session) => {
+// 		// const stream = fs.createReadStream(`${__dirname}/guaxi.csv`);
+// 		// populate db
+// 		// csv
+// 		// 	.fromStream(stream, { headers: true })
+// 		// 	.on('data', (data) => {
+// 		// 		console.log(`\n${JSON.stringify(data)}`);
+// 		// 		console.log(data['Nome no Facebook']);
+// 		//
+// 		// 		User.create({
+// 		// 			name: data['Nome Cadastrado'],
+// 		// 			occupation: 'undefined',
+// 		// 			email: 'undefined',
+// 		// 			birth_date: 'undefined',
+// 		// 			state: data.Estado,
+// 		// 			city: data['Município'],
+// 		// 			cellphone_number: 'undefined',
+// 		// 			active: true,
+// 		// 			approved: true,
+// 		// 			fb_id: session.userData.userid,
+// 		// 			fb_name: data['Nome no Facebook'],
+// 		// 			admin: data['É administrador'],
+// 		// 			session: {
+// 		// 				dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
+// 		// 			},
+// 		// 			group: data.Grupo,
+// 		// 		});
+// 		// 	})
+// 		// 	.on('end', () => {
+// 		// 		console.log('done');
+// 		// 	});
+//
+// 		session.endDialog();
+// 	},
+// ]);

@@ -62,7 +62,6 @@ library.dialog('/currentMission', [
 			missionUser = UserMissionData[UserMissionData.length - 1].dataValues;
 
 			switch (missionUser.mission_id) {
-			// TODO Ele manda gerar um pedido mesmo se o pedido já estiver gerado.
 			case 1:
 				if (missionUser.completed) {
 					session.replaceDialog(
