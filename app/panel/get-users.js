@@ -11,7 +11,8 @@ const timestamp = require('time-stamp');
 
 const file = 'guaxi_usuario_temp.csv';
 const generatedRequest = new Base64File();
-const csvStream = csv.createWriteStream({ headers: true });
+let csvStream;
+let writableStream;
 
 const apiUri = process.env.MAILCHIMP_API_URI;
 const apiUser = process.env.MAILCHIMP_API_USER;
@@ -22,17 +23,15 @@ const User = require('../server/schema/models').user;
 library.dialog('/', [
 	(session, args, next) => {
 		User.findAndCountAll({
-			attributes: ['id', 'fb_name', 'name', 'state', 'city', 'receiveMessage', 'group', 'createdAt', 'updatedAt'],
+			attributes: ['id', 'fb_name', 'name', 'state', 'city', 'receiveMessage', 'group', 'createdAt', 'updatedAt', 'admin'],
 			order: [['id', 'ASC']],
-			// admin: {
-			// 	$eq: false, // we're not counting admins as users
-			// },
 		}).then((listUser) => {
 			if (listUser.count === 0) {
 				session.send('Não encontrei ninguém. Não temos ninguém salvo? Melhor entrar em contato com o suporte!');
 				session.endDialog();
 			} else {
-				const writableStream = fs.createWriteStream(file);
+				csvStream = csv.createWriteStream({ headers: true });
+				writableStream = fs.createWriteStream(file);
 				csvStream.pipe(writableStream);
 
 				let count = 0;
@@ -50,6 +49,7 @@ library.dialog('/', [
 						Grupo: element.dataValues.group,
 						'Criado em': element.dataValues.createdAt,
 						'Última Interação': element.dataValues.updatedAt,
+						'É administrador': element.dataValues.admin,
 					});
 
 					console.log(count);
