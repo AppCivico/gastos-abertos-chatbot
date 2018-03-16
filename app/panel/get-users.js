@@ -51,17 +51,16 @@ library.dialog('/', [
 						'Última Interação': element.dataValues.updatedAt,
 						'É administrador': element.dataValues.admin,
 					});
-
-					console.log(count);
-					// this block will be executed last
-					if (count === listUser.rows.length) {
-						writableStream.on('finish', () => {
-							console.log('DONE!');
-							next();
-						});
-						csvStream.end();
-					}
 				});
+				console.log(count);
+				// this block will be executed last
+				if (count === listUser.rows.length) {
+					writableStream.on('finish', () => {
+						console.log('DONE!');
+						next();
+					});
+					csvStream.end();
+				}
 			}
 		}).catch((err) => {
 			session.send(`Ocorreu um erro ao pesquisar usuários => ${err}`);
