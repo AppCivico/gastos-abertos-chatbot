@@ -218,10 +218,10 @@ bot.dialog('/promptButtons', [
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
 			if (user.sendMessage === true) {
-				// menuOptions.push(messageMenu);
+				menuOptions.push(messageMenu);
 			}
 			if (user.admin === true) {
-				// menuOptions.push(adminPanel);
+				menuOptions.push(adminPanel);
 			}
 		}).catch(() => {
 			session.replaceDialog('/promptButtons');
