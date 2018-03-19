@@ -56,7 +56,7 @@ library.dialog('/', [
 			'Essas mensagens tem caráter ADMINISTRATIVO para anunciar novas versões, por exemplo. Não devendo ser muito frequentes.' +
 			'\n\nEssa forma de mandar mensagem é mais demorada que a outra.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o botão no menu ao lado.',
-			[writeMsg, imageMsg, testMessage, goBack],
+			[writeMsg, imageMsg, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',

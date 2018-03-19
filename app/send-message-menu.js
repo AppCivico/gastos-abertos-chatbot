@@ -54,7 +54,7 @@ library.dialog('/', [
 			`A mensagem será mandada em nome do grupo ${session.userData.group}. Você não receberá a mensagem. ` +
 			'Com essas mensagens, o fluxo do usuário não será interrompido, continuando de onde parou.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o menu ao lado. Tome cuidado!',
-			[writeMsg, imageMsg, testMessage, goBack],
+			[writeMsg, imageMsg, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',

@@ -35,7 +35,7 @@ library.dialog('/messageHelp', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case messageHelp:
-				session.send('asdfasdfaf');
+				session.send('asdfasdfaf'); // TODO this
 				break;
 			default: // goBack
 				if (session.userData.address) {
