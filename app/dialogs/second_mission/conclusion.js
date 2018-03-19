@@ -10,10 +10,9 @@ const answers = {
 };
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
-const custom = require('../../misc/custom_intents');
+const saveSession = require('../../misc/save_session');
+
 const Notification = require('../../server/schema/models').notification;
-
-
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 
@@ -27,7 +26,7 @@ let user;
 
 library.dialog('/', [
 	(session, args) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		if (!args.user && args.user_mission) {
 			session.send('Ooops, houve algum problema, vamos voltar para o início.');
 			session.replaceDialog('*:/getStarted');
@@ -56,7 +55,7 @@ library.dialog('/', [
 
 library.dialog('/secondMissionQuestions', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		[user] = [args.user];
 		session.sendTyping();
 		// reloadArgs(args);
@@ -144,7 +143,7 @@ library.dialog('/secondMissionQuestions', [
 
 library.dialog('/conclusion', [
 	(session, args, next) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 
 		User.findOne({
 			attributes: ['id'],
@@ -198,7 +197,7 @@ library.dialog('/conclusion', [
 
 library.dialog('/congratulations', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo dessa tarefa! ' +
 		`\n\nAposto que você e eu aprendemos muitas coisas novas nesse processo! ${emoji.get('slightly_smiling_face').repeat(2)}` +
 		'\n\nDarei a você uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!');

@@ -6,25 +6,22 @@ bot.library(require('./conclusion'));
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
-const custom = require('../../misc/custom_intents');
+const saveSession = require('../../misc/save_session');
 const emoji = require('node-emoji');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 const Notification = require('../../server/schema/models').notification;
 
-
 const Yes = 'Sim';
 const No = 'Não';
-
 let user;
-
 let userCity;
 let userState;
 
 library.dialog('/', [
 	(session, args) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		[user] = [args.user];
 		UserMission.create({
 			user_id: user.id,
@@ -58,7 +55,7 @@ library.dialog('/', [
 
 library.dialog('/askState', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		session.beginDialog('validators:state', {
 			prompt: `Qual é o estado(sigla) que você mora? ${emoji.get('flag-br')}`,
@@ -75,7 +72,7 @@ library.dialog('/askState', [
 
 library.dialog('/askCity', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, userState);
+		saveSession.updateSession(session.userData.userid, session, userState);
 		if (!userState) {
 			console.log('no user state');
 			userState = args.usefulData;
@@ -107,7 +104,7 @@ library.dialog('/askCity', [
 
 library.dialog('/moreDetails', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
 			'Quer o link para alguns portais de transparência para usar como referência?',

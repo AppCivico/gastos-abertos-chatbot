@@ -14,14 +14,14 @@ const NotYet = 'Ainda não';
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
-const custom = require('../../misc/custom_intents');
+const saveSession = require('../../misc/save_session');
 
 let user;
 
 library.dialog('/', [
 	(session, args) => {
 		[user] = [args.user];
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
 			'Agora, vamos ver nossa segunda missão?',
@@ -51,7 +51,7 @@ library.dialog('/', [
 library.dialog('/assign', [
 	(session, args) => {
 		[user] = [args.user];
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		UserMission.findOrCreate({
 			where: { // checks if exists
 				user_id: user.id,

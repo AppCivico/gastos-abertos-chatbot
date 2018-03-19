@@ -8,13 +8,13 @@ bot.library(require('../second_mission/assign'));
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 const emoji = require('node-emoji');
-const custom = require('../../misc/custom_intents');
+const saveSession = require('../../misc/save_session');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 const Notification = require('../../server/schema/models').notification;
 
-const answers = {
+let answers = {
 	transparencyPortalExists: '',
 	transparencyPortalURL: '',
 	transparencyPortalHasFinancialData: '',
@@ -33,21 +33,21 @@ const WelcomeBack = 'Beleza!';
 
 let user;
 
-function reloadArgs() { // called after session updates to saves us some lines
+function reloadArgs(args) { // called after session updates to saves us some lines
 	if (!answers || !user) { // empty when dialog gets interrupted
-		// [answers] = args.usefulData.answers; // stores saved values from bd
-		// [user] = args.usefulData.User; // necessary => user.state
+		[answers] = args.usefulData.answers; // stores saved values from bd
+		[user] = args.usefulData.User; // necessary => user.state
 	}
 }
 
 library.dialog('/', [
 	(session, args) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		[user] = [args.user];
 
 		args.usefulData = { answers: null, User: null };
-		// args.usefulData.answers = '';
-		// args.usefulData.User = '';
+		args.usefulData.answers = '';
+		args.usefulData.User = '';
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -84,7 +84,7 @@ library.dialog('/', [
 
 library.dialog('/conclusionPromptAfterMoreDetails', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -117,7 +117,7 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 
 library.dialog('/transparencyPortalExists', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		session.send(`Agora vamos avaliar o portal de transparêcia no seu município! ${emoji.get('slightly_smiling_face')}`);
 		session.send("Caso você queira deixar para outra hora, basta digitar 'começar' e eu te levarei para o início.");
@@ -155,7 +155,7 @@ library.dialog('/transparencyPortalExists', [
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
@@ -172,7 +172,7 @@ library.dialog('/transparencyPortalURL', [
 
 library.dialog('/transparencyPortalHasFinancialData', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -204,7 +204,7 @@ library.dialog('/transparencyPortalHasFinancialData', [
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
@@ -237,7 +237,7 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
@@ -252,7 +252,7 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 
 library.dialog('/transparencyPortalHasContractsData', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -283,7 +283,7 @@ library.dialog('/transparencyPortalHasContractsData', [
 
 library.dialog('/transparencyPortalHasBiddingsData', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -314,7 +314,7 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -345,7 +345,7 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 
 library.dialog('/userUpdate', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, User });
+		saveSession.updateSession(session.userData.userid, session, { answers, User });
 		reloadArgs(args);
 		const msg = new builder.Message(session);
 		msg.sourceEvent({

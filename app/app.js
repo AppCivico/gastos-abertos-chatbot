@@ -8,8 +8,8 @@ require('./connectorSetup.js')();
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const Timer = require('./timer'); // eslint-disable-line no-unused-vars
-const csv = require('fast-csv');
-const fs = require('fs');
+// const csv = require('fast-csv');
+// const fs = require('fs');
 
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
@@ -21,6 +21,7 @@ bot.library(require('./panel/admin-panel'));
 bot.library(require('./send-message-menu'));
 
 const User = require('./server/schema/models').user;
+const saveSession = require('./misc/save_session');
 
 const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
@@ -48,14 +49,14 @@ const custom = require('./misc/custom_intents');
 
 bot.recognizer(intents);
 
-// intents.matches('ajuda', 'gastosAbertosInformation:/');
-// intents.matches('missoes', 'game:/');
-// intents.matches('pedido', 'gastosAbertosInformation:/');
+intents.matches('ajuda', 'gastosAbertosInformation:/');
+intents.matches('missoes', 'game:/');
+intents.matches('pedido', 'gastosAbertosInformation:/');
 intents.matches('Default Welcome Intent', '/reset');
 intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
-// console.log(`intents: ${Object.entries(intents.actions)}`);
+console.log(`intents: ${Object.entries(intents.actions)}`);
 
 const { pageToken } = process.env;
 // const adminArray = process.env.adminArray.split(',');
@@ -122,7 +123,7 @@ bot.dialog('/', [
 			}
 
 			// it's better to always update fb_name to follow any changes the user may do
-			custom.userFacebook(
+			saveSession.userFacebook(
 				session.userData.userid, session.userData.pageToken,
 				(result => User.update({
 					fb_name: `${result.first_name} ${result.last_name}`,
@@ -211,7 +212,7 @@ bot.dialog('/getStarted', [
 
 bot.dialog('/promptButtons', [
 	(session, args, next) => { // adds admin menu to admin
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
 			attributes: ['admin', 'sendMessage', 'group'],

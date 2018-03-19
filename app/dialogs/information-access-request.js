@@ -10,7 +10,7 @@ const Base64File = require('js-base64-file');
 const emoji = require('node-emoji');
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
-const custom = require('../misc/custom_intents');
+const saveSession = require('../misc/save_session');
 
 bot.library(require('./second_mission/conclusion'));
 
@@ -143,7 +143,7 @@ library.dialog('/alreadyCreated', [
 
 library.dialog('/askLAI', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -189,7 +189,7 @@ library.dialog('/askLAI', [
 });
 library.dialog('/questionOne', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		// questionNumber shows the question number in each question(disabled 2 rules for this)
 		answers.questionNumber = 1; // reseting value
 		currentQuestion = `${answers.questionNumber} - Seu município identifica de onde vêm os recursos que ele recebe? ` +
@@ -224,7 +224,7 @@ library.dialog('/questionOne', [
 
 library.dialog('/questionTwo', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência disponibiliza dados referentes a remuneração de ` +
 		'cada um dos agentes públicos, individualizada?';
 		builder.Prompts.choice(
@@ -257,7 +257,7 @@ library.dialog('/questionTwo', [
 // /*
 library.dialog('/questionThree', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência disponibiliza: a relação de pagamentos de diárias, ` +
 		'a aquisição de passagens aéreas e adiantamento de despesas?';
 		builder.Prompts.choice(
@@ -289,7 +289,7 @@ library.dialog('/questionThree', [
 
 library.dialog('/questionFour', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência disponibiliza as despesas realizadas com cartões corporativos em nome da prefeitura?`;
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -319,7 +319,7 @@ library.dialog('/questionFour', [
 
 library.dialog('/questionFive', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion =	`${answers.questionNumber} - O portal de transparência disponibiliza os valores referentes às verbas de representação,` +
 		'de gabinete e reembolsáveis de qualquer natureza?';
 		builder.Prompts.choice(
@@ -350,7 +350,7 @@ library.dialog('/questionFive', [
 
 library.dialog('/questionSix', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, ` +
 		'com indicação das licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
 		builder.Prompts.choice(
@@ -382,7 +382,7 @@ library.dialog('/questionSix', [
 
 library.dialog('/questionSeven', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e ` +
 		'inexigibilidade de licitações, com respectivas fundamentações?';
 		builder.Prompts.choice(
@@ -414,7 +414,7 @@ library.dialog('/questionSeven', [
 
 library.dialog('/questionEight', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		session.send(`Ufa! Não desanime, parceiro. Faltam apenas ${14 - answers.questionNumber} perguntas para finalizar seu pedido. ${emoji.get('wink')}`);
 		currentQuestion = `${answers.questionNumber} - O portal de transparência realiza a disponibilização do controle de estoque da prefeitura, ` +
 		'com lista de entradas e saídas de bens patrimoniais, além da relação de cessões, permutas e doação de bens?';
@@ -447,7 +447,7 @@ library.dialog('/questionEight', [
 
 library.dialog('/questionNine', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas ` +
 		'que deram origem a pagamentos?';
 		builder.Prompts.choice(
@@ -478,7 +478,7 @@ library.dialog('/questionNine', [
 
 library.dialog('/questionTen', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência realiza a disponibilização do plano plurianual; ` +
 		'da lei de diretrizes orçamentárias; da lei orçamentária?';
 		builder.Prompts.choice(
@@ -509,7 +509,7 @@ library.dialog('/questionTen', [
 
 library.dialog('/questionEleven', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência realiza a disponibilização dos relatórios Resumido de Execução Orçamentária; ` +
 					'Relatórios de Gestão Fiscal; Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões: ' +
 					' 		\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
@@ -547,7 +547,7 @@ library.dialog('/questionEleven', [
 
 library.dialog('/questionTwelve', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência realiza a disponibilização dos extratos de conta única?`;
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -577,7 +577,7 @@ library.dialog('/questionTwelve', [
 
 library.dialog('/questionThirteen', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
 		currentQuestion = `${answers.questionNumber} - O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato ` +
 		'legível por máquina incluindo as colunas: função, subfunção, programa, ação, valor liquidado e valor empenhado?';
 		builder.Prompts.choice(
@@ -622,7 +622,7 @@ library.dialog('/questionThirteen', [
 
 library.dialog('/askFullName', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
 	(session, args) => {
@@ -651,7 +651,7 @@ library.dialog('/askFullName', [
 
 library.dialog('/generateRequest', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		// style config that will be used for the html creation
 		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em';
 		const html = `<p style="${styleDiv}">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011,` +
