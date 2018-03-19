@@ -14,7 +14,7 @@ const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 const Notification = require('../../server/schema/models').notification;
 
-let answers = {
+const answers = {
 	transparencyPortalExists: '',
 	transparencyPortalURL: '',
 	transparencyPortalHasFinancialData: '',
@@ -33,21 +33,19 @@ const WelcomeBack = 'Beleza!';
 
 let user;
 
-function reloadArgs(args) { // called after session updates to saves us some lines
-	if (!answers || !user) { // empty when dialog gets interrupted
-		[answers] = args.usefulData.answers; // stores saved values from bd
-		[user] = args.usefulData.User; // necessary => user.state
-	}
-}
+// function reloadArgs(args) { // called after session updates to saves us some lines
+// 	if (!answers || !user) { // empty when dialog gets interrupted
+// 		[answers] = args.usefulData.answers; // stores saved values from bd
+// 		[user] = args.usefulData.User; // necessary => user.state
+// 	}
+// }
 
 library.dialog('/', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session);
 		[user] = [args.user];
 
-		args.usefulData = { answers: null, User: null };
-		args.usefulData.answers = '';
-		args.usefulData.User = '';
+		// args.usefulData = { answers: null, User: null };
 
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -117,6 +115,14 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 
 library.dialog('/transparencyPortalExists', [
 	(session) => {
+		User.findOne({
+			attributes: ['state', 'id'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			session.userData.state = userData.state;
+			session.userData.id = userData.id;
+		});
+
 		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		session.send(`Agora vamos avaliar o portal de transparêcia no seu município! ${emoji.get('slightly_smiling_face')}`);
@@ -173,7 +179,7 @@ library.dialog('/transparencyPortalURL', [
 library.dialog('/transparencyPortalHasFinancialData', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -205,7 +211,7 @@ library.dialog('/transparencyPortalHasFinancialData', [
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+		// reloadArgs(args);
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -238,7 +244,7 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 library.dialog('/transparencyPortalFinancialDataFormats', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
 	},
@@ -253,7 +259,7 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 library.dialog('/transparencyPortalHasContractsData', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -284,7 +290,7 @@ library.dialog('/transparencyPortalHasContractsData', [
 library.dialog('/transparencyPortalHasBiddingsData', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -315,7 +321,7 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 library.dialog('/transparencyPortalHasBiddingProcessData', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -346,7 +352,7 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 library.dialog('/userUpdate', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, User });
-		reloadArgs(args);
+		// reloadArgs(args);
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
 			facebook: {
@@ -373,43 +379,45 @@ library.dialog('/userUpdate', [
 
 		User.count({
 			where: {
-				state: user.state,
+				state: session.userData.state,
 			},
-		})
-			.then((count) => {
-				if (count < 10 && count !== 1) {
-					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
+		}).then((count) => {
+			if (count < 10 && count !== 1) {
+				session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
 					`\n\nAtualmente há ${count} líderes no seu estado. Vamos aumentar este número para 10 líderes?`);
-					session.send('Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!');
-					if (session.message.address.channelId === 'facebook') {
-						session.send(msg);
-					}
-				} else if (count < 10 && count === 1) {
-					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
-					'\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?');
-					session.send('Compartilhe isto com os seus amigos! Assim nós teremos mais força para incentivar a transparência em seu estado!');
-					if (session.message.address.channelId === 'facebook') {
-						session.send(msg);
-					}
+				session.send('Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!');
+				if (session.message.address.channelId === 'facebook') {
+					session.send(msg);
 				}
-			}).catch((e) => {
-				console.log(`Error${e}`);
-				session.send('Oooops, tive um problema ao finalizar suas missões, tente novamente mais tarde.');
-				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-				throw e;
-			});
+			} else if (count < 10 && count === 1) {
+				session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
+					'\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?');
+				session.send('Compartilhe isto com os seus amigos! Assim nós teremos mais força para incentivar a transparência em seu estado!');
+				if (session.message.address.channelId === 'facebook') {
+					session.send(msg);
+				}
+			}
+		}).catch((e) => {
+			console.log(`Error${e}`);
+			session.send('Oooops, tive um problema ao finalizar suas missões, tente novamente mais tarde.');
+			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
+			throw e;
+		});
+
 		UserMission.update({
 			completed: true,
 			metadata: answers,
 		}, {
 			where: {
-				user_id: user.id,
+				user_id: session.userData.id,
 				mission_id: 1,
 				completed: false,
 			},
 			returning: true,
 			raw: true,
 		}).then((missionData) => {
+			console.log('\n\nÉ aqui');
+			console.log(missionData[1][0].id);
 			console.log(`Mission ${missionData[1][0].id} Updated!`);
 			Notification.update({
 				// sentAlready == true and timeSent == null or numberSent = 0
