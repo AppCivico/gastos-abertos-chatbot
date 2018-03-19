@@ -8,6 +8,7 @@ const Send = require('./admin-message');
 const library = new builder.Library('adminMessageMenu');
 
 const User = require('../server/schema/models').user;
+const groupMessage = require('../server/schema/models').group_message;
 
 const writeMsg = 'Escrever Mensagem';
 const imageMsg = 'Mensagem com Imagem';
@@ -26,7 +27,7 @@ library.dialog('/', [
 	(session, args, next) => {
 		msgCount = 0;
 		User.findOne({
-			attributes: ['group'],
+			attributes: ['group', 'id'],
 			where: { fb_id: session.userData.userid },
 		}).then((userData) => {
 			if (userData.group === '' || userData.group === 'Cidadão') {
@@ -34,6 +35,7 @@ library.dialog('/', [
 				'\n\nPor favor, entre em contato com nossa equipe imediatamente.');
 				session.endDialog();
 			} else {
+				session.userData.id = userData.id;
 				session.userData.group = userData.group;
 				next();
 			}
@@ -52,6 +54,7 @@ library.dialog('/', [
 			'\n\nUsuários que aceitam ou que ainda não interagiram com o Guaxi para responder a essa pergunta irão receber essas mensagens ' +
 			'e serão mandados para o início do fluxo do bot, interronpendo o fluxo do usuário. ' +
 			'Essas mensagens tem caráter ADMINISTRATIVO para anunciar novas versões, por exemplo. Não devendo ser muito frequentes.' +
+			'\n\nEssa forma de mandar mensagem é mais demorada que a outra.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o botão no menu ao lado.',
 			[writeMsg, imageMsg, testMessage, goBack],
 			{
@@ -140,6 +143,7 @@ library.dialog('/sendingImage', [ // sends image and text message
 	(session, args) => {
 		[messageText] = [args.messageText];
 		[imageUrl] = [args.imageUrl];
+		session.sendTyping();
 		User.findAll({
 			attributes: ['name', 'address', 'session', 'fb_id'],
 			where: {
@@ -167,6 +171,17 @@ library.dialog('/sendingImage', [ // sends image and text message
 			console.log(`Erro ao enviar mensagem: ${err}`);
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
+			groupMessage.create({
+				user_id: session.userData.id,
+				user_group: session.userData.group,
+				content: messageText,
+				image_url: imageUrl,
+				number_sent: msgCount,
+			}).then(() => {
+				console.log('Message saved successfully!');
+			}).catch((err) => {
+				console.log(`Couldn't send Message => ${err}`);
+			});
 			session.replaceDialog('/');
 		});
 	},
@@ -215,6 +230,7 @@ library.dialog('/sendingMessage', [ // sends text message
 		} else {
 			[messageText] = [args.messageText];
 		}
+		session.sendTyping();
 		User.findAll({
 			attributes: ['name', 'address', 'session', 'fb_id'],
 			where: {
@@ -241,6 +257,17 @@ library.dialog('/sendingMessage', [ // sends text message
 			console.log(`Erro ao enviar mensagem: ${err}`);
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
+			groupMessage.create({
+				user_id: session.userData.id,
+				user_group: session.userData.group,
+				content: messageText,
+				image_url: imageUrl,
+				number_sent: msgCount,
+			}).then(() => {
+				console.log('Message saved successfully!');
+			}).catch((err) => {
+				console.log(`Couldn't send Message => ${err}`);
+			});
 			session.replaceDialog('/');
 		});
 	},

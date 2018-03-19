@@ -22,7 +22,7 @@ const startProactiveImage = (user, customMessage, customImage, group) => {
 		textMessage.textLocale('pt-BR');
 		bot.send(textMessage);
 	} catch (err) {
-		console.log(`Erro ao enviar mensagem: ${err}`);
+		console.log(`Couldn't send Message => ${err}`);
 	} finally {
 		bot.beginDialog(user.address, '*:/confirm', {
 			userDialogo: user.session.dialogName,
@@ -46,9 +46,9 @@ const startProactiveDialog = (user, customMessage, group) => {
 		textMessage.textLocale('pt-BR');
 		bot.send(textMessage);
 	} catch (err) {
-		console.log(`Erro ao enviar mensagem: ${err}`);
+		console.log(`Couldn't send Message => ${err}`);
 	}
-	console.log(`${user.name} vai para ${user.session.dialogName}\n\n`);
+	// console.log(`${user.name} vai para ${user.session.dialogName}\n\n`);
 	bot.beginDialog(user.address, '*:/confirm', {
 		userDialogo: user.session.dialogName,
 		usefulData: user.session.usefulData,

@@ -8,11 +8,12 @@ const Send = require('./send-message');
 const library = new builder.Library('sendMessageMenu');
 
 const User = require('./server/schema/models').user;
+const groupMessage = require('./server/schema/models').group_message;
 
 const writeMsg = 'Escrever Mensagem';
 const imageMsg = 'Mensagem com Imagem';
 const testMessage = 'Mensagem Teste(Temporário)';
-const goBack = 'Voltar para o menu';
+const goBack = 'Voltar para o painel';
 const Confirm = 'Enviar';
 const Negate = 'Não enviar/Voltar';
 const messageFrom = 'Essa é uma mensagem de ';
@@ -26,15 +27,16 @@ library.dialog('/', [
 	(session, args, next) => {
 		msgCount = 0;
 		User.findOne({
-			attributes: ['group'],
+			attributes: ['group', 'id'],
 			where: { fb_id: session.userData.userid },
 		}).then((userData) => {
 			if (userData.group === '' || userData.group === 'Cidadão') {
-				session.send(`Você parece é do grupo ${session.userData.group}. Desse jeito não poderá enviar mensagem.` +
+				session.send(`Você parece ser do grupo ${session.userData.group}. Desse jeito, não poderá enviar mensagem.` +
 				'\n\nPor favor, entre em contato com nossa equipe imediatamente.');
 				session.endDialog();
 			} else {
 				session.userData.group = userData.group;
+				session.userData.id = userData.id;
 				next();
 			}
 		}).catch((err) => {
@@ -139,6 +141,7 @@ library.dialog('/sendingImage', [ // sends image and text message
 	(session, args) => {
 		[messageText] = [args.messageText];
 		[imageUrl] = [args.imageUrl];
+		session.sendTyping();
 		User.findAll({
 			attributes: ['name', 'address', 'session'],
 			where: {
@@ -162,6 +165,17 @@ library.dialog('/sendingImage', [ // sends image and text message
 			console.log(`Erro ao enviar mensagem: ${err}`);
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
+			groupMessage.create({
+				user_id: session.userData.id,
+				user_group: session.userData.group,
+				content: messageText,
+				image_url: imageUrl,
+				number_sent: msgCount,
+			}).then(() => {
+				console.log('Message saved successfully!');
+			}).catch((err) => {
+				console.log(`Couldn't send Message => ${err}`);
+			});
 			session.replaceDialog('/');
 		});
 	},
@@ -210,6 +224,7 @@ library.dialog('/sendingMessage', [ // sends text message
 		} else {
 			[messageText] = [args.messageText];
 		}
+		session.sendTyping();
 		User.findAll({
 			attributes: ['name', 'address', 'session'],
 			where: {
@@ -234,6 +249,16 @@ library.dialog('/sendingMessage', [ // sends text message
 			console.log(`Erro ao enviar mensagem: ${err}`);
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
+			groupMessage.create({
+				user_id: session.userData.id,
+				user_group: session.userData.group,
+				content: messageText,
+				number_sent: msgCount,
+			}).then(() => {
+				console.log('Message saved successfully!');
+			}).catch((err) => {
+				console.log(`Couldn't send Message => ${err}`);
+			});
 			session.replaceDialog('/');
 		});
 	},
