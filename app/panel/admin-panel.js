@@ -12,6 +12,7 @@ bot.library(require('./get-users'));
 
 const library = new builder.Library('panelAdmin');
 
+const subMenu = 'Admin e Grupo';
 const addAdmin = 'Adicionar Administrador';
 const removeAdmin = 'Remover Administrador';
 const addGroup = 'Adicionar à um grupo';
@@ -25,7 +26,7 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session, 'Esse é o menu administrativo. Muito cuidado por aqui!' +
 			'\n\nEscolha o que deseja fazer:',
-			[sendMessage, addAdmin, removeAdmin, addGroup, removeGroup, userCSV, comeBack],
+			[sendMessage, subMenu, userCSV, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -40,17 +41,8 @@ library.dialog('/', [
 			case sendMessage:
 				session.beginDialog('adminMessageMenu:/');
 				break;
-			case addAdmin:
-				session.beginDialog('addAdmin:/');
-				break;
-			case removeAdmin:
-				session.beginDialog('removeAdmin:/');
-				break;
-			case addGroup:
-				session.beginDialog('addGroup:/');
-				break;
-			case removeGroup:
-				session.beginDialog('removeGroup:/');
+			case subMenu:
+				session.beginDialog('/subMenu');
 				break;
 			case userCSV:
 				session.beginDialog('csvUser:/');
@@ -66,5 +58,44 @@ library.dialog('/', [
 	},
 ]);
 
+library.dialog('/subMenu', [
+	(session) => {
+		builder.Prompts.choice(
+			session, 'Esse é o menu para adicionar e remover usuários em grupos ou transformalos em administradores.' +
+			'\n\nCuidado!',
+			[addAdmin, removeAdmin, addGroup, removeGroup, comeBack],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choiceIntent,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case addAdmin:
+				session.beginDialog('addAdmin:/');
+				break;
+			case removeAdmin:
+				session.beginDialog('removeAdmin:/');
+				break;
+			case addGroup:
+				session.beginDialog('addGroup:/');
+				break;
+			case removeGroup:
+				session.beginDialog('removeGroup:/');
+				break;
+			default: // comeBack
+				session.endDialog();
+				break;
+			}
+		}
+	},
+	(session) => {
+		session.replaceDialog('/');
+	},
+]);
 
 module.exports = library;
