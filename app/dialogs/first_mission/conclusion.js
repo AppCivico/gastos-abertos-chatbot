@@ -33,21 +33,12 @@ const WelcomeBack = 'Beleza!';
 
 let user;
 
-// function reloadArgs(args) { // called after session updates to saves us some lines
-// 	if (!answers || !user) { // empty when dialog gets interrupted
-// 		[answers] = args.usefulData.answers; // stores saved values from bd
-// 		[user] = args.usefulData.User; // necessary => user.state
-// 	}
-// }
-
 library.dialog('/', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session);
+		session.sendTyping();
 		[user] = [args.user];
 
-		// args.usefulData = { answers: null, User: null };
-
-		session.sendTyping();
 		builder.Prompts.choice(
 			session,
 			'Pelo o que vi aqui você está na primeira missão, vamos concluí-la?',
@@ -177,9 +168,8 @@ library.dialog('/transparencyPortalURL', [
 });
 
 library.dialog('/transparencyPortalHasFinancialData', [
-	(session, args) => {
+	(session) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -209,9 +199,8 @@ library.dialog('/transparencyPortalHasFinancialData', [
 });
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
-	(session, args) => {
+	(session) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		// reloadArgs(args);
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -242,9 +231,8 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 });
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
-	(session, args) => {
+	(session) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
 	},
@@ -257,9 +245,8 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 });
 
 library.dialog('/transparencyPortalHasContractsData', [
-	(session, args) => {
+	(session) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -288,9 +275,8 @@ library.dialog('/transparencyPortalHasContractsData', [
 });
 
 library.dialog('/transparencyPortalHasBiddingsData', [
-	(session, args) => {
+	(session) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -319,9 +305,8 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 });
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
-	(session, args) => {
+	(session) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		// reloadArgs(args);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -350,9 +335,8 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 });
 
 library.dialog('/userUpdate', [
-	(session, args) => {
+	(session) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, User });
-		// reloadArgs(args);
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
 			facebook: {
