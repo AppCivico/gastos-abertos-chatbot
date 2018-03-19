@@ -19,6 +19,7 @@ bot.library(require('./dialogs/game'));
 bot.library(require('./validators'));
 bot.library(require('./panel/admin-panel'));
 bot.library(require('./send-message-menu'));
+bot.library(require('./misc/error_message'));
 
 const User = require('./server/schema/models').user;
 const saveSession = require('./misc/save_session');
@@ -236,7 +237,7 @@ bot.dialog('/promptButtons', [
 			session, menuMessage, menuOptions,
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: retryPrompts.choiceIntent,
+				// retryPrompt: () => { console.log('\n\n\nsdfsdf'); },
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -246,7 +247,7 @@ bot.dialog('/promptButtons', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case GastosAbertosInformation:
-				session.beginDialog('gastosAbertosInformation:/', {	User });
+				session.beginDialog('gastosAbertosInformation:/');
 				break;
 			case Missions:
 				session.beginDialog('game:/');
@@ -267,20 +268,22 @@ bot.dialog('/promptButtons', [
 	(session) => {
 		session.replaceDialog('/promptButtons');
 	},
-]);
-// ]).customAction({
-// 	matches: /^[\w]+/,
-// 	onSelectAction: (session) => {
-// 		custom.allIntents(session, intents, ((response) => {
-// 			console.log(`session: ${(session)}`);
-// 			if (response === 'error') {
-// 				session.send('Não entendi');
-// 			} else {
-// 				session.replaceDialog(response);
-// 			}
-// 		}));
-// 	},
-// });
+// ]);
+]).customAction({
+	matches: /^[\w]+/,
+	onSelectAction: (session) => {
+		custom.allIntents(session, intents, ((response) => {
+			if (response === 'error') {
+				session.send('Não entendi');
+				session.beginDialog('errorMessage:/messageHelp', { dialogName: session.dialogStack()[session.dialogStack().length - 1].id });
+			} else {
+				session.send('Passei por aqui');
+				session.replaceDialog(response);
+			}
+		}));
+	},
+});
+
 
 bot.dialog('/askPermission', [
 	(session) => {
@@ -305,18 +308,14 @@ bot.dialog('/askPermission', [
 					address: session.message.address,
 					receiveMessage: true,
 				}, {
-					where: {
-						fb_id: session.userData.userid,
-					},
+					where: { fb_id: session.userData.userid },
 					returning: true,
-				})
-					.then(() => {
-						console.log('User address updated sucessfuly');
-					})
-					.catch((err) => {
-						console.log(err);
-						throw err;
-					});
+				}).then(() => {
+					console.log('User address updated sucessfuly');
+				}).catch((err) => {
+					console.log(err);
+					throw err;
+				});
 				break;
 			default: // No
 				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
@@ -324,18 +323,14 @@ bot.dialog('/askPermission', [
 					address: session.message.address,
 					receiveMessage: false,
 				}, {
-					where: {
-						fb_id: session.userData.userid,
-					},
+					where: { fb_id: session.userData.userid },
 					returning: true,
-				})
-					.then(() => {
-						console.log('User address erased sucessfuly');
-					})
-					.catch((err) => {
-						console.log(err);
-						throw err;
-					});
+				}).then(() => {
+					console.log('User address erased sucessfuly');
+				}).catch((err) => {
+					console.log(err);
+					throw err;
+				});
 				break;
 			}
 			session.replaceDialog('/promptButtons');

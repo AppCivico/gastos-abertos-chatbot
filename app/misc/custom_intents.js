@@ -1,6 +1,5 @@
 // A class for attaching custom intents to dialogs
 
-
 const allIntents = (message, intents, callback) => {
 	intents.recognize(message, (iDontGetIt, request2) => {
 		console.log(`Intent: ${Object.entries(request2)}`);

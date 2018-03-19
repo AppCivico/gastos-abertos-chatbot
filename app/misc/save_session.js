@@ -1,7 +1,7 @@
-const User = require('../server/schema/models').user;
 // Collection of functions for saving users sessions and getting usernames from facebook
 
 const request = require('request');
+const User = require('../server/schema/models').user;
 
 // gets usernames from facebook
 const userFacebook = (userID, pageToken, callback) => {
