@@ -38,7 +38,8 @@ library.dialog('/messageHelp', [
 				session.send('asdfasdfaf');
 				break;
 			default: // goBack
-				if (!session.userData.address) {
+				if (session.userData.address) {
+					// this simply doesn't work on the bot emulator, try running it on messenger
 					bot.beginDialog(session.userData.address, session.userData.session);
 				}	else {
 					session.replaceDialog('*:/promptButtons');

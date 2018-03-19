@@ -63,7 +63,6 @@ library.dialog('/askState', [
 			maxRetries: 10,
 		});
 	},
-
 	(session, args) => {
 		userState = args.response;
 		session.replaceDialog('/askCity');

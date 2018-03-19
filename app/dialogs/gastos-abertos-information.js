@@ -1,14 +1,16 @@
-/* global builder:true */
+/* global bot:true builder:true */
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const saveSession = require('../misc/save_session');
 
 const library = new builder.Library('gastosAbertosInformation');
+bot.library(require('./contact'));
 
 const accessLaw = 'Saber mais';
-const reset = 'Voltar ao início';
+const goBack = 'Voltar ao início';
 const receiveMessage = 'Receber Mensagens?';
+const Contato = 'Contato';
 let receiveDialog;
 let receiveYes;
 let receiveNo;
@@ -18,8 +20,7 @@ let booleanMessage;
 let User;
 
 library.dialog('/', [
-	(session, args) => {
-		[User] = [args.User];
+	(session) => {
 		session.sendTyping();
 		session.send('A equipe Gastos Abertos tem o objetivo de conectar cidadãos com o orçamento público.' +
 		'\n\nAcreditamos na mobilização e na educação cidadã sobre transparência nos municípios brasileiros.');
@@ -33,7 +34,7 @@ library.dialog('/promptButtons', [
 		builder.Prompts.choice(
 			session,
 			`Como posso te ajudar? ${emoji.get('slightly_smiling_face').repeat(2)}`,
-			[accessLaw, receiveMessage, reset],
+			[accessLaw, receiveMessage, Contato, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.about,
@@ -51,7 +52,10 @@ library.dialog('/promptButtons', [
 			case receiveMessage:
 				session.replaceDialog('/receiveMessage');
 				break;
-			default: // reset
+			case Contato:
+				session.replaceDialog('contact:/');
+				break;
+			default: // goBack
 				session.endDialog();
 				break;
 			}
