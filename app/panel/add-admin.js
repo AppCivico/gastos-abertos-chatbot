@@ -1,4 +1,6 @@
 /* global builder:true */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 // A menu for admins to add new admins
 
 const library = new builder.Library('addAdmin');
@@ -23,7 +25,7 @@ library.dialog('/', [
 		'\n\nQuem já é administrador não será listado!');
 	},
 	(session, args, next) => {
-		userName = args.response;
+		userName = session.userData.userDoubt; // comes from customAction
 
 		User.findAndCountAll({ // list all users with desired like = fb_name
 			attributes: ['fb_name'],
@@ -99,6 +101,16 @@ library.dialog('/', [
 			session.endDialog();
 		}
 	},
-]);
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
+});
 
 module.exports = library;

@@ -274,7 +274,6 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
-				session.send('Não entendi');
 				session.beginDialog('errorMessage:/messageHelp');
 			} else {
 				session.replaceDialog(response);

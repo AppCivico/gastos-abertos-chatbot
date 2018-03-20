@@ -1,4 +1,6 @@
 /* global builder:true */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 // A menu for admins to add users to groups
 
 const library = new builder.Library('addGroup');
@@ -23,7 +25,7 @@ library.dialog('/', [
 		builder.Prompts.text(session, 'Insira o nome do perfil, escolha na lista e confirme.');
 	},
 	(session, args, next) => {
-		userName = args.response;
+		userName = session.message.text; // comes from customAction
 
 		User.findAndCountAll({ // list all users with desired like = fb_name
 			attributes: ['fb_name', 'group'],
@@ -39,7 +41,7 @@ library.dialog('/', [
 			},
 		}).then((listUser) => {
 			if (listUser.count === 0) {
-				session.send('Não foi encontrado nenhum usuário com esse nome!');
+				session.send(`Não foi encontrado nenhum usuário chamado ${userName}!`);
 				session.endDialog();
 			} else {
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
@@ -85,8 +87,8 @@ library.dialog('/', [
 			session.endDialog();
 		}
 	},
-	(session, results) => {
-		userGroup = results.response;
+	(session) => {
+		userGroup = session.message.text; // comes from customAction
 		builder.Prompts.choice(
 			session, `Deseja adicionar ${userName} no grupo ${userGroup}? Ele receberá o direito de mandar mensagens diretas para o usuário!`,
 			[Confirm, Cancel],
@@ -127,6 +129,16 @@ library.dialog('/', [
 			}
 		}
 	},
-]);
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
+});
 
 module.exports = library;
