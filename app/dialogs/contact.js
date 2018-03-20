@@ -1,4 +1,4 @@
-/* global bot:true builder:true */
+/* global builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
@@ -26,8 +26,8 @@ library.dialog('/', [
 library.dialog('/userInput', [
 	(session) => {
 		session.userData.userDoubt = '';
-		builder.Prompts.text(session, `Digite sua dúvida. Iremos te responder assim que pudermos. ${emoji.get('smile')} ` +
-		'Evite utilizar mais de 500 caracteres.\n\nPara cancelar, digite \'cancelar\', \'começar\' ou \'voltar\'.');
+		builder.Prompts.text(session, 'Digite sua dúvida. Iremos te responder assim que pudermos. Evite utilizar mais de 500 caracteres. ' +
+		`${emoji.get('smile')}\n\nPara cancelar, digite 'cancelar', 'começar' ou 'voltar'.`);
 	},
 	(session) => {
 		session.replaceDialog('/receives', { userMessage: session.userData.userDoubt });
@@ -50,15 +50,5 @@ library.dialog('/receives', [
 		session.send(args.userMessage);
 	},
 ]);
-
-// ]).triggerAction({
-// 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-// 	onSelectAction: (session) => {
-// 		console.log('\n');
-//
-// 		session.beginDialog(session.userData.session);
-// 	},
-// });
-
 
 module.exports = library;

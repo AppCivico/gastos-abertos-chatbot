@@ -36,7 +36,7 @@ library.dialog('/messageHelp', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case messageHelp:
-				session.replaceDialog();
+				session.replaceDialog('contact:/userInput');
 				break;
 			default: // goBack
 				if (session.userData.session) {

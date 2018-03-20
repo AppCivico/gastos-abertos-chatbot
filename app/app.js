@@ -57,7 +57,7 @@ intents.matches('Default Welcome Intent', '/reset');
 intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
-console.log(`intents: ${Object.entries(intents.actions)}`);
+// console.log(`intents: ${Object.entries(intents.actions)}`);
 
 const { pageToken } = process.env;
 // const adminArray = process.env.adminArray.split(',');
