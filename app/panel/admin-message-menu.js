@@ -31,7 +31,7 @@ library.dialog('/', [
 			where: { fb_id: session.userData.userid },
 		}).then((userData) => {
 			if (userData.group === '' || userData.group === 'Cidadão') {
-				session.send(`Você parece é do grupo ${session.userData.group}. Desse jeito não poderá enviar mensagem.` +
+				session.send(`Você parece ser do grupo ${session.userData.group}. Desse jeito não poderá enviar mensagem.` +
 				'\n\nPor favor, entre em contato com nossa equipe imediatamente.');
 				session.endDialog();
 			} else {

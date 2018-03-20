@@ -1,6 +1,6 @@
 module.exports = {
 	up(queryInterface, Sequelize) {
-		return queryInterface.createTable('group_message', {
+		return queryInterface.createTable('user_message', {
 			id: {
 				allowNull: false,
 				autoIncrement: true,
@@ -11,20 +11,26 @@ module.exports = {
 				type: Sequelize.INTEGER,
 				allowNull: false,
 			},
-			user_group: {
+			user_name: {
 				type: Sequelize.STRING,
+				allowNull: false,
+			},
+			user_address: {
+				type: Sequelize.JSON,
 				allowNull: false,
 			},
 			content: {
 				type: Sequelize.STRING,
 				allowNull: false,
 			},
-			image_url: {
-				type: Sequelize.STRING,
+			response: {
+				type: Sequelize.BOOLEAN,
 			},
-			number_sent: {
+			admin_id: {
 				type: Sequelize.INTEGER,
-				allowNull: false,
+			},
+			answered: {
+				type: Sequelize.BOOLEAN,
 			},
 			createdAt: {
 				type: Sequelize.DATE,
@@ -37,6 +43,6 @@ module.exports = {
 		});
 	},
 	down(queryInterface) {
-		return queryInterface.dropTable('group_message');
+		return queryInterface.dropTable('user_message');
 	},
 };

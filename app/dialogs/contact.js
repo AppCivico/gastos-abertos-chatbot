@@ -4,15 +4,19 @@
 
 const library = new builder.Library('contact');
 const emoji = require('node-emoji');
-const User = require('../server/schema/models').user;
 
+const User = require('../server/schema/models').user;
+const userMessage = require('../server/schema/models').user_message;
+
+let user;
 library.dialog('/', [
 	(session) => {
 		User.findOne({
-			attributes: ['session', 'address'],
+			attributes: ['session', 'id', 'fb_name', 'address'],
 			where: { fb_id: session.userData.userid },
-		}).then((user) => {
-			// session.userData.address = user.address;
+		}).then((userData) => {
+			user = userData;
+			session.userData.id = user.id;
 			session.userData.session = user.session.dialogName;
 			console.log(session.userData.session);
 		});
@@ -26,7 +30,7 @@ library.dialog('/', [
 library.dialog('/userInput', [
 	(session) => {
 		session.userData.userDoubt = '';
-		builder.Prompts.text(session, 'Digite sua dúvida. Iremos te responder assim que pudermos. Evite utilizar mais de 500 caracteres. ' +
+		builder.Prompts.text(session, 'Digite sua dúvida. Iremos te responder assim que pudermos. Evite utilizar mais de 250 caracteres. ' +
 		`${emoji.get('smile')}\n\nPara cancelar, digite 'cancelar', 'começar' ou 'voltar'.`);
 	},
 	(session) => {
@@ -46,8 +50,21 @@ library.dialog('/userInput', [
 
 library.dialog('/receives', [
 	(session, args) => {
-		session.send('Sua dúvida é:');
-		session.send(args.userMessage);
+		userMessage.create({
+			user_id: user.id,
+			user_name: user.fb_name,
+			user_address: user.address,
+			content: args.userMessage,
+			response: false,
+			answered: false,
+		}).then(() => {
+			session.send('Recebemos sua dúvida com sucesso! Em breve, entraremos em contato.');
+		}).catch((err) => {
+			console.log(`Couldn't create new message => ${err}`);
+			session.send('Tivemos um problema técnico! Tente novamente mais tarde ou entre em nosso grupo!');
+		}).finally(() => {
+			session.replaceDialog(session.userData.session);
+		});
 	},
 ]);
 

@@ -9,6 +9,7 @@ bot.library(require('./remove-admin'));
 bot.library(require('./add-group'));
 bot.library(require('./remove-group'));
 bot.library(require('./get-users'));
+bot.library(require('./answer-messages'));
 
 const library = new builder.Library('panelAdmin');
 
@@ -19,6 +20,7 @@ const addGroup = 'Adicionar à um grupo';
 const removeGroup = 'Remover de grupo';
 const sendMessage = 'Mensagens pra todos';
 const userCSV = 'Usuários CSV';
+const answerMessages = 'Responder Mensagens';
 const comeBack = 'Voltar';
 
 library.dialog('/', [
@@ -26,7 +28,7 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session, 'Esse é o menu administrativo. Muito cuidado por aqui!' +
 			'\n\nEscolha o que deseja fazer:',
-			[sendMessage, subMenu, userCSV, comeBack],
+			[sendMessage, subMenu, userCSV, answerMessages, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -47,6 +49,9 @@ library.dialog('/', [
 			case userCSV:
 				session.beginDialog('csvUser:/');
 				break;
+			case answerMessages:
+				session.beginDialog('answerMessages:/');
+				break;
 			default: // comeBack
 				session.replaceDialog('*:/promptButtons');
 				break;
@@ -61,7 +66,7 @@ library.dialog('/', [
 library.dialog('/subMenu', [
 	(session) => {
 		builder.Prompts.choice(
-			session, 'Esse é o menu para adicionar e remover usuários em grupos ou transformalos em administradores.' +
+			session, 'Esse é o menu para adicionar e remover usuários em grupos ou transforma-los em administradores.' +
 			'\n\nCuidado!',
 			[addAdmin, removeAdmin, addGroup, removeGroup, comeBack],
 			{
