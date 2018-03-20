@@ -1,9 +1,10 @@
-/* global  bot:true builder:true */
+/* global bot:true builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
 // Default error dialog for NLP entries
 const library = new builder.Library('errorMessage');
+bot.library(require('../dialogs/contact'));
 
 const User = require('../server/schema/models').user;
 
@@ -35,13 +36,11 @@ library.dialog('/messageHelp', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case messageHelp:
-				session.send('asdfasdfaf'); // TODO this
+				session.replaceDialog();
 				break;
 			default: // goBack
-				if (session.userData.address) {
-					session.beginDialog(session.userData.session); // this works?
-					// this simply doesn't work on the bot emulator, try running it on messenger
-					// bot.beginDialog(session.userData.address, session.userData.session);
+				if (session.userData.session) {
+					session.replaceDialog(session.userData.session);
 				}	else {
 					session.replaceDialog('*:/promptButtons');
 				}

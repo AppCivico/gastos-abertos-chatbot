@@ -157,14 +157,20 @@ library.dialog('/transparencyPortalURL', [
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
 	},
-
-	(session, args) => {
-		answers.transparencyPortalURL = args.response;
+	(session) => {
+		answers.transparencyPortalURL = session.message.text; // comes from customAction
 		session.replaceDialog('/transparencyPortalHasFinancialData');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
 });
 
 library.dialog('/transparencyPortalHasFinancialData', [
@@ -236,12 +242,21 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
 	},
-	(session, args) => {
-		answers.transparencyPortalFinancialDataFormats = args.response;
+	(session) => {
+		// session.message.text = comes from customAction
+		answers.transparencyPortalFinancialDataFormats = session.message.text;
 		session.replaceDialog('/transparencyPortalHasContractsData');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
 });
 
 library.dialog('/transparencyPortalHasContractsData', [

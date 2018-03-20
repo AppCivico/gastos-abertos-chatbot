@@ -275,15 +275,8 @@ bot.dialog('/promptButtons', [
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
 				session.send('Não entendi');
-				session.beginDialog(
-					'errorMessage:/messageHelp',
-					{
-						dialogName:
-						session.dialogStack()[session.dialogStack().length - 1].id,
-					} // eslint-disable-line comma-dangle
-				);
+				session.beginDialog('errorMessage:/messageHelp');
 			} else {
-				session.send('Passei por aqui');
 				session.replaceDialog(response);
 			}
 		}));

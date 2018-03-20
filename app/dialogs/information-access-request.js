@@ -607,7 +607,7 @@ library.dialog('/questionThirteen', [
 			where: { fb_id: session.userData.userid },
 		}).then((userData) => {
 			answers.requesterName = userData.name;
-			if (userData.name === 'undefined' || userData.name === null) {
+			if (userData.name === 'undefined' || userData.name === null || userData.name === '') {
 				session.beginDialog('/askFullName');
 			} else {
 				session.beginDialog('/generateRequest');
@@ -626,9 +626,10 @@ library.dialog('/askFullName', [
 		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
 	(session, args) => {
-		answers.requesterName = args.response.split('/').join(''); // stops user from entering '/' and breaking the file creation
+		// session.message.text = comes from customAction
+		answers.requesterName = session.message.text.split('/').join(''); // stops user from entering '/' and breaking the file creation
 		User.update({
-			name: args.response,
+			name: answers.requesterName,
 		}, {
 			where: {
 				fb_id: session.userData.userid,
@@ -645,8 +646,16 @@ library.dialog('/askFullName', [
 				session.beginDialog('/generateRequest');
 			});
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
 });
 
 library.dialog('/generateRequest', [

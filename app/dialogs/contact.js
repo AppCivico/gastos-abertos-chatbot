@@ -2,12 +2,9 @@
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
-const retryPrompts = require('../misc/speeches_utils/retry-prompts');
-const emoji = require('node-emoji');
-
-const User = require('../server/schema/models').user;
-
 const library = new builder.Library('contact');
+const emoji = require('node-emoji');
+const User = require('../server/schema/models').user;
 
 library.dialog('/', [
 	(session) => {
@@ -15,7 +12,7 @@ library.dialog('/', [
 			attributes: ['session', 'address'],
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
-			session.userData.address = user.address;
+			// session.userData.address = user.address;
 			session.userData.session = user.session.dialogName;
 			console.log(session.userData.session);
 		});
@@ -28,19 +25,32 @@ library.dialog('/', [
 
 library.dialog('/userInput', [
 	(session) => {
-		builder.Prompts.text(session, `Digite sua dúvida. Iremos te responder assim que pudermos. ${emoji.get('smile')}` +
-	'Para cancelar, digite \'cancelar\', \'começar\' ou \'voltar\'.');
+		session.userData.userDoubt = '';
+		builder.Prompts.text(session, `Digite sua dúvida. Iremos te responder assim que pudermos. ${emoji.get('smile')} ` +
+		'Evite utilizar mais de 500 caracteres.\n\nPara cancelar, digite \'cancelar\', \'começar\' ou \'voltar\'.');
 	},
-	(session, args) => {
-		session.userData.userInput = args.response;
+	(session) => {
+		session.replaceDialog('/receives', { userMessage: session.userData.userDoubt });
 	},
 ]).customAction({
-	matches: /^[\w]+/, // /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+	matches: /^[\w]+/, // override main customAction at app.js
 	onSelectAction: (session) => {
-		// /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i.test(args);
-		session.endDialog();
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
 	},
 });
+
+library.dialog('/receives', [
+	(session, args) => {
+		session.send('Sua dúvida é:');
+		session.send(args.userMessage);
+	},
+]);
+
 // ]).triggerAction({
 // 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 // 	onSelectAction: (session) => {

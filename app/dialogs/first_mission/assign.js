@@ -1,4 +1,6 @@
 /* global  bot:true builder:true */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 
 const library = new builder.Library('firstMissionAssign');
 
@@ -80,8 +82,8 @@ library.dialog('/askCity', [
 		builder.Prompts.text(session, `Qual é o município que você representará? ${emoji.get('cityscape')}`);
 	},
 
-	(session, args) => {
-		userCity = args.response;
+	(session) => {
+		userCity = session.userData.userDoubt; // comes from customAction
 		User.update({
 			state: userState.toUpperCase(),
 			city: userCity,
@@ -99,7 +101,17 @@ library.dialog('/askCity', [
 			});
 		session.replaceDialog('/moreDetails');
 	},
-]);
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
+});
 
 library.dialog('/moreDetails', [
 	(session) => {
