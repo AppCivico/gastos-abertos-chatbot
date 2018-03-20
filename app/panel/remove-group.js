@@ -25,7 +25,7 @@ library.dialog('/', [
 		builder.Prompts.text(session, 'Digite o nome do usuario a ser removido para iniciarmos a pesquisa.');
 	},
 	(session, args, next) => {
-		userName = session.userData.userDoubt; // comes from customAction
+		userName = session.userData.userInput; // comes from customAction
 
 		User.findAndCountAll({ // list all users with desired like = fb_name
 			attributes: ['fb_name', 'group'],
@@ -127,7 +127,7 @@ library.dialog('/', [
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
 			session.replaceDialog(session.userData.session); // cancel option
 		} else {
-			session.userData.userDoubt = session.message.text;
+			session.userData.userInput = session.message.text;
 			session.endDialog();
 		}
 	},

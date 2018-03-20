@@ -135,7 +135,7 @@ library.dialog('/', [
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
 			session.replaceDialog(session.userData.session); // cancel option
 		} else {
-			session.userData.userDoubt = session.message.text;
+			session.userData.userInput = session.message.text;
 			session.endDialog();
 		}
 	},

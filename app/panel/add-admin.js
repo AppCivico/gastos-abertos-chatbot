@@ -20,12 +20,11 @@ library.dialog('/', [
 		session.send('Esse é o menu para adicionar usuários que já interagiram com o bot ao grupo de administradores, ' +
 		'dando-lhe permissão para adicionar mais administradores, grupos e mandar mensagens.' +
 		'\nInsira o nome do perfil, escolha na lista e confirme. Por padrão, a pessoa será inserida no grupo AppCívico.');
-		// TODO admin que volta pro menu inicial volta pro grupo AppCívico
 		builder.Prompts.text(session, 'Digite o nome do usuario a ser adicionado para iniciarmos a pesquisa. ' +
 		'\n\nQuem já é administrador não será listado!');
 	},
 	(session, args, next) => {
-		userName = session.userData.userDoubt; // comes from customAction
+		userName = session.userData.userInput; // comes from customAction
 
 		User.findAndCountAll({ // list all users with desired like = fb_name
 			attributes: ['fb_name'],
@@ -107,7 +106,7 @@ library.dialog('/', [
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
 			session.replaceDialog(session.userData.session); // cancel option
 		} else {
-			session.userData.userDoubt = session.message.text;
+			session.userData.userInput = session.message.text;
 			session.endDialog();
 		}
 	},
