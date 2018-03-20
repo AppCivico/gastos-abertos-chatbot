@@ -92,8 +92,8 @@ library.dialog('/askImage', [ // asks user for text and image URL
 		builder.Prompts.text(session, 'Aqui enviaremos uma imagem seguida de uma mensagem de texto logo abaixo.' +
 		'\n\nDigite a mensagem de texto desejada:');
 	},
-	(session, args) => {
-		messageText = args.response;
+	(session) => {
+		messageText = session.userData.userInput; // comes from customAction
 		builder.Prompts.text(session, 'Digite a URL da imagem desejada.' +
 		'\n\nLembre-se: ela deve estar online e acessível a todos. Cuidado com o tamanho. Pode ser GIF.' +
 		'\n\nExemplo: https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png');
@@ -135,7 +135,17 @@ library.dialog('/askImage', [ // asks user for text and image URL
 			}
 		}
 	},
-]);
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userInput = session.message.text;
+			session.endDialog();
+		}
+	},
+});
 
 library.dialog('/sendingImage', [ // sends image and text message
 	(session, args) => {
@@ -187,8 +197,8 @@ library.dialog('/askText', [ // asks user for text message
 		builder.Prompts.text(session, 'Digite a sua mensagem. Ela será enviada a todos os usuários que ' +
 		'concordaram em receber mensagens pelo Guaxi.');
 	},
-	(session, args) => {
-		messageText = args.response;
+	(session) => {
+		messageText = session.userData.userInput; // comes from customAction
 		session.send('Sua mensagem aparecerá da seguinte forma para os usuários:');
 		session.send(messageFrom + session.userData.group);
 		session.send(messageText);
@@ -215,7 +225,17 @@ library.dialog('/askText', [ // asks user for text message
 			}
 		}
 	},
-]);
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userInput = session.message.text;
+			session.endDialog();
+		}
+	},
+});
 
 library.dialog('/sendingMessage', [ // sends text message
 	(session, args) => {
