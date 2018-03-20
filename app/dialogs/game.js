@@ -83,7 +83,7 @@ library.dialog('/currentMission', [
 			default: // 2
 				if (missionUser.completed) {
 					session.send(`Parabéns! Você concluiu o processo de missões do Gastos Abertos! ${emoji.get('tada').repeat(3)}`);
-					session.send('Junte-se a nós no Grupo de Lideranças do Gastos Abertos no WhatsApp do Gastos Abertos.' +
+					session.send('Junte-se a nós no Grupo de Lideranças do Gastos Abertos no WhatsApp do Gastos Abertos. ' +
 					`Participe dos debates e compartilhe suas experiências conosco. ${emoji.get('slightly_smiling_face').repeat(2)}`);
 					session.send('Para entrar, basta acessar o link abaixo do seu celular:' +
 					'\n\n https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');

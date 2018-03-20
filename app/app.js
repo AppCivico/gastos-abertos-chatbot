@@ -268,22 +268,27 @@ bot.dialog('/promptButtons', [
 	(session) => {
 		session.replaceDialog('/promptButtons');
 	},
-]);
-// ]).customAction({
-// 	matches: /^[\w]+/,
-// 	onSelectAction: (session) => {
-// 		custom.allIntents(session, intents, ((response) => {
-// 			if (response === 'error') {
-// 				session.send('Não entendi');
-// 				session.beginDialog('errorMessage:/messageHelp', { dialogName: session.dialogStack()[session.dialogStack().length - 1].id });
-// 			} else {
-// 				session.send('Passei por aqui');
-// 				session.replaceDialog(response);
-// 			}
-// 		}));
-// 	},
-// });
-
+// ]);
+]).customAction({
+	matches: /^[\w]+/,
+	onSelectAction: (session) => {
+		custom.allIntents(session, intents, ((response) => {
+			if (response === 'error') {
+				session.send('Não entendi');
+				session.beginDialog(
+					'errorMessage:/messageHelp',
+					{
+						dialogName:
+						session.dialogStack()[session.dialogStack().length - 1].id,
+					} // eslint-disable-line comma-dangle
+				);
+			} else {
+				session.send('Passei por aqui');
+				session.replaceDialog(response);
+			}
+		}));
+	},
+});
 
 bot.dialog('/askPermission', [
 	(session) => {

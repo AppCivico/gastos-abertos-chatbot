@@ -51,9 +51,8 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session, 'Este é o menu para mandarmos mensagens aos usuários de uma forma diferente! Aqui, o administrador poderá mandar mensagens ' +
 			'para TODOS os usuários que já interagiram com o Guaxi, EXCETO aqueles que explicitamente escolheram NÃO receber mensagens.' +
-			'\n\nUsuários que aceitam ou que ainda não interagiram com o Guaxi para responder a essa pergunta irão receber essas mensagens ' +
-			'e serão mandados para o início do fluxo do bot, interronpendo o fluxo do usuário. ' +
-			'Essas mensagens tem caráter ADMINISTRATIVO para anunciar novas versões, por exemplo. Não devendo ser muito frequentes.' +
+			'\n\nUsuários que aceitam ou que ainda não interagiram com o Guaxi para responder a pergunta irão receber essas mensagens ' +
+			'e serão mandados para o início do fluxo do bot, perdendo seu fluxo. ' +
 			'\n\nEssa forma de mandar mensagem é mais demorada que a outra.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o botão no menu ao lado.',
 			[writeMsg, imageMsg, goBack],
