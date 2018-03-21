@@ -625,7 +625,7 @@ library.dialog('/askFullName', [
 		saveSession.updateSession(session.userData.userid, session);
 		builder.Prompts.text(session, `Qual é o seu nome completo? ${emoji.get('memo')}`);
 	},
-	(session, args) => {
+	(session) => {
 		// session.message.text = comes from customAction
 		answers.requesterName = session.message.text.split('/').join(''); // stops user from entering '/' and breaking the file creation
 		User.update({
@@ -635,16 +635,14 @@ library.dialog('/askFullName', [
 				fb_id: session.userData.userid,
 			},
 			returning: true,
-		})
-			.then(() => {
-				console.log('User name updated sucessfuly');
-			})
-			.catch((err) => {
-				console.log(err);
-				throw err;
-			}).finally(() => {
-				session.beginDialog('/generateRequest');
-			});
+		}).then(() => {
+			console.log('User name updated sucessfuly');
+		}).catch((err) => {
+			console.log(err);
+			throw err;
+		}).finally(() => {
+			session.beginDialog('/generateRequest');
+		});
 	},
 ]).customAction({
 	matches: /^[\w]+/, // override main customAction at app.js

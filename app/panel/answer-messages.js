@@ -1,4 +1,4 @@
-/* global  builder:true */
+/* global bot:true builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
@@ -6,12 +6,37 @@
 
 const library = new builder.Library('answerMessages');
 
+const User = require('../server/schema/models').user;
 const userMessage = require('../server/schema/models').user_message;
 
-const Cancel = 'Cancelar/Voltar';
 const arrayData = []; // data from user_message
 const arrayName = []; // only user_name from user_message
+const writeAnswer = 'Escrever resposta';
+const markAnswered = 'Marcar como respondida';
+const Confirm = 'Enviar';
+const Cancel = 'Cancelar/Voltar';
 let lastIndex = 0;
+let messageData = '';
+let adminData = '';
+let adminMessage = '';
+
+function sendAnswer(user, Message, session) {
+	let userSend;
+	User.findOne({
+		attributes: ['id', 'fb_name', 'address', 'session'],
+		where: { id: user.user_id },
+	}).then((userData) => {
+		userSend = userData; // getting admin user_ID
+	}).catch((err) => {
+		session.send(`Erro: => ${err}`);
+	}).finally(() => {
+		bot.beginDialog(userSend.address, '*:/sendAnswer', {
+			userDialog: userSend.session.dialogName,
+			usefulData: userSend.session.usefulData,
+			answer: Message,
+		});
+	});
+}
 
 library.dialog('/', [
 	(session, args, next) => {
@@ -38,6 +63,7 @@ library.dialog('/', [
 						user_name: element.dataValues.user_name,
 						user_address: element.dataValues.user_address,
 						content:	element.dataValues.content,
+						createdAt: element.dataValues.createdAt,
 					});
 					arrayName.push(element.dataValues.user_name);
 				});
@@ -56,8 +82,6 @@ library.dialog('/', [
 			'Você poderá cancelar com a última opção.', arrayName,
 			{
 				listStyle: builder.ListStyle.button,
-				retryPrompt: 'Opção errada',
-				maxRetries: 10,
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -67,7 +91,7 @@ library.dialog('/', [
 			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
 				session.endDialog();
 			} else {
-				session.beginDialog('/viewMessage', { messageData: arrayData[result.response.index] });
+				session.replaceDialog('/viewMessage', { messageData: arrayData[result.response.index] });
 			}
 		} else {
 			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
@@ -76,11 +100,129 @@ library.dialog('/', [
 	},
 ]);
 
-library.dialog('/viewMessage', [ // TODO
+library.dialog('/viewMessage', [
 	(session, args) => {
-		console.log(args.messageData);
+		User.findOne({
+			attributes: ['id', 'fb_name'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			adminData = userData; // getting admin user_ID
+		});
+		messageData = args.messageData; // eslint-disable-line prefer-destructuring
+		session.send('A mensagem está sendo exibida abaixo. Escolha como você deseja responde-la. ' +
+		'Você pode escrever um texto e manda-lo. Ou, se a mensagem não for relevante, marca-la como respondida.');
+		builder.Prompts.choice(
+			session, `${messageData.content}\n\n${messageData.user_name} - ${messageData.createdAt}`, [writeAnswer, markAnswered, Cancel],
+			{
+				listStyle: builder.ListStyle.button,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case writeAnswer:
+				session.beginDialog('/writeMessage');
+				break;
+			case markAnswered:
+				userMessage.update({
+					answered: true,
+					admin_id: adminData.id,
+				}, {
+					where: {
+						id: messageData.id,
+					},
+				}).then(() => {
+					session.send('Marcado como respondida com sucesso!');
+				}).catch((err) => {
+					session.send(`Ocorreu um erro => ${err}`);
+				}).finally(() => { session.endDialog(); });
+				break;
+			default: // Cancel
+				session.endDialog();
+				break;
+			}
+		}
 	},
 ]);
+
+bot.dialog('/sendAnswer', [
+	(session, args) => {
+		session.userData.dialogName = args.userDialog;
+		session.userData.usefulData = args.usefulData;
+		builder.Prompts.choice(
+			session, args.answer, 'Ok',
+			{
+				listStyle: builder.ListStyle.button,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session) => {
+		const { dialogName } = session.userData; // it seems that doing this is necessary because
+		const { usefulData } = session.userData; // session.dialogName adds '*:' at replaceDialog
+		session.send('Voltando pro fluxo normal...');
+		session.replaceDialog(dialogName, { usefulData });
+	},
+]);
+
+library.dialog('/writeMessage', [
+	(session) => {
+		console.log(adminData.fb_name);
+		if (/^undef$|^undefined$|^null$|^undefined undefined$/i.test(adminData.fb_name)) { // stop 'undefined' to pass as admin name
+			adminData.fb_name = 'a Administração.';
+		}
+		builder.Prompts.text(session, 'Digite sua mensagem. Ela será enviada ao diretamente ao usuário e ' +
+		'incluirá uma assinatura com seu nome no final. Evite passar de 200 caracteres. :)');
+	},
+	(session) => {
+		adminMessage = `${session.userData.userInput}\n\nAtenciosamente, ${adminData.fb_name}`; // comes from customAction
+		session.send('Sua mensagem ficou assim:');
+		session.send(adminMessage);
+		builder.Prompts.choice(
+			session, 'Deseja envia-la?', [Confirm, Cancel],
+			{
+				listStyle: builder.ListStyle.button,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session, result) => {
+		session.sendTyping();
+		if (result.response) {
+			switch (result.response.entity) {
+			case Confirm:
+				userMessage.update({
+					// answered: true,
+					admin_id: adminData.id,
+					response: adminMessage,
+				}, {
+					where: {
+						id: messageData.id,
+					},
+				}).then(() => {
+					sendAnswer(messageData, adminMessage);
+					session.send('Respondemos com sucesso!');
+				}).catch((err) => {
+					session.send(`Ocorreu um erro => ${err}`);
+				}).finally(() => { session.endDialog(); });
+				break;
+			default: // Cancel
+				session.endDialog();
+				break;
+			}
+		}
+	},
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userInput = session.message.text;
+			session.endDialog();
+		}
+	},
+});
 
 
 module.exports = library;

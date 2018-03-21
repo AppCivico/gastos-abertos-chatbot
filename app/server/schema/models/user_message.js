@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
 			user_name: DataTypes.STRING, // name of the user
 			user_address: DataTypes.JSON, // address of the user
 			content: DataTypes.STRING, // what user(or admin) wrote
-			response: DataTypes.BOOLEAN, // is it a response? or a user doubt?
+			response: DataTypes.STRING, // admin response
 			admin_id: DataTypes.INTEGER, // id of admin involved
 			answered: DataTypes.BOOLEAN, // admin can mark as answered without actually answering
 		},

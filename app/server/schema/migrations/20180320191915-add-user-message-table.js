@@ -24,7 +24,7 @@ module.exports = {
 				allowNull: false,
 			},
 			response: {
-				type: Sequelize.BOOLEAN,
+				type: Sequelize.STRING,
 			},
 			admin_id: {
 				type: Sequelize.INTEGER,

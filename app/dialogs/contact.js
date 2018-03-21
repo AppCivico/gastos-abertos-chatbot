@@ -11,15 +11,6 @@ const userMessage = require('../server/schema/models').user_message;
 let user;
 library.dialog('/', [
 	(session) => {
-		User.findOne({
-			attributes: ['session', 'id', 'fb_name', 'address'],
-			where: { fb_id: session.userData.userid },
-		}).then((userData) => {
-			user = userData;
-			session.userData.id = user.id;
-			session.userData.session = user.session.dialogName;
-			console.log(session.userData.session);
-		});
 		session.sendTyping();
 		session.send('Se estiver com alguma dúvida, aqui você poderá mandar uma mensagem para um de nossos administradores.' +
 	'\n\nVocê também pode visitar o nosso grupo de lideranças: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
@@ -29,6 +20,12 @@ library.dialog('/', [
 
 library.dialog('/userInput', [
 	(session) => {
+		User.findOne({
+			attributes: ['session', 'id', 'fb_name', 'address'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			user = userData;
+		});
 		session.userData.userDoubt = '';
 		builder.Prompts.text(session, 'Digite sua dúvida. Iremos te responder assim que pudermos. Evite utilizar mais de 250 caracteres. ' +
 		`${emoji.get('smile')}\n\nPara cancelar, digite 'cancelar', 'começar' ou 'voltar'.`);
@@ -40,7 +37,7 @@ library.dialog('/userInput', [
 	matches: /^[\w]+/, // override main customAction at app.js
 	onSelectAction: (session) => {
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
-			session.replaceDialog(session.userData.session); // cancel option
+			session.replaceDialog(user.session.dialogName); // cancel option
 		} else {
 			session.userData.userDoubt = session.message.text;
 			session.endDialog();
@@ -58,12 +55,12 @@ library.dialog('/receives', [
 			response: false,
 			answered: false,
 		}).then(() => {
-			session.send('Recebemos sua dúvida com sucesso! Em breve, entraremos em contato.');
+			session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
 		}).catch((err) => {
 			console.log(`Couldn't create new message => ${err}`);
 			session.send('Tivemos um problema técnico! Tente novamente mais tarde ou entre em nosso grupo!');
 		}).finally(() => {
-			session.replaceDialog(session.userData.session);
+			session.replaceDialog(user.session.dialogName);
 		});
 	},
 ]);
