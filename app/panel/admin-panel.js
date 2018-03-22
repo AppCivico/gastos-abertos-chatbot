@@ -20,7 +20,7 @@ const addGroup = 'Adicionar à um grupo';
 const removeGroup = 'Remover de grupo';
 const sendMessage = 'Mensagens pra todos';
 const userCSV = 'Usuários CSV';
-const answerMessages = 'Responder Mensagens';
+const answerMessages = 'Caixa de entrada';
 const comeBack = 'Voltar';
 
 library.dialog('/', [

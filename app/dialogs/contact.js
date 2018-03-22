@@ -1,14 +1,19 @@
-/* global builder:true */
+/* global bot:true builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
 const library = new builder.Library('contact');
 const emoji = require('node-emoji');
 
+bot.library(require('../panel/answer-messages'));
+
 const User = require('../server/schema/models').user;
 const userMessage = require('../server/schema/models').user_message;
 
+const inbox = 'Ir pra caixa de entrada';
+const goBack = 'Voltar';
 let user;
+
 library.dialog('/', [
 	(session) => {
 		session.sendTyping();
@@ -56,12 +61,55 @@ library.dialog('/receives', [
 			answered: false,
 		}).then(() => {
 			session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
+			User.findAll({ // list all users with desired like = fb_name
+				attributes: ['fb_name', 'address', 'session'],
+				where: {
+					admin: {
+						$eq: true,
+					},
+				},
+			}).then((adminData) => {
+				adminData.forEach((element) => {
+					bot.beginDialog(element.address, '*:/sendNotification', {
+						userDialog: element.session.dialogName,
+						usefulData: element.session.usefulData,
+					});
+				});
+			});
 		}).catch((err) => {
 			console.log(`Couldn't create new message => ${err}`);
 			session.send('Tivemos um problema técnico! Tente novamente mais tarde ou entre em nosso grupo!');
 		}).finally(() => {
 			session.replaceDialog(user.session.dialogName);
 		});
+	},
+]);
+
+bot.dialog('/sendNotification', [
+	(session, args) => {
+		session.userData.dialogName = args.userDialog;
+		session.userData.usefulData = args.usefulData;
+		builder.Prompts.choice(
+			session, 'Recebemos uma nova mensagem! Entre na caixa de entrada para responder!', [inbox, goBack],
+			{
+				listStyle: builder.ListStyle.button,
+			} // eslint-disable-line comma-dangle
+		);
+	},
+	(session, result) => {
+		const { dialogName } = session.userData; // it seems that doing this is necessary because
+		const { usefulData } = session.userData; // session.dialogName adds '*:' at replaceDialog
+		if (result.response) {
+			switch (result.response.entity) {
+			case inbox:
+				session.replaceDialog('answerMessages:/', { usefulData });
+				break;
+			default: // goBack
+				session.send('Voltando pro fluxo normal...');
+				session.replaceDialog(dialogName, { usefulData });
+				break;
+			}
+		}
 	},
 ]);
 
