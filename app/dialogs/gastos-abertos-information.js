@@ -53,7 +53,7 @@ library.dialog('/promptButtons', [
 				session.replaceDialog('/receiveMessage');
 				break;
 			case Contato:
-				session.replaceDialog('contact:/');
+				session.replaceDialog('contact_doubt:/');
 				break;
 			default: // goBack
 				session.endDialog();

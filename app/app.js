@@ -16,6 +16,7 @@ console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`)
 
 bot.library(require('./dialogs/gastos-abertos-information'));
 bot.library(require('./dialogs/game'));
+bot.library(require('./dialogs/contact'));
 bot.library(require('./validators'));
 bot.library(require('./panel/admin-panel'));
 bot.library(require('./send-message-menu'));
@@ -32,6 +33,7 @@ const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
 const messageMenu = 'Mandar mensagens';
+let userData;
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
@@ -187,7 +189,8 @@ bot.dialog('/getStarted', [
 				],
 			});
 			session.send('Olá, eu sou o Guaxi, o assistente virtual do Gastos Abertos e seu parceiro sobre dados abertos e transparência em orçamento público.');
-			session.send(`\n\nPara facilitar, há um menu com algumas opções sobre como podemos seguir essa parceria. ${emoji.get('smile')}`);
+			session.send(`Utilize os botões abaixo para seguirmos essa parceria. ${emoji.get('smile')}` +
+			'\n\nQualquer dúvida, escreva uma mensagem e nos envie. Vamos responder o mais cedo possível.');
 			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
 
 			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
@@ -216,9 +219,9 @@ bot.dialog('/promptButtons', [
 		saveSession.updateSession(session.userData.userid, session);
 		menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
 		User.findOne({
-			attributes: ['admin', 'sendMessage', 'group'],
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
+			userData = user;
 			if (user.sendMessage === true && user.group !== 'Cidadão') {
 				menuOptions.push(messageMenu);
 			}
@@ -237,7 +240,6 @@ bot.dialog('/promptButtons', [
 			session, menuMessage, menuOptions,
 			{
 				listStyle: builder.ListStyle.button,
-				// retryPrompt: () => { console.log('\n\n\nsdfsdf'); },
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -274,7 +276,7 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
-				session.beginDialog('errorMessage:/messageHelp');
+				session.beginDialog('contact_doubt:/receives', { userMessage: session.message.text });
 			} else {
 				session.replaceDialog(response);
 			}

@@ -1,10 +1,11 @@
 /* global bot:true builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
-
 // the menu to send direct messages to user
 
 const library = new builder.Library('answerMessages');
+
+// bot.library(require('../dialogs/contact'));
 
 const User = require('../server/schema/models').user;
 const userMessage = require('../server/schema/models').user_message;
@@ -14,7 +15,7 @@ const arrayName = []; // only user_name from user_message
 const writeAnswer = 'Escrever resposta';
 const markAnswered = 'Marcar como respondida';
 const Confirm = 'Enviar';
-const Cancel = 'Cancelar/Voltar';
+const Cancel = 'Voltar';
 let lastIndex = 0;
 let messageData = '';
 let adminData = '';
@@ -78,7 +79,7 @@ library.dialog('/', [
 		arrayName.push(Cancel); // adds Cancel button
 		lastIndex = arrayName.length;
 		builder.Prompts.choice(
-			session, 'Clique no nome abaixo para ver e responder a mensagem. A mensagem mais velha aparece primeiro(limitando a 10 opções). ' +
+			session, 'Clique no nome abaixo para ver e responder a mensagem. A mensagem mais nova aparece primeiro(limitando a 10 opções). ' +
 			'Você poderá cancelar com a última opção.', arrayName,
 			{
 				listStyle: builder.ListStyle.button,
@@ -151,8 +152,9 @@ bot.dialog('/sendAnswer', [
 	(session, args) => {
 		session.userData.dialogName = args.userDialog;
 		session.userData.usefulData = args.usefulData;
+		session.send(args.answer);
 		builder.Prompts.choice(
-			session, args.answer, 'Ok',
+			session, 'Se tiver outra dúvida, basta enviar outra mensagem.', 'Ok',
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle
@@ -161,7 +163,6 @@ bot.dialog('/sendAnswer', [
 	(session) => {
 		const { dialogName } = session.userData; // it seems that doing this is necessary because
 		const { usefulData } = session.userData; // session.dialogName adds '*:' at replaceDialog
-		session.send('Voltando pro fluxo normal...');
 		session.replaceDialog(dialogName, { usefulData });
 	},
 ]);
@@ -192,7 +193,7 @@ library.dialog('/writeMessage', [
 			switch (result.response.entity) {
 			case Confirm:
 				userMessage.update({
-					// answered: true,
+					answered: true,
 					admin_id: adminData.id,
 					response: adminMessage,
 				}, {
