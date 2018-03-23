@@ -10,6 +10,9 @@ module.exports = {
 			user_id: {
 				type: Sequelize.INTEGER,
 			},
+			user_name: {
+				type: Sequelize.STRING,
+			},
 			error_message: {
 				type: Sequelize.STRING,
 			},
@@ -24,6 +27,7 @@ module.exports = {
 			},
 			resolved: {
 				type: Sequelize.BOOLEAN,
+				defaultValue: false,
 			},
 			createdAt: {
 				type: Sequelize.DATE,

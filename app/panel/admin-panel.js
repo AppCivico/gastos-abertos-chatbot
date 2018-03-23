@@ -10,6 +10,7 @@ bot.library(require('./add-group'));
 bot.library(require('./remove-group'));
 bot.library(require('./get-users'));
 bot.library(require('./answer-messages'));
+bot.library(require('./error-panel'));
 
 const library = new builder.Library('panelAdmin');
 
@@ -54,7 +55,7 @@ library.dialog('/', [
 				session.beginDialog('answerMessages:/');
 				break;
 			case errorBox:
-				session.beginDialog('answerMessages:/');
+				session.beginDialog('errorLog:/');
 				break;
 			default: // comeBack
 				session.replaceDialog('*:/promptButtons');

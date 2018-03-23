@@ -11,6 +11,7 @@ const emoji = require('node-emoji');
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const saveSession = require('../misc/save_session');
+const errorLog = require('../misc/send_log');
 
 bot.library(require('./second_mission/conclusion'));
 
@@ -77,7 +78,7 @@ library.dialog('/', [
 
 			UserMission.findOrCreate({
 				where: { // checks if exists
-					user_id: user.id,
+					user_id: 'dfss', // user.id,
 					mission_id: 2,
 				},
 				defaults: {
@@ -102,6 +103,8 @@ library.dialog('/', [
 					session.beginDialog('/askLAI');
 				}
 			}).catch((err) => {
+				session.send('deu bad');
+				errorLog.storeErrorLog(session, err, user.id, user.fb_name);
 				console.log(`Error findind or creating UserMission => ${err}`);
 			});
 		});
@@ -133,7 +136,7 @@ library.dialog('/alreadyCreated', [
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para terminarmos! ${emoji.get('wave').repeat(2)}`);
-			session.beginDialog('*:/getStarted');
+			session.replaceDialog('*:/getStarted');
 			break;
 		}
 	},
@@ -180,7 +183,7 @@ library.dialog('/askLAI', [
 			break;
 		default: // Denial
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
-			session.beginDialog('*:/getStarted');
+			session.replaceDialog('*:/getStarted');
 			break;
 		}
 	},
