@@ -77,8 +77,8 @@ const MissionTimer = new Cron.CronJob(
 					attributes: ['address', 'session', 'id'],
 					where: {
 						id: element.userID,
-						address: { // search for people that accepted receiving messages(address = not null)
-							$ne: null,
+						receiveMessage: {
+							$ne: false,
 						},
 					},
 				}).then((userData) => {
@@ -127,8 +127,8 @@ function requestWarning(user, missionID) {
 // Cronjob for following the user after request generation
 const RequestTimer = new Cron.CronJob(
 	'00 20 9-23/3 * * 1-6', () => { // (Hopefully) On the 10th minute Every 3 hours from 9-23h except on sundays
-		const d = new Date(Date.now());
-		const limit = new Date(d.setDate(d.getDate() - 2)); // limit = now - N day(s)
+		// const d = new Date(Date.now());
+		// const limit = new Date(d.setDate(d.getDate() - 2)); // limit = now - N day(s)
 		let data;
 		Notification.findAll({
 			attributes: ['userID', 'missionID', 'msgSent', 'updatedAt', 'createdAt', 'numberSent'],
@@ -136,16 +136,17 @@ const RequestTimer = new Cron.CronJob(
 				sentAlready: false,
 				missionID: 3,
 				numberSent: {
-					$lte: 50,
+					$lte: 4,
 				},
 				// createdAt: { $lte: limit }, // createdAt <= limit
 			},
 
 		}).then((listNotification) => {
-			listNotification.forEach((element) => { // TODO essa parada
+			listNotification.forEach((element) => {
 				// ( updated_at + retry ^ interval ) <= now
 				data = element.updatedAt;
-				data = new Date(data.setMinutes(data.getMinutes() + (element.numberSent ** 1.4)));
+				data = new Date(data.setDate(data.getDate() +
+					(Math.ceil((element.numberSent + 1) ** 1.8))));
 				console.log(data);
 				console.log(`${new Date(Date.now()).toISOString()} `);
 
@@ -156,8 +157,8 @@ const RequestTimer = new Cron.CronJob(
 						attributes: ['address', 'session', 'id'],
 						where: {
 							id: element.userID,
-							address: { // search for people that accepted receiving messages(address = not null)
-								$ne: null,
+							receiveMessage: {
+								$ne: false,
 							},
 						},
 					}).then((userData) => {
