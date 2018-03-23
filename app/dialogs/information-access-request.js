@@ -102,7 +102,7 @@ library.dialog('/', [
 
 					session.beginDialog('/askLAI');
 				}
-			}).catch((err) => {
+			}).catch((err) => { // TODO VER ISSO!
 				session.send('deu bad');
 				errorLog.storeErrorLog(session, err, user.id, user.fb_name);
 				console.log(`Error findind or creating UserMission => ${err}`);
@@ -177,7 +177,6 @@ library.dialog('/askLAI', [
 			}).catch((errNotification) => {
 				console.log(`Couldn't save notification 2 :( -> ${errNotification})`);
 			});
-
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)}`);
 			session.beginDialog('/questionOne');
 			break;

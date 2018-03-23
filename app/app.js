@@ -75,7 +75,6 @@ bot.dialog('/reset', [
 
 bot.dialog('/', [
 	(session) => {
-		// TODO rever toda a estrura do 'cancelar'
 		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
 		if (session.message.address.channelId === 'facebook') {
 			session.userData.userid = session.message.sourceEvent.sender.id;
