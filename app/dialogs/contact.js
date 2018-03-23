@@ -48,7 +48,7 @@ library.dialog('/receives', [
 			answered: false,
 		}).then(() => {
 			session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
-			User.findAll({ // list all users with desired like = fb_name
+			User.findAll({
 				attributes: ['fb_name', 'address', 'session'],
 				where: {
 					admin: {

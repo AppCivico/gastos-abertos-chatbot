@@ -33,7 +33,6 @@ const adminPanel = 'Painel Administrativo';
 const Yes = 'Sim!';
 const No = 'Não';
 const messageMenu = 'Mandar mensagens';
-let userData;
 
 let menuMessage = 'Como posso te ajudar?';
 let menuOptions = [GastosAbertosInformation, Missions, InformationAcessRequest];
@@ -221,7 +220,6 @@ bot.dialog('/promptButtons', [
 		User.findOne({
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
-			userData = user;
 			if (user.sendMessage === true && user.group !== 'Cidadão') {
 				menuOptions.push(messageMenu);
 			}

@@ -128,35 +128,44 @@ function requestWarning(user, missionID) {
 const RequestTimer = new Cron.CronJob(
 	'00 20 9-23/3 * * 1-6', () => { // (Hopefully) On the 10th minute Every 3 hours from 9-23h except on sundays
 		const d = new Date(Date.now());
-		const limit = new Date(d.setDate(d.getDate() - 1)); // limit = now - N day(s)
-
+		const limit = new Date(d.setDate(d.getDate() - 2)); // limit = now - N day(s)
+		let data;
 		Notification.findAll({
-			attributes: ['userID', 'missionID', 'msgSent'],
+			attributes: ['userID', 'missionID', 'msgSent', 'updatedAt', 'createdAt', 'numberSent'],
 			where: {
 				sentAlready: false,
 				missionID: 3,
 				numberSent: {
-					$lte: 5,
+					$lte: 50,
 				},
-				createdAt: { $lte: limit }, // createdAt <= limit
+				// createdAt: { $lte: limit }, // createdAt <= limit
 			},
+
 		}).then((listNotification) => {
-			listNotification.forEach((element) => {
-				console.log(`Sending request notification to user ${element.userID}`);
-				console.log(`Time: ${new Date(Date.now())}`);
-				User.findOne({
-					attributes: ['address', 'session', 'id'],
-					where: {
-						id: element.userID,
-						address: { // search for people that accepted receiving messages(address = not null)
-							$ne: null,
+			listNotification.forEach((element) => { // TODO essa parada
+				// ( updated_at + retry ^ interval ) <= now
+				data = element.updatedAt;
+				data = new Date(data.setMinutes(data.getMinutes() + (element.numberSent ** 1.4)));
+				console.log(data);
+				console.log(`${new Date(Date.now()).toISOString()} `);
+
+				if (data <= Date.now()) {
+					console.log(`Sending request notification to user ${element.userID}`);
+					console.log(`Time: ${new Date(Date.now())}`);
+					User.findOne({
+						attributes: ['address', 'session', 'id'],
+						where: {
+							id: element.userID,
+							address: { // search for people that accepted receiving messages(address = not null)
+								$ne: null,
+							},
 						},
-					},
-				}).then((userData) => {
-					requestWarning(userData, element.missionID);
-				}).catch((errUser) => {
-					console.log(`Coundn't find User => ${errUser}`);
-				});
+					}).then((userData) => {
+						requestWarning(userData, element.missionID);
+					}).catch((errUser) => {
+						console.log(`Coundn't find User => ${errUser}`);
+					});
+				}
 			});
 		}).catch((errMission) => {
 			console.log(`Coundn't find Notifications => ${errMission}`);
@@ -168,6 +177,16 @@ const RequestTimer = new Cron.CronJob(
 	'America/Sao_Paulo',
 	false, // context
 	// Below: runOnInit = true TODO useful only for tests
-	false // eslint-disable-line comma-dangle
+	true // eslint-disable-line comma-dangle
 );
 module.exports.RequestTimer = RequestTimer;
+
+
+// console.log('\n\nHere');
+// date = new Date(Date.now());
+// console.log(`${date} `);
+// console.log('\n');
+// const newDate = new Date(date.setTime(date.getTime() - (element.numberSent * 86400000)));
+// console.log(`${newDate} `);
+// console.log(`${element.updatedAt} `);
+// if (element.updatedAt <= newDate) {

@@ -21,6 +21,7 @@ const removeGroup = 'Remover de grupo';
 const sendMessage = 'Mensagens pra todos';
 const userCSV = 'Usuários CSV';
 const answerMessages = 'Caixa de entrada';
+const errorBox = 'Log de erros';
 const comeBack = 'Voltar';
 
 library.dialog('/', [
@@ -28,7 +29,7 @@ library.dialog('/', [
 		builder.Prompts.choice(
 			session, 'Esse é o menu administrativo. Muito cuidado por aqui!' +
 			'\n\nEscolha o que deseja fazer:',
-			[sendMessage, subMenu, userCSV, answerMessages, comeBack],
+			[sendMessage, subMenu, userCSV, answerMessages, errorBox, comeBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: retryPrompts.choiceIntent,
@@ -50,6 +51,9 @@ library.dialog('/', [
 				session.beginDialog('csvUser:/');
 				break;
 			case answerMessages:
+				session.beginDialog('answerMessages:/');
+				break;
+			case errorBox:
 				session.beginDialog('answerMessages:/');
 				break;
 			default: // comeBack

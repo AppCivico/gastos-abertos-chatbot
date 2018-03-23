@@ -398,9 +398,8 @@ library.dialog('/userUpdate', [
 			}
 		}).catch((e) => {
 			console.log(`Error${e}`);
-			session.send('Oooops, tive um problema ao finalizar suas missões, tente novamente mais tarde.');
-			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-			throw e;
+			session.send(`Você já pode começar sua segunda missão! Basta gerar um relatório. ${emoji.get('grinning').repeat(2)}`);
+			session.replaceDialog('*:/promptButtons');
 		});
 
 		UserMission.update({
@@ -415,12 +414,9 @@ library.dialog('/userUpdate', [
 			returning: true,
 			raw: true,
 		}).then((missionData) => {
-			console.log('\n\nÉ aqui');
 			console.log(missionData[1][0].id);
 			console.log(`Mission ${missionData[1][0].id} Updated!`);
 			Notification.update({
-				// sentAlready == true and timeSent == null or numberSent = 0
-				// means that no message was sent, because there was no need to
 			}, {
 				where: {
 					userID: missionData[1][0].user_id,
@@ -430,8 +426,7 @@ library.dialog('/userUpdate', [
 				console.log('Notification Updated! This message will not be sent!');
 			}).catch((err) => {
 				console.log(`Couldn\t update Notification => ${err}! This message will be sent!`);
-				session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
-				session.replaceDialog('*:/promptButtons');
+				// session.replaceDialog('*:/promptButtons');
 			});
 
 			builder.Prompts.choice(
@@ -445,9 +440,8 @@ library.dialog('/userUpdate', [
 			);
 		}).catch((err) => {
 			console.log(`Error updating mission${err}`);
-			session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
+			session.send(`Você já pode começar sua segunda missão! Basta gerar um relatório. ${emoji.get('grinning').repeat(2)}`);
 			session.replaceDialog('*:/promptButtons');
-			throw err;
 		});
 	},
 
