@@ -78,7 +78,7 @@ library.dialog('/', [
 
 			UserMission.findOrCreate({
 				where: { // checks if exists
-					user_id: 'dfss', // user.id, // TODO
+					user_id: user.id,
 					mission_id: 2,
 				},
 				defaults: {
@@ -99,15 +99,14 @@ library.dialog('/', [
 					`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 					'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
 					session.send('Além disso, você pode a qualquer momento digitar \'começar\' e eu te levo para o início.');
-
-					session.beginDialog('/askLAI');
 				}
-			}).catch((err) => { // TODO VER ISSO! E ali em cima
-				session.send('deu bad');
-				console.log();
-				errorLog.storeErrorLog(session, err, user.id);
-				console.log(`Error findind or creating UserMission => ${err}`);
+			}).catch((err) => {
+				session.beginDialog('/askLAI');
+				errorLog.storeErrorLog(session, `Error findind or creating UserMission => ${err}`, user.id);
 			});
+		}).catch((err) => {
+			session.beginDialog('/askLAI');
+			errorLog.storeErrorLog(session, `Error findind User => ${err}`, user.id);
 		});
 	},
 ]).cancelAction('cancelAction', '', {
@@ -175,8 +174,8 @@ library.dialog('/askLAI', [
 					msgSent: 'Percebemos que você ainda não terminou de gerar um pedido de acesso a informação.' +
 		'\n\nSe precisar de ajuda, entre em contato conosco ou visite nosso grupo de lideranças: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS',
 				},
-			}).catch((errNotification) => {
-				console.log(`Couldn't save notification 2 :( -> ${errNotification})`);
+			}).catch((err) => {
+				errorLog.storeErrorLog(session, `Couldn't save notification 2 => ${err})`, user.id);
 			});
 			session.send(`Legal! Boa sorte! ${emoji.get('v').repeat(3)}`);
 			session.beginDialog('/questionOne');
@@ -641,8 +640,7 @@ library.dialog('/askFullName', [
 		}).then(() => {
 			console.log('User name updated sucessfuly');
 		}).catch((err) => {
-			console.log(err);
-			throw err;
+			errorLog.storeErrorLog(session, `Couldn't save user name => ${err})`, user.id);
 		}).finally(() => {
 			session.beginDialog('/generateRequest');
 		});
@@ -699,7 +697,7 @@ library.dialog('/generateRequest', [
 		}
 	},
 
-	(session) => {
+	(session, args, next) => {
 		let data = generatedRequest.loadSync(path, file.slice(5));
 		data = JSON.stringify(data);
 		// Uploading the generated PDF to MailChimp
@@ -764,8 +762,8 @@ library.dialog('/generateRequest', [
 						missionID: missionData[1][0].id,
 					}).then(() => {
 						console.log('Mission/Request created successfully! :)');
-					}).catch((errRequest) => {
-						console.log(`Couldn't save request :( -> ${errRequest})`);
+					}).catch((err) => {
+						errorLog.storeErrorLog(session, `Couldn't save LAI request => ${err})`, user.id);
 					});
 					console.log(`Mission ${missionData[1][0].id} updated successfully`);
 					session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
@@ -775,7 +773,7 @@ library.dialog('/generateRequest', [
 					session.send(`E precisamos dessa resposta para completar nossa ação. ${emoji.get('page_facing_up')}`);
 					builder.Prompts.choice(
 						session,
-						`Quando puder concluir nosso processo, volte em 'Gerar Pedido'  e responda as questões. ${emoji.get('wink')}`,
+						`Quando puder concluir nosso processo, volte em 'Gerar Pedido' e responda as questões. ${emoji.get('wink')}`,
 						[goBack],
 						{
 							listStyle: builder.ListStyle.button,
@@ -783,10 +781,8 @@ library.dialog('/generateRequest', [
 						} // eslint-disable-line comma-dangle
 					);
 				}).catch((err) => {
-					console.log(`Error updating mission${err}`);
-					session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
-					session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-					throw err;
+					errorLog.storeErrorLog(session, `Couldn't update user mission => ${err})`, user.id);
+					next();
 				});
 			}
 		}
@@ -805,7 +801,9 @@ library.dialog('/generateRequest', [
 			},
 		}).then(() => {
 			console.log('Notification Updated! This message will not be sent!');
-		}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Couldn't update notification 2 => ${err})`, user.id);
+		});
 
 		Notification.findOrCreate({
 			where: { // checks if exists
@@ -820,8 +818,8 @@ library.dialog('/generateRequest', [
 			},
 		}).then(() => {
 			console.log('Added a new notification 3 to be sent!');
-		}).catch((errNotification) => {
-			console.log(`Couldn't save notification 3 :( -> ${errNotification})`);
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Couldn't save notification 3 => ${err})`, user.id);
 		});
 	},
 

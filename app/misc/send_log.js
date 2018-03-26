@@ -5,15 +5,13 @@
 const errorLog = require('../server/schema/models').error_log;
 const User = require('../server/schema/models').user;
 
+const errorBox = 'Log de erros';
 const goBack = 'Voltar';
 
-const errorBox = 'Log de erros';
-
-const storeErrorLog = (session, error, userID = 0, userName) => {
+const storeErrorLog = (session, error, userID = 0) => {
 	errorLog.create({
-		user_id: userID,
-		user_name: userName,
-		error_message: 'O diabo que me carregue',
+		user_id: userID, // Maybe we won't have userID, so 0 is set as a default value
+		error_message: error, // it's interesting to have the log text begin saved for more precision
 		dialog_stack: session.dialogStack(),
 	}).then(() => {
 		User.findAll({
