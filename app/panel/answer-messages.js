@@ -180,10 +180,11 @@ library.dialog('/writeMessage', [
 	},
 	(session) => {
 		adminMessage = `${session.userData.userInput}\n\nAtenciosamente, ${adminData.fb_name}`; // comes from customAction
-		session.send('Sua mensagem ficou assim:');
+		session.send('Sua mensagem fica como abaixo, seguida da outra mensagem e do botão \'OK\' que leva o usuário para onde ele estava:');
 		session.send(adminMessage);
+		session.send('Se tiver mais alguma dúvida, basta enviar outra mensagem.');
 		builder.Prompts.choice(
-			session, 'Deseja envia-la?', [Confirm, Cancel],
+			session, 'Deseja enviá-la?', [Confirm, Cancel],
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle

@@ -17,7 +17,9 @@ const Cancel = 'Voltar';
 let lastIndex = 0;
 let errorData = '';
 let adminData = '';
+const moreUserData = ''; // fb_name and A
 let adminMessage = '';
+
 
 function sendAnswerToError(user, Message, session) {
 	let userSend;
@@ -64,7 +66,9 @@ library.dialog('/', [
 						dialog_stack:	element.dataValues.dialog_stack,
 						createdAt: element.dataValues.createdAt,
 					});
-					arrayName.push(`${element.dataValues.user_id} `); // space turn number id to string
+					// space at the end turns number id to string
+					// Necessary because builder.prompts needs string
+					arrayName.push(`${element.dataValues.user_id} `);
 				});
 				next();
 			}
@@ -74,11 +78,17 @@ library.dialog('/', [
 		});
 	},
 	(session) => {
+		User.findOne({ // Getting useful admin information!
+			attributes: ['id', 'fb_name'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			adminData = userData;
+		});
 		arrayName.push(Cancel); // adds Cancel button
 		lastIndex = arrayName.length;
 		builder.Prompts.choice(
 			session, 'Clique no id abaixo para ver e responder o erro. O erro mais novo aparece primeiro(limitando a 10 opções). ' +
-			'Você poderá cancelar com a última opção.', arrayName,
+			'Você poderá cancelar com a última opção.', arrayName, // <= !
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle
@@ -90,7 +100,16 @@ library.dialog('/', [
 			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
 				session.replaceDialog('panelAdmin:/');
 			} else {
-				session.replaceDialog('/viewMessage', { errorData: arrayData[result.response.index] });
+				User.findOne({ // Getting user information => fb_name and address
+					attributes: ['fb_name', 'address', 'session'],
+					where: { id: arrayName[result.response.index].trim() }, // trim whitespace = string to int
+				}).then((userData) => {
+					// passing arguments to the keys in same index position as the option admin just clicked
+					arrayData[result.response.index].address = userData.address;
+					arrayData[result.response.index].session = userData.session;
+					arrayData[result.response.index].fb_name = userData.fb_name;
+					session.replaceDialog('/viewMessage', { errorData: arrayData[result.response.index] });
+				}).catch((err) => { console.log(err); });
 			}
 		} else {
 			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
@@ -101,17 +120,11 @@ library.dialog('/', [
 
 library.dialog('/viewMessage', [
 	(session, args) => {
-		User.findOne({
-			attributes: ['id', 'fb_name'],
-			where: { fb_id: session.userData.userid },
-		}).then((userData) => {
-			adminData = userData; // getting admin user_ID
-		});
 		errorData = args.errorData; // eslint-disable-line prefer-destructuring
-		session.send('O erro  está sendo exibida abaixo. Escolha como você deseja responde-la. ' +
+		session.send('O erro está sendo exibida abaixo. Escolha como você deseja responde-la. ' +
 		'Você pode escrever um texto e manda-lo. Ou, se a mensagem não for relevante, marca-la como respondida.');
 		builder.Prompts.choice(
-			session, `${errorData.error_message}\n\n${errorData.user_name} ${errorData.createdAt}`, [writeAnswer, markAnswered, Cancel],
+			session, `${errorData.error_message}\n\n${errorData.fb_name} ${errorData.createdAt}`, [writeAnswer, markAnswered, Cancel],
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle
@@ -152,9 +165,8 @@ bot.dialog('/sendAnswerToError', [
 	(session, args) => {
 		session.userData.dialogName = args.userDialog;
 		session.userData.usefulData = args.usefulData;
-		session.send(args.answer);
 		builder.Prompts.choice(
-			session, 'Se tiver outra dúvida, basta enviar outra mensagem.', 'Ok',
+			session, args.answer, 'Ok',
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle
@@ -178,10 +190,10 @@ library.dialog('/writeMessage', [
 	},
 	(session) => {
 		adminMessage = `${session.userData.userInput}\n\nAtenciosamente, ${adminData.fb_name}`; // comes from customAction
-		session.send('Sua mensagem ficou assim:');
+		session.send('Sua mensagem fica como abaixo, seguida de um botão \'OK\' que leva o usuário para onde ele estava:');
 		session.send(adminMessage);
 		builder.Prompts.choice(
-			session, 'Deseja envia-la?', [Confirm, Cancel],
+			session, 'Deseja enviá-la?', [Confirm, Cancel],
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle
@@ -193,7 +205,7 @@ library.dialog('/writeMessage', [
 			switch (result.response.entity) {
 			case Confirm:
 				errorLog.update({
-					resolved: true,
+					resolved: false,
 					admin_id: adminData.id,
 					response: adminMessage,
 				}, {

@@ -78,7 +78,7 @@ library.dialog('/', [
 
 			UserMission.findOrCreate({
 				where: { // checks if exists
-					user_id: 'dfss', // user.id,
+					user_id: 'dfss', // user.id, // TODO
 					mission_id: 2,
 				},
 				defaults: {
@@ -102,9 +102,10 @@ library.dialog('/', [
 
 					session.beginDialog('/askLAI');
 				}
-			}).catch((err) => { // TODO VER ISSO!
+			}).catch((err) => { // TODO VER ISSO! E ali em cima
 				session.send('deu bad');
-				errorLog.storeErrorLog(session, err, user.id, user.fb_name);
+				console.log();
+				errorLog.storeErrorLog(session, err, user.id);
 				console.log(`Error findind or creating UserMission => ${err}`);
 			});
 		});
