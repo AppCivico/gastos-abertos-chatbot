@@ -2,6 +2,8 @@
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
+const emoji = require('node-emoji');
+
 const library = new builder.Library('firstMissionAssign');
 
 bot.library(require('./conclusion'));
@@ -9,7 +11,7 @@ bot.library(require('./conclusion'));
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
 const saveSession = require('../../misc/save_session');
-const emoji = require('node-emoji');
+const errorLog = require('../../misc/send_log');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -37,25 +39,24 @@ library.dialog('/', [
 				'\n\nSe precisar de ajuda, entre em contato conosco. :)',
 			}).then(() => {
 				console.log('Added a new notification to be sent!');
-			}).catch((errNotification) => {
-				console.log(`Couldn't save notification :( -> ${errNotification})`);
+			}).catch((err) => {
+				errorLog.storeErrorLog(session, `Couldn't save notification => ${err}`);
 			});
 			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
 			session.send(texts.first_mission.details);
-			session.beginDialog('/askState');
+			session.replaceDialog('/bosta');
 		}).catch((err) => {
-			console.log(`Error creating user mission: ${err}`);
-			session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde ou entre em contato conosco.' +
-				` ${emoji.get('dizzy_face').repeat(3)}`);
-			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-			throw err;
+			errorLog.storeErrorLog(session, `Error finding user => ${err}`);
+			session.send(`Tive um problema ao iniciar suas missões. ${emoji.get('dizzy_face').repeat(2)}. ` +
+			'Estarei tentando resolver o problema. Tente novamente mais tarde.');
+			session.replaceDialog('*:/getStarted');
 		});
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
-library.dialog('/askState', [
+library.dialog('/bosta', [
 	(session) => {
 		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
@@ -92,13 +93,11 @@ library.dialog('/askCity', [
 				fb_id: session.userData.userid,
 			},
 			returning: true,
-		})
-			.then(() => {
-				console.log('User address updated sucessfuly');
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+		}).then(() => {
+			console.log('User address updated sucessfuly');
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Couldn't save user address => ${err}`);
+		});
 		session.replaceDialog('/moreDetails');
 	},
 ]).customAction({

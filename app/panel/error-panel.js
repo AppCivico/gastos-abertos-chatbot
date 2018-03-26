@@ -17,9 +17,7 @@ const Cancel = 'Voltar';
 let lastIndex = 0;
 let errorData = '';
 let adminData = '';
-const moreUserData = ''; // fb_name and A
 let adminMessage = '';
-
 
 function sendAnswerToError(user, Message, session) {
 	let userSend;
@@ -99,17 +97,19 @@ library.dialog('/', [
 		if (result.response) {
 			if (result.response.index === (lastIndex - 1)) { // check if user chose 'Cancel'
 				session.replaceDialog('panelAdmin:/');
-			} else {
+			} else if (arrayName[result.response.index].trim() !== '0') {
 				User.findOne({ // Getting user information => fb_name and address
 					attributes: ['fb_name', 'address', 'session'],
 					where: { id: arrayName[result.response.index].trim() }, // trim whitespace = string to int
 				}).then((userData) => {
-					// passing arguments to the keys in same index position as the option admin just clicked
+				// passing arguments to the keys in same index position as the option admin just clicked
 					arrayData[result.response.index].address = userData.address;
 					arrayData[result.response.index].session = userData.session;
 					arrayData[result.response.index].fb_name = userData.fb_name;
-					session.replaceDialog('/viewMessage', { errorData: arrayData[result.response.index] });
+					session.replaceDialog('/viewMessage', { errorData: arrayData[result.response.index], choiceOptions: [writeAnswer, markAnswered, Cancel] });
 				}).catch((err) => { console.log(err); });
+			} else {
+				session.replaceDialog('/viewMessage', { errorData: arrayData[result.response.index], choiceOptions: [markAnswered, Cancel] });
 			}
 		} else {
 			session.send('Obs. Parece que a opção não foi selecionada corretamente. Tente novamente.');
@@ -124,7 +124,7 @@ library.dialog('/viewMessage', [
 		session.send('O erro está sendo exibida abaixo. Escolha como você deseja responde-la. ' +
 		'Você pode escrever um texto e manda-lo. Ou, se a mensagem não for relevante, marca-la como respondida.');
 		builder.Prompts.choice(
-			session, `${errorData.error_message}\n\n${errorData.fb_name} ${errorData.createdAt}`, [writeAnswer, markAnswered, Cancel],
+			session, `${errorData.error_message}\n\n${errorData.fb_name} ${errorData.createdAt}`, args.choiceOptions,
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle

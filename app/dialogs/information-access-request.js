@@ -99,6 +99,7 @@ library.dialog('/', [
 					`Caso você tenha qualquer tipo de dúvidas nos mande! ${emoji.get('writing_hand')} ` +
 					'\n\nO grupo de lideranças é muito bom para isso! (https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS)');
 					session.send('Além disso, você pode a qualquer momento digitar \'começar\' e eu te levo para o início.');
+					session.beginDialog('/askLAI');
 				}
 			}).catch((err) => {
 				session.beginDialog('/askLAI');

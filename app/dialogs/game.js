@@ -41,10 +41,10 @@ library.dialog('/', [
 							user,
 						} // eslint-disable-line comma-dangle
 					);
-					// return user;
+					return user; // necessary
 				}
 				session.replaceDialog('/currentMission');
-				// return undefined;
+				return undefined; // not so much
 			}).catch((err) => {
 				errorLog.storeErrorLog(session, `Error finding user or counting Mission => ${err}`, user.id);
 				session.send('Ocorreu um erro! Nossos administradores estão sendo avisados e logo eles irão te ajudar.');

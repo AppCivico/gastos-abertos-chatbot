@@ -2,13 +2,16 @@
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
+const emoji = require('node-emoji');
+
 const library = new builder.Library('firstMissionConclusion');
+
 bot.library(require('../second_mission/assign'));
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
-const emoji = require('node-emoji');
 const saveSession = require('../../misc/save_session');
+const errorLog = require('../../misc/send_log');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -112,6 +115,8 @@ library.dialog('/transparencyPortalExists', [
 		}).then((userData) => {
 			session.userData.state = userData.state;
 			session.userData.id = userData.id;
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error finding user (getting state) => ${err}`);
 		});
 
 		saveSession.updateSession(session.userData.userid, session);
@@ -374,7 +379,7 @@ library.dialog('/userUpdate', [
 		});
 
 		session.send('Uhuuu! Concluímos nossa primeira missão! ' +
-			`\n\nEu disse que formariamos uma boa equipe! ${emoji.get('sunglasses')} ${emoji.get('clap').repeat(3)}`);
+			`\n\nEu disse que formariamos uma boa equipe! ${emoji.get('sunglasses')} ${emoji.get('clap').repeat(2)}`);
 
 		User.count({
 			where: {
@@ -396,9 +401,9 @@ library.dialog('/userUpdate', [
 					session.send(msg);
 				}
 			}
-		}).catch((e) => {
-			console.log(`Error${e}`);
-			session.send(`Você já pode começar sua segunda missão! Basta gerar um relatório. ${emoji.get('grinning').repeat(2)}`);
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error finding user => ${err}`);
+			session.send(`Você já pode começar sua segunda missão. Basta gerar um pedido de acesso a informação! ${emoji.get('grinning').repeat(2)}`);
 			session.replaceDialog('*:/promptButtons');
 		});
 
@@ -425,8 +430,7 @@ library.dialog('/userUpdate', [
 			}).then(() => {
 				console.log('Notification Updated! This message will not be sent!');
 			}).catch((err) => {
-				console.log(`Couldn\t update Notification => ${err}! This message will be sent!`);
-				// session.replaceDialog('*:/promptButtons');
+				errorLog.storeErrorLog(session, `Couldn't update Notification 1 => ${err}`);
 			});
 
 			builder.Prompts.choice(
@@ -439,8 +443,8 @@ library.dialog('/userUpdate', [
 				} // eslint-disable-line comma-dangle
 			);
 		}).catch((err) => {
-			console.log(`Error updating mission${err}`);
-			session.send(`Você já pode começar sua segunda missão! Basta gerar um relatório. ${emoji.get('grinning').repeat(2)}`);
+			errorLog.storeErrorLog(session, `Error updating userMission => ${err}`);
+			session.send(`Você já pode começar sua segunda missão. Basta gerar um pedido de acesso a informação! ${emoji.get('grinning').repeat(2)}`);
 			session.replaceDialog('*:/promptButtons');
 		});
 	},
@@ -448,12 +452,7 @@ library.dialog('/userUpdate', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case nextMission:
-			session.replaceDialog(
-				'secondMissionAssign:/assign',
-				{
-					user,
-				} // eslint-disable-line comma-dangle
-			);
+			session.replaceDialog('secondMissionAssign:/assign');
 			break;
 		default: // WelcomeBack
 			session.replaceDialog('*:/getStarted');

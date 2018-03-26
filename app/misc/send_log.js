@@ -23,6 +23,9 @@ const storeErrorLog = (session, error, userID = 0) => {
 				admin: { // excludes whoever is sending the direct message
 					$eq: true,
 				},
+				fb_id: {
+					$ne: session.userData.userid,
+				},
 			},
 		}).then((listAdmin) => {
 			listAdmin.forEach((element) => {
