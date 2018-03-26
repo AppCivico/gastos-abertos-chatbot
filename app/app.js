@@ -22,8 +22,10 @@ bot.library(require('./panel/admin-panel'));
 bot.library(require('./send-message-menu'));
 bot.library(require('./misc/error_message'));
 
-const User = require('./server/schema/models').user;
 const saveSession = require('./misc/save_session');
+const errorLog = require('./misc/send_log');
+
+const User = require('./server/schema/models').user;
 
 const GastosAbertosInformation = 'Quero aprender mais';
 const Missions = 'Minha cidade?';
@@ -135,10 +137,8 @@ bot.dialog('/', [
 							$eq: session.userData.userid,
 						},
 					},
-				}).then(() => {
-					console.log('Facebook Name atualizado com sucesso!');
 				}).catch((err) => {
-					console.log(`Não foi possível atualizar Facebook Name => ${err}`);
+					errorLog.storeErrorLog(session, `Couldn't update facebook name => ${err}`, user.get('id'));
 				})) // eslint-disable-line comma-dangle
 			);
 			// if user was created, there's no point in updating
@@ -166,7 +166,7 @@ bot.dialog('/', [
 				session.replaceDialog('/getStarted');
 			}
 		}).catch((err) => {
-			console.log(`Error creating user => ${err}`);
+			errorLog.storeErrorLog(session, `Error creating user at app.js! => ${err}`);
 			session.replaceDialog('/promptButtons');
 		}); // eslint-disable-line comma-dangle
 	},
@@ -191,7 +191,6 @@ bot.dialog('/getStarted', [
 			'\n\nQualquer dúvida, escreva uma mensagem e nos envie. Vamos responder o mais cedo possível.');
 			session.send('Para retornar ao começo dessa conversa, a qualquer momento, basta digitar \'começar\'.');
 
-			// TODO remover todas as menções de missão para o usuário.('Minha cidade?' deve ser trocado?)
 			User.findOne({ // checks if user has an address and asks permission if he doesn't
 				attributes: ['receiveMessage'],
 				where: { fb_id: session.userData.userid },
@@ -201,7 +200,8 @@ bot.dialog('/getStarted', [
 				} else {
 					session.replaceDialog('/promptButtons');
 				}
-			}).catch(() => {
+			}).catch((err) => {
+				errorLog.storeErrorLog(session, `Error finding user for permission! => ${err}`);
 				session.replaceDialog('/promptButtons');
 			});
 		} else { // welcome back
@@ -225,7 +225,8 @@ bot.dialog('/promptButtons', [
 			if (user.admin === true) {
 				menuOptions.push(adminPanel);
 			}
-		}).catch(() => {
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error finding user for adminPanel! => ${err}`);
 			session.replaceDialog('/promptButtons');
 		}).finally(() => {
 			next();
@@ -306,26 +307,20 @@ bot.dialog('/askPermission', [
 				}, {
 					where: { fb_id: session.userData.userid },
 					returning: true,
-				}).then(() => {
-					console.log('User address updated sucessfuly');
 				}).catch((err) => {
-					console.log(err);
-					throw err;
+					errorLog.storeErrorLog(session, `Error updating user permission[Yes]! => ${err}`);
 				});
 				break;
 			default: // No
-				session.send(`Tranquilo! Você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
+				session.send(`Tranquilo! Se quiser, você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
 				User.update({
 					address: session.message.address,
 					receiveMessage: false,
 				}, {
 					where: { fb_id: session.userData.userid },
 					returning: true,
-				}).then(() => {
-					console.log('User address erased sucessfuly');
 				}).catch((err) => {
-					console.log(err);
-					throw err;
+					errorLog.storeErrorLog(session, `Error updating user permission[No]! => ${err}`);
 				});
 				break;
 			}
