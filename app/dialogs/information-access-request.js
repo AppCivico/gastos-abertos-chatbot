@@ -102,7 +102,7 @@ library.dialog('/', [
 				}
 			}).catch((err) => {
 				session.beginDialog('/askLAI');
-				errorLog.storeErrorLog(session, `Error findind or creating UserMission => ${err}`, user.id);
+				errorLog.storeErrorLog(session, `Error finding or creating UserMission => ${err}`, user.id);
 			});
 		}).catch((err) => {
 			session.beginDialog('/askLAI');

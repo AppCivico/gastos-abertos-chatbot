@@ -4,6 +4,7 @@
 
 const library = new builder.Library('contact_doubt');
 const emoji = require('node-emoji');
+const errorLog = require('../misc/send_log');
 
 bot.library(require('../panel/answer-messages'));
 
@@ -33,7 +34,7 @@ library.dialog('/receives', [
 		}).then((userData) => {
 			user = userData; // getting admin user_ID
 		}).catch((err) => {
-			session.send(`Erro: => ${err}`);
+			errorLog.storeErrorLog(session, `Error findind User => ${err}`, user.id);
 		}).finally(() => {
 			next();
 		});
@@ -67,8 +68,7 @@ library.dialog('/receives', [
 				});
 			});
 		}).catch((err) => {
-			console.log(`Couldn't create new message => ${err}`);
-			session.send('Tivemos um problema técnico! Tente novamente mais tarde ou entre em nosso grupo!');
+			errorLog.storeErrorLog(session, `Error creating user message => ${err}`, user.id);
 		}).finally(() => {
 			session.replaceDialog(user.session.dialogName);
 		});

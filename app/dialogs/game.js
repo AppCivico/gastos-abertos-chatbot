@@ -9,6 +9,7 @@ bot.library(require('./second_mission/conclusion'));
 const emoji = require('node-emoji');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const saveSession = require('../misc/save_session');
+const errorLog = require('../misc/send_log');
 
 const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
@@ -40,10 +41,14 @@ library.dialog('/', [
 							user,
 						} // eslint-disable-line comma-dangle
 					);
-					return user;
+					// return user;
 				}
 				session.replaceDialog('/currentMission');
-				return undefined;
+				// return undefined;
+			}).catch((err) => {
+				errorLog.storeErrorLog(session, `Error finding user or counting Mission => ${err}`, user.id);
+				session.send('Ocorreu um erro! Nossos administradores estão sendo avisados e logo eles irão te ajudar.');
+				session.replaceDialog('*:/getStarted');
 			});
 		});
 	},
@@ -108,6 +113,10 @@ library.dialog('/currentMission', [
 					);
 				}
 			}
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error finding user or counting Mission => ${err}`, user.id);
+			session.send('Ocorreu um erro! Nossos administradores estão sendo avisados e logo eles irão te ajudar.');
+			session.replaceDialog('*:/getStarted');
 		});
 	},
 

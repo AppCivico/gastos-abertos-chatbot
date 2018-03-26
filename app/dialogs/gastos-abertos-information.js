@@ -3,9 +3,12 @@
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const saveSession = require('../misc/save_session');
+const errorLog = require('../misc/send_log');
 
 const library = new builder.Library('gastosAbertosInformation');
 bot.library(require('./contact'));
+
+const User = require('../server/schema/models').user;
 
 const accessLaw = 'Saber mais';
 const goBack = 'Voltar ao início';
@@ -16,8 +19,6 @@ let receiveYes;
 let receiveNo;
 let newAddress;
 let booleanMessage;
-
-let User;
 
 library.dialog('/', [
 	(session) => {
@@ -88,7 +89,7 @@ library.dialog('/receiveMessage', [
 		User.findOne({
 			where: { fb_id: session.userData.userid },
 		}).then((user) => {
-			if (user.get('address') === null) {
+			if (user.get('receiveMessage') === null || user.get('receiveMessage') === false) {
 				receiveDialog = 'No momento, você não está recebendo nenhum de nossas mensagens diretas.\n\nDeseja começar a recebê-las?';
 				receiveYes = 'Sim, quero receber!';
 				receiveNo = 'Não quero receber';
@@ -103,9 +104,9 @@ library.dialog('/receiveMessage', [
 			}
 			session.replaceDialog('/updateAddress');
 		}).catch((err) => {
-			console.log(err);
-			session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)}. Estou com problemas técnicos no momento.`);
-			session.replaceDialog('/promptButtons');
+			errorLog.storeErrorLog(session, `Error finding user => ${err}`);
+			session.send(`Ocorreu um erro! ${emoji.get('dizzy_face').repeat(2)}. Tente novamente mais tarde.`);
+			session.replaceDialog('*:/getStarted');
 		});
 	},
 ]);
@@ -134,19 +135,15 @@ library.dialog('/updateAddress', [
 						fb_id: session.userData.userid,
 					},
 					returning: true,
-				})
-					.then(() => {
-						session.send(`Suas preferências foram atualizadas! ${emoji.get('slightly_smiling_face').repeat(2)}`);
-						console.log('User address updated sucessfuly');
-					})
-					.catch((err) => {
-						session.send(`Desculpe-me. ${emoji.get('dizzy_face').repeat(2)}. Estou com problemas técnicos no momento.` +
-						'\n\nTente novamente mais tarde.');
-						console.log(err);
-						throw err;
-					}).finally(() => {
-						session.replaceDialog('/promptButtons');
-					});
+				}).then(() => {
+					session.send(`Suas preferências foram atualizadas! ${emoji.get('slightly_smiling_face').repeat(2)}`);
+					console.log('User address updated sucessfuly');
+				}).catch((err) => {
+					errorLog.storeErrorLog(session, `Error finding user => ${err}`);
+					session.send(`Ocorreu um erro! ${emoji.get('dizzy_face').repeat(2)}. Tente novamente mais tarde.`);
+				}).finally(() => {
+					session.replaceDialog('/promptButtons');
+				});
 				break;
 			default: // receiveNo
 				session.send(`Ok! Suas preferências não foram atualizadas. ${emoji.get('slightly_smiling_face').repeat(2)}`);
