@@ -2,6 +2,8 @@
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 /* eslint no-plusplus: 0 */
+/* eslint max-len: 0 */
+
 
 const request = require('request');
 const pdf = require('html-pdf');
@@ -32,31 +34,10 @@ const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
 
 let user;
-
-// '' => no answer
-// 0 => portal has thing, nice!
-// 1 => portal doesn't has thing, we have to include it in the request
-const answers = {
-	answer1: '',
-	answer2: '',
-	answer3: '',
-	answer4: '',
-	answer5: '',
-	answer6: '',
-	answer7: '',
-	answer8: '',
-	answer9: '',
-	answer10: '',
-	answer11: '',
-	answer12: '',
-	answer13: '',
-};
-
 let itens = []; // eslint-disable-line prefer-const
 
 const generatedRequest = new Base64File();
 const path = '/tmp/';
-let file = '';
 
 const apiUri = process.env.MAILCHIMP_API_URI;
 const apiUser = process.env.MAILCHIMP_API_USER;
@@ -189,7 +170,27 @@ library.dialog('/askLAI', [
 });
 library.dialog('/questionOne', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		// session.userData.answer.answerN where N is questionNumber
+		// '' => no answer
+		// 0 => portal has thing, nice!
+		// 1 => portal doesn't has thing, we have to include it in the request
+
+		session.userData.answers = {
+			answer1: '',
+			answer2: '',
+			answer3: '',
+			answer4: '',
+			answer5: '',
+			answer6: '',
+			answer7: '',
+			answer8: '',
+			answer9: '',
+			answer10: '',
+			answer11: '',
+			answer12: '',
+			answer13: '',
+		};
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		// questionNumber shows the question number in each question(disabled 2 rules for this)
 		session.userData.questionNumber = 1; // reseting value
 		currentQuestion = `${session.userData.questionNumber} - Seu município identifica de onde vêm os recursos que ele recebe? ` +
@@ -207,16 +208,17 @@ library.dialog('/questionOne', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer1 = 0;
+			session.userData.answers.answer1 = 0;
 			break;
 		default: // No
-			answers.answer1 = 1;
+			session.userData.answers.answer1 = 1;
+
 			itens.push('<p> - Disponibilização sobre receitas, despesas e endividamento público, nos termos da Lei Complementar 131, ' +
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
 		}
-		// session.replaceDialog('/questionTwo');
-		session.beginDialog('/questionEleven'); // for time-saving testing purposes
+		session.replaceDialog('/questionTwo');
+		// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -224,8 +226,7 @@ library.dialog('/questionOne', [
 
 library.dialog('/questionTwo', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
-
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência disponibiliza dados referentes a remuneração de ` +
 		'cada um dos agentes públicos, individualizada?';
 		builder.Prompts.choice(
@@ -241,10 +242,10 @@ library.dialog('/questionTwo', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer2 = 0;
+			session.userData.answers.answer2 = 0;
 			break;
 		default: // No
-			answers.answer2 = 1;
+			session.userData.answers.answer2 = 1;
 			itens.push('<p> - Disponibilização sobre remuneração de cada um dos agentes públicos, ' +
 			'individualizada – o modelo do Portal da Transparência do Governo Federal é um exemplo;</p>');
 			break;
@@ -258,7 +259,7 @@ library.dialog('/questionTwo', [
 // /*
 library.dialog('/questionThree', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência disponibiliza: a relação de pagamentos de diárias, ` +
 		'a aquisição de passagens aéreas e adiantamento de despesas?';
 		builder.Prompts.choice(
@@ -274,10 +275,10 @@ library.dialog('/questionThree', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer3 = 0;
+			session.userData.answers.answer3 = 0;
 			break;
 		default: // No
-			answers.answer3 = 1;
+			session.userData.answers.answer3 = 1;
 			itens.push('<p> - Disponibilização da relação de pagamentos de diárias, aquisição de passagens aéreas (destino e motivo da viagem) ' +
 			'e adiantamento de despesas</p>');
 			break;
@@ -290,7 +291,7 @@ library.dialog('/questionThree', [
 
 library.dialog('/questionFour', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência disponibiliza as despesas realizadas com cartões corporativos em nome da prefeitura?`;
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -305,10 +306,10 @@ library.dialog('/questionFour', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer4 = 0;
+			session.userData.answers.answer4 = 0;
 			break;
 		default: // No
-			answers.answer4 = 1;
+			session.userData.answers.answer4 = 1;
 			itens.push('<p> - Disponibilização das despesas realizadas com cartões corporativos em nome da prefeitura</p>');
 			break;
 		}
@@ -320,7 +321,7 @@ library.dialog('/questionFour', [
 
 library.dialog('/questionFive', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion =	`${session.userData.questionNumber} - O portal de transparência disponibiliza os valores referentes às verbas de representação,` +
 		'de gabinete e reembolsáveis de qualquer natureza?';
 		builder.Prompts.choice(
@@ -336,10 +337,10 @@ library.dialog('/questionFive', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer5 = 0;
+			session.userData.answers.answer5 = 0;
 			break;
 		default: // No
-			answers.answer5 = 1;
+			session.userData.answers.answer5 = 1;
 			itens.push('<p> - Disponibilização dos valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza</p>');
 			break;
 		}
@@ -351,7 +352,8 @@ library.dialog('/questionFive', [
 
 library.dialog('/questionSix', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
+
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência disponibiliza os editais de licitação, dos procedimentos licitatórios, ` +
 		'com indicação das licitações abertas, em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados?';
 		builder.Prompts.choice(
@@ -367,10 +369,10 @@ library.dialog('/questionSix', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer6 = 0;
+			session.userData.answers.answer6 = 0;
 			break;
 		default: // No
-			answers.answer6 = 1;
+			session.userData.answers.answer6 = 1;
 			itens.push('<p> - Disponibilização dos editais de licitação, dos procedimentos licitatórios, com indicação das licitações abertas,' +
 			' em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados</p>');
 			break;
@@ -383,7 +385,7 @@ library.dialog('/questionSix', [
 
 library.dialog('/questionSeven', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência realiza a disponibilização da íntegra dos procedimentos de dispensa e ` +
 		'inexigibilidade de licitações, com respectivas fundamentações?';
 		builder.Prompts.choice(
@@ -399,10 +401,10 @@ library.dialog('/questionSeven', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer7 = 0;
+			session.userData.answers.answer7 = 0;
 			break;
 		default: // No
-			answers.answer7 = 1;
+			session.userData.answers.answer7 = 1;
 			itens.push('<p> - Disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, ' +
 			'com respectivas fundamentações</p>');
 			break;
@@ -415,7 +417,7 @@ library.dialog('/questionSeven', [
 
 library.dialog('/questionEight', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		session.send(`Ufa! Não desanime, parceiro. Faltam apenas ${14 - session.userData.questionNumber} perguntas para finalizar seu pedido. ${emoji.get('wink')}`);
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência realiza a disponibilização do controle de estoque da prefeitura, ` +
 		'com lista de entradas e saídas de bens patrimoniais, além da relação de cessões, permutas e doação de bens?';
@@ -432,10 +434,10 @@ library.dialog('/questionEight', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer8 = 0;
+			session.userData.answers.answer8 = 0;
 			break;
 		default: // No
-			answers.answer8 = 1;
+			session.userData.answers.answer8 = 1;
 			itens.push('<p>-Disponibilização do controle de estoque da prefeitura, com lista de entradas' +
 		' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
 			break;
@@ -448,7 +450,7 @@ library.dialog('/questionEight', [
 
 library.dialog('/questionNine', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência realiza a disponibilização das notas-fiscais eletrônicas ` +
 		'que deram origem a pagamentos?';
 		builder.Prompts.choice(
@@ -464,10 +466,10 @@ library.dialog('/questionNine', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer9 = 0;
+			session.userData.answers.answer9 = 0;
 			break;
 		default: // No
-			answers.answer9 = 1;
+			session.userData.answers.answer9 = 1;
 			itens.push('<p> - Disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos</p>');
 			break;
 		}
@@ -479,7 +481,7 @@ library.dialog('/questionNine', [
 
 library.dialog('/questionTen', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência realiza a disponibilização do plano plurianual; ` +
 		'da lei de diretrizes orçamentárias; da lei orçamentária?';
 		builder.Prompts.choice(
@@ -495,10 +497,10 @@ library.dialog('/questionTen', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer10 = 0;
+			session.userData.answers.answer10 = 0;
 			break;
 		default: // No
-			answers.answer10 = 1;
+			session.userData.answers.answer10 = 1;
 			itens.push('<p> - Disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária</p>');
 			break;
 		}
@@ -510,7 +512,7 @@ library.dialog('/questionTen', [
 
 library.dialog('/questionEleven', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência realiza a disponibilização dos relatórios Resumido de Execução Orçamentária; ` +
 					'Relatórios de Gestão Fiscal; Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões: ' +
 					' 		\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
@@ -529,10 +531,10 @@ library.dialog('/questionEleven', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer11 = 0;
+			session.userData.answers.answer11 = 0;
 			break;
 		default: // No
-			answers.answer11 = 1;
+			session.userData.answers.answer11 = 1;
 			itens.push('<p> - Disponibilização dos relatórios Resumido de Execução Orçamentária; Relatórios de Gestão Fiscal; ' +
 			' Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões:' +
 			'	\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
@@ -548,7 +550,7 @@ library.dialog('/questionEleven', [
 
 library.dialog('/questionTwelve', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência realiza a disponibilização dos extratos de conta única?`;
 		builder.Prompts.choice(
 			session, currentQuestion,
@@ -563,10 +565,10 @@ library.dialog('/questionTwelve', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer12 = 0;
+			session.userData.answers.answer12 = 0;
 			break;
 		default: // No
-			answers.answer12 = 1;
+			session.userData.answers.answer12 = 1;
 			itens.push('<p> - Disponibilização dos extratos de conta única</p>');
 			break;
 		}
@@ -578,7 +580,7 @@ library.dialog('/questionTwelve', [
 
 library.dialog('/questionThirteen', [
 	(session) => {
-		saveSession.updateSession(session.userData.userid, session,	{ answers, user });
+		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		currentQuestion = `${session.userData.questionNumber} - O portal de transparência realiza a disponibilização das despesas em um único arquivo em formato ` +
 		'legível por máquina incluindo as colunas: função, subfunção, programa, ação, valor liquidado e valor empenhado?';
 		builder.Prompts.choice(
@@ -594,10 +596,10 @@ library.dialog('/questionThirteen', [
 		session.userData.questionNumber++; // in case of interruptions
 		switch (args.response.entity) {
 		case Yes:
-			answers.answer13 = 0;
+			session.userData.answers.answer13 = 0;
 			break;
 		default: // No
-			answers.answer13 = 1;
+			session.userData.answers.answer13 = 1;
 			itens.push('<p> - Disponibilização das despesas em um único arquivo em formato legível por máquina incluindo as colunas:' +
 			' função, subfunção, programa, ação, valor liquidado e valor empenhado\n\n</p>');
 			break;
@@ -672,8 +674,8 @@ library.dialog('/generateRequest', [
 		' e que acompanhe a resposta a esta solicitação.</p></div>';
 
 		pdf.create(html).toStream((err, stream) => {
-			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${answers.requesterName}_LAI.pdf`));
-			file = pdfFile.path;
+			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${session.userData.requesterName}_LAI.pdf`));
+			session.userData.file = pdfFile.path;
 			next();
 		});
 		itens.length = 0;
@@ -698,7 +700,7 @@ library.dialog('/generateRequest', [
 	},
 
 	(session, args, next) => {
-		let data = generatedRequest.loadSync(path, file.slice(5));
+		let data = generatedRequest.loadSync(path, session.userData.file.slice(5));
 		data = JSON.stringify(data);
 		// Uploading the generated PDF to MailChimp
 		const dataString = `{"name":"${session.userData.requesterName}_LAI.pdf" , "file_data":${data}}`;
@@ -756,7 +758,7 @@ library.dialog('/generateRequest', [
 					// creates request in user_information_acess_request
 					infoRequest.create({ // saves the request generated
 						user_id: user.id,
-						metadata: answers,
+						metadata: session.userData.answers,
 						isMission: true,
 						missionID: missionData[1][0].id,
 					}).then(() => {
@@ -787,7 +789,7 @@ library.dialog('/generateRequest', [
 		}
 
 		request(options, callback);
-		fs.unlink(file);
+		fs.unlink(session.userData.file);
 
 		Notification.update({
 			// sentAlready == true and timeSent == null
@@ -823,6 +825,7 @@ library.dialog('/generateRequest', [
 	},
 
 	(session, args) => {
+		session.userData.answers = ''; // reseting to free up space
 		switch (args.response.entity) {
 		default: // GoBack
 			session.replaceDialog('*:/getStarted');
