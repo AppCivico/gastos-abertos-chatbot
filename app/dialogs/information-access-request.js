@@ -658,7 +658,7 @@ library.dialog('/askFullName', [
 });
 
 library.dialog('/generateRequest', [
-	(session) => {
+	(session, args, next) => {
 		saveSession.updateSession(session.userData.userid, session);
 		// style config that will be used for the html creation
 		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em';
@@ -672,22 +672,23 @@ library.dialog('/generateRequest', [
 		' e que acompanhe a resposta a esta solicitação.</p></div>';
 
 		pdf.create(html).toStream((err, stream) => {
-			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${session.userData.requesterName}_LAI.pdf`));
+			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${answers.requesterName}_LAI.pdf`));
 			file = pdfFile.path;
-
-			builder.Prompts.choice(
-				session,
-				'Legal! Acabamos! Vamos gerar seu pedido?',
-				[HappyYes],
-				{
-					listStyle: builder.ListStyle.button,
-					retryPrompt: retryPrompts.choice,
-				} // eslint-disable-line comma-dangle
-			);
+			next();
 		});
 		itens.length = 0;
 	},
-
+	(session) => {
+		builder.Prompts.choice(
+			session,
+			'Legal! Acabamos! Vamos gerar seu pedido?',
+			[HappyYes],
+			{
+				listStyle: builder.ListStyle.button,
+				retryPrompt: retryPrompts.choice,
+			} // eslint-disable-line comma-dangle
+		);
+	},
 	(session, args, next) => {
 		switch (args.response.entity) {
 		default: // Doesn't matter what happens here
