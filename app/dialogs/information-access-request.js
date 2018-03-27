@@ -34,7 +34,7 @@ const goBack = 'Voltar para o início';
 let currentQuestion = ''; // repeats the current question after/if the retry.prompt is activated
 
 let user;
-let itens = []; // eslint-disable-line prefer-const
+// let itens = []; // eslint-disable-line prefer-const
 
 const generatedRequest = new Base64File();
 const path = '/tmp/';
@@ -190,6 +190,8 @@ library.dialog('/questionOne', [
 			answer12: '',
 			answer13: '',
 		};
+
+		session.userData.itens = [];
 		saveSession.updateSession(session.userData.userid, session,	{ answers: session.userData.answers, user });
 		// questionNumber shows the question number in each question(disabled 2 rules for this)
 		session.userData.questionNumber = 1; // reseting value
@@ -213,12 +215,12 @@ library.dialog('/questionOne', [
 		default: // No
 			session.userData.answers.answer1 = 1;
 
-			itens.push('<p> - Disponibilização sobre receitas, despesas e endividamento público, nos termos da Lei Complementar 131, ' +
+			session.userData.itens.push('<p> - Disponibilização sobre receitas, despesas e endividamento público, nos termos da Lei Complementar 131, ' +
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
 		}
-		session.replaceDialog('/questionTwo');
-		// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
+		// session.replaceDialog('/questionTwo');
+		session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -246,7 +248,7 @@ library.dialog('/questionTwo', [
 			break;
 		default: // No
 			session.userData.answers.answer2 = 1;
-			itens.push('<p> - Disponibilização sobre remuneração de cada um dos agentes públicos, ' +
+			session.userData.itens.push('<p> - Disponibilização sobre remuneração de cada um dos agentes públicos, ' +
 			'individualizada – o modelo do Portal da Transparência do Governo Federal é um exemplo;</p>');
 			break;
 		}
@@ -279,7 +281,7 @@ library.dialog('/questionThree', [
 			break;
 		default: // No
 			session.userData.answers.answer3 = 1;
-			itens.push('<p> - Disponibilização da relação de pagamentos de diárias, aquisição de passagens aéreas (destino e motivo da viagem) ' +
+			session.userData.itens.push('<p> - Disponibilização da relação de pagamentos de diárias, aquisição de passagens aéreas (destino e motivo da viagem) ' +
 			'e adiantamento de despesas</p>');
 			break;
 		}
@@ -310,7 +312,7 @@ library.dialog('/questionFour', [
 			break;
 		default: // No
 			session.userData.answers.answer4 = 1;
-			itens.push('<p> - Disponibilização das despesas realizadas com cartões corporativos em nome da prefeitura</p>');
+			session.userData.itens.push('<p> - Disponibilização das despesas realizadas com cartões corporativos em nome da prefeitura</p>');
 			break;
 		}
 		session.beginDialog('/questionFive');
@@ -341,7 +343,7 @@ library.dialog('/questionFive', [
 			break;
 		default: // No
 			session.userData.answers.answer5 = 1;
-			itens.push('<p> - Disponibilização dos valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza</p>');
+			session.userData.itens.push('<p> - Disponibilização dos valores referentes às verbas de representação, de gabinete e reembolsáveis de qualquer natureza</p>');
 			break;
 		}
 		session.beginDialog('/questionSix');
@@ -373,7 +375,7 @@ library.dialog('/questionSix', [
 			break;
 		default: // No
 			session.userData.answers.answer6 = 1;
-			itens.push('<p> - Disponibilização dos editais de licitação, dos procedimentos licitatórios, com indicação das licitações abertas,' +
+			session.userData.itens.push('<p> - Disponibilização dos editais de licitação, dos procedimentos licitatórios, com indicação das licitações abertas,' +
 			' em andamento e já realizadas, dos contratos e aditivos, e dos convênios celebrados</p>');
 			break;
 		}
@@ -405,7 +407,7 @@ library.dialog('/questionSeven', [
 			break;
 		default: // No
 			session.userData.answers.answer7 = 1;
-			itens.push('<p> - Disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, ' +
+			session.userData.itens.push('<p> - Disponibilização da íntegra dos procedimentos de dispensa e inexigibilidade de licitações, ' +
 			'com respectivas fundamentações</p>');
 			break;
 		}
@@ -438,7 +440,7 @@ library.dialog('/questionEight', [
 			break;
 		default: // No
 			session.userData.answers.answer8 = 1;
-			itens.push('<p>-Disponibilização do controle de estoque da prefeitura, com lista de entradas' +
+			session.userData.itens.push('<p>-Disponibilização do controle de estoque da prefeitura, com lista de entradas' +
 		' e saídas de bens patrimoniais,além da relação de cessões, permutas e doação de bens</p>');
 			break;
 		}
@@ -470,7 +472,7 @@ library.dialog('/questionNine', [
 			break;
 		default: // No
 			session.userData.answers.answer9 = 1;
-			itens.push('<p> - Disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos</p>');
+			session.userData.itens.push('<p> - Disponibilização das notas-fiscais eletrônicas que deram origem a pagamentos</p>');
 			break;
 		}
 		session.beginDialog('/questionTen');
@@ -501,7 +503,7 @@ library.dialog('/questionTen', [
 			break;
 		default: // No
 			session.userData.answers.answer10 = 1;
-			itens.push('<p> - Disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária</p>');
+			session.userData.itens.push('<p> - Disponibilização do plano plurianual; da lei de diretrizes orçamentárias; da lei orçamentária</p>');
 			break;
 		}
 		session.beginDialog('/questionEleven');
@@ -535,7 +537,7 @@ library.dialog('/questionEleven', [
 			break;
 		default: // No
 			session.userData.answers.answer11 = 1;
-			itens.push('<p> - Disponibilização dos relatórios Resumido de Execução Orçamentária; Relatórios de Gestão Fiscal; ' +
+			session.userData.itens.push('<p> - Disponibilização dos relatórios Resumido de Execução Orçamentária; Relatórios de Gestão Fiscal; ' +
 			' Atas das Audiências Públicas de Avaliação de Metas Fiscais, com a abordagem das seguintes questões:' +
 			'	\n\ni) Demonstrativo de Aplicação na Área de Educação;' +
 			'	\n\nii) Demonstrativo de Aplicação na Área de Saúde;' +
@@ -569,7 +571,7 @@ library.dialog('/questionTwelve', [
 			break;
 		default: // No
 			session.userData.answers.answer12 = 1;
-			itens.push('<p> - Disponibilização dos extratos de conta única</p>');
+			session.userData.itens.push('<p> - Disponibilização dos extratos de conta única</p>');
 			break;
 		}
 		session.beginDialog('/questionThirteen');
@@ -600,7 +602,7 @@ library.dialog('/questionThirteen', [
 			break;
 		default: // No
 			session.userData.answers.answer13 = 1;
-			itens.push('<p> - Disponibilização das despesas em um único arquivo em formato legível por máquina incluindo as colunas:' +
+			session.userData.itens.push('<p> - Disponibilização das despesas em um único arquivo em formato legível por máquina incluindo as colunas:' +
 			' função, subfunção, programa, ação, valor liquidado e valor empenhado\n\n</p>');
 			break;
 		}
@@ -667,7 +669,7 @@ library.dialog('/generateRequest', [
 		const html = `<p style="${styleDiv}">Eu, ${session.userData.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011,` +
 		' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
 		' e na Lei Complementar 131, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em' +
-		` página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="${styleDiv}">${itens.join('')}` +
+		` página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="${styleDiv}">${session.userData.itens.join('')}` +
 		`</div><div style="${styleDiv}"><p>Caso a disponibilização desde a vigência da Lei Complementar 131/2009 não seja possível,` +
 		' solicito que a impossibilidade de apresentação de informações seja motivada, sob pena de responsabilidade, ' +
 		' e que a série histórica mais longa disponível à Prefeitura das informações seja disponibilizada em página oficial na internet ' +
@@ -678,7 +680,7 @@ library.dialog('/generateRequest', [
 			session.userData.file = pdfFile.path;
 			next();
 		});
-		itens.length = 0;
+		session.userData.itens.length = 0; // reseting to free up space
 	},
 	(session) => {
 		builder.Prompts.choice(
