@@ -42,7 +42,7 @@ library.dialog('/', [
 			}).catch((err) => {
 				errorLog.storeErrorLog(session, `Couldn't save notification => ${err}`);
 			});
-			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
+			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sunglasses').repeat(2)}`);
 			session.send(texts.first_mission.details);
 			session.replaceDialog('/bosta');
 		}).catch((err) => {
