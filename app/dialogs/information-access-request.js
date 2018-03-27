@@ -37,7 +37,6 @@ let user;
 // 0 => portal has thing, nice!
 // 1 => portal doesn't has thing, we have to include it in the request
 const answers = {
-	requesterName: '',
 	answer1: '',
 	answer2: '',
 	answer3: '',
@@ -216,8 +215,8 @@ library.dialog('/questionOne', [
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
 		}
-		session.replaceDialog('/questionTwo');
-		// session.beginDialog('/questionEleven'); // for time-saving testing purposes
+		// session.replaceDialog('/questionTwo');
+		session.beginDialog('/questionEleven'); // for time-saving testing purposes
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -608,7 +607,8 @@ library.dialog('/questionThirteen', [
 			attributes: ['name'],
 			where: { fb_id: session.userData.userid },
 		}).then((userData) => {
-			answers.requesterName = userData.name;
+			session.userData.requesterName = userData.name;
+			// answers.requesterName = userData.name;
 			if (userData.name === 'undefined' || userData.name === null || userData.name === '') {
 				session.beginDialog('/askFullName');
 			} else {
@@ -629,9 +629,9 @@ library.dialog('/askFullName', [
 	},
 	(session) => {
 		// session.message.text = comes from customAction
-		answers.requesterName = session.message.text.split('/').join(''); // stops user from entering '/' and breaking the file creation
+		session.userData.requesterName = session.message.text.split('/').join(''); // stops user from entering '/' and breaking the file creation
 		User.update({
-			name: answers.requesterName,
+			name: session.userData.requesterName,
 		}, {
 			where: {
 				fb_id: session.userData.userid,
@@ -662,7 +662,7 @@ library.dialog('/generateRequest', [
 		saveSession.updateSession(session.userData.userid, session);
 		// style config that will be used for the html creation
 		const styleDiv = 'font-size:12pt;margin-left:1.5em;margin-right:1.5em;margin-bottom:0.5em;margin-top:2.0em';
-		const html = `<p style="${styleDiv}">Eu, ${answers.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011,` +
+		const html = `<p style="${styleDiv}">Eu, ${session.userData.requesterName}, com fundamento na Lei 12.527, de 18 de novembro de 2011,` +
 		' de 27 de maio de 2009, venho por meio deste pedido solicitar o acesso às seguintes informações, ' +
 		' e na Lei Complementar 131, que devem ser disponibilizadas com periodicidade diária ou mensal (quando aplicável) em' +
 		` página oficial na internet desde o momento em que a Lei Complementar 131/2009 passou a vigorar:</p><div style="${styleDiv}">${itens.join('')}` +
@@ -672,7 +672,7 @@ library.dialog('/generateRequest', [
 		' e que acompanhe a resposta a esta solicitação.</p></div>';
 
 		pdf.create(html).toStream((err, stream) => {
-			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${answers.requesterName}_LAI.pdf`));
+			const pdfFile = stream.pipe(fs.createWriteStream(`/tmp/${session.userData.requesterName}_LAI.pdf`));
 			file = pdfFile.path;
 
 			builder.Prompts.choice(
@@ -700,7 +700,7 @@ library.dialog('/generateRequest', [
 		let data = generatedRequest.loadSync(path, file.slice(5));
 		data = JSON.stringify(data);
 		// Uploading the generated PDF to MailChimp
-		const dataString = `{"name":"${answers.requesterName}_LAI.pdf" , "file_data":${data}}`;
+		const dataString = `{"name":"${session.userData.requesterName}_LAI.pdf" , "file_data":${data}}`;
 
 		const options = {
 			url: apiUri,
@@ -726,7 +726,7 @@ library.dialog('/generateRequest', [
 								template_type: 'generic',
 								elements: [
 									{
-										title: `Pedido de acesso à informação gerado pelo Guaxi para ${answers.requesterName}`,
+										title: `Pedido de acesso à informação gerado pelo Guaxi para ${session.userData.requesterName}`,
 										buttons: [{
 											type: 'web_url',
 											url: obj.full_size_url,
