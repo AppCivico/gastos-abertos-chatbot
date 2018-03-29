@@ -90,6 +90,7 @@ library.dialog('/secondMissionQuestions', [
 				session.send(`Que pena! ${emoji.get('cold_sweat')} No entanto, recomendamos que você o protocolize mesmo assim ` +
 				'pois é muito importante que a sociedade civil demande dados. ' +
 				'\nDepois de protocolar, você poderá responder esse questionário em \'Gerar Pedido\'. ');
+				session.replaceDialog('*:/getStarted');
 				break;
 			}
 		}

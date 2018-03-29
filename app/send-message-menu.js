@@ -49,12 +49,12 @@ library.dialog('/', [
 
 	(session) => {
 		builder.Prompts.choice(
-			session, 'Este é o menu para mandarmos mensagens aos usuários! Apenas usuários que aceitaram receber essas mensagens irão recebê-las.' +
-			'\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), visualize como fica a mensagem e confirme. ' +
+			session, 'Este é o menu para os embaixadores mandarem mensagens aos usuários! Apenas quem aceitarou receber mensagens irão recebê-las.' +
+			'\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), visualize como fica e confirme. ' +
 			`A mensagem será mandada em nome do grupo ${session.userData.group}. Você não receberá a mensagem. ` +
 			'Com essas mensagens, o fluxo do usuário não será interrompido, continuando de onde parou.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o menu ao lado. Tome cuidado!',
-			[writeMsg, imageMsg, goBack],
+			[writeMsg, imageMsg, testMessage, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',
@@ -147,32 +147,46 @@ library.dialog('/askImage', [ // asks user for text and image URL
 	},
 });
 
+
 library.dialog('/sendingImage', [ // sends image and text message
 	(session, args) => {
 		[messageText] = [args.messageText];
 		[imageUrl] = [args.imageUrl];
 		session.sendTyping();
 		User.findAll({
-			attributes: ['name', 'address', 'session'],
+			attributes: ['fb_id'],
+			group: 'fb_id',
 			where: {
 				receiveMessage: { // search for people that accepted receiving messages
 					$eq: true,
 				},
 				fb_id: { // excludes whoever is sending the direct message
-					$ne: session.userData.userid,
+					$and: [{ $ne: session.userData.userid }, { $ne: '000000000000001' }],
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				Send.startProactiveImage(
-					element.dataValues, messageText, imageUrl,
-					messageFrom + session.userData.group // eslint-disable-line comma-dangle
-				);
+				console.log(`\nUsuário: ${Object.entries(element.dataValues)}`);
+				User.findOne({
+					attributes: ['address', 'session', 'fb_id'],
+					where: {
+						fb_id: {
+							$eq: element.fb_id,
+						},
+					},
+				}).then((userData) => {
+					Send.startProactiveImage(
+						userData.dataValues, messageText, imageUrl,
+						messageFrom + session.userData.group // eslint-disable-line comma-dangle
+					);
+				}).catch((err) => {
+					console.log(`Erro => ${err}`);
+				});
 				msgCount += 1;
 			});
 		}).catch((err) => {
-			session.send('Ocorreu um erro ao enviar mensagem');
-			console.log(`Erro ao enviar mensagem: ${err}`);
+			session.send(`Ocorreu um erro ao enviar mensagem => ${err}`);
+			msgCount = 0;
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 			groupMessage.create({
@@ -246,27 +260,39 @@ library.dialog('/sendingMessage', [ // sends text message
 		}
 		session.sendTyping();
 		User.findAll({
-			attributes: ['name', 'address', 'session'],
+			attributes: ['fb_id'],
+			group: 'fb_id',
 			where: {
 				receiveMessage: { // search for people that accepted receiving messages
 					$eq: true,
 				},
 				fb_id: { // excludes whoever is sending the direct message
-					$ne: session.userData.userid,
+					$and: [{ $ne: session.userData.userid }, { $ne: '000000000000001' }],
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				console.log(`Usuário: ${Object.entries(element.dataValues)}`);
-				Send.startProactiveDialog(
-					element.dataValues, messageText,
-					messageFrom + session.userData.group // eslint-disable-line comma-dangle
-				);
+				console.log(`\nUsuário: ${Object.entries(element.dataValues)}`);
+				User.findOne({
+					attributes: ['address', 'session', 'fb_id'],
+					where: {
+						fb_id: {
+							$eq: element.fb_id,
+						},
+					},
+				}).then((userData) => {
+					Send.startProactiveDialog(
+						userData.dataValues, messageText,
+						messageFrom + session.userData.group // eslint-disable-line comma-dangle
+					);
+				}).catch((err) => {
+					console.log(`Erro => ${err}`);
+				});
 				msgCount += 1;
 			});
 		}).catch((err) => {
-			session.send('Ocorreu um erro ao enviar mensagem');
-			console.log(`Erro ao enviar mensagem: ${err}`);
+			session.send(`Ocorreu um erro ao enviar mensagem => ${err}`);
+			msgCount = 0;
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 			groupMessage.create({

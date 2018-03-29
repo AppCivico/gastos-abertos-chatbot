@@ -54,7 +54,7 @@ library.dialog('/', [
 			'e serão mandados para o início do fluxo do bot, perdendo seu fluxo. ' +
 			'\n\nEssa forma de mandar mensagem é mais demorada que a outra.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o botão no menu ao lado.',
-			[writeMsg, imageMsg, testMessage, goBack],
+			[writeMsg, imageMsg, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',
@@ -179,8 +179,8 @@ library.dialog('/sendingImage', [ // sends image and text message
 				msgCount += 1;
 			});
 		}).catch((err) => {
-			session.send('Ocorreu um erro ao enviar mensagem.');
-			console.log(`Erro ao enviar mensagem: ${err}`);
+			session.send(`Ocorreu um erro ao enviar mensagem => ${err}`);
+			msgCount = 0;
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 			groupMessage.create({
