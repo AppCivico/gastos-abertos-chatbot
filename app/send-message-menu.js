@@ -54,7 +54,7 @@ library.dialog('/', [
 			`A mensagem será mandada em nome do grupo ${session.userData.group}. Você não receberá a mensagem. ` +
 			'Com essas mensagens, o fluxo do usuário não será interrompido, continuando de onde parou.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o menu ao lado. Tome cuidado!',
-			[writeMsg, imageMsg, testMessage, goBack],
+			[writeMsg, imageMsg, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',
@@ -147,7 +147,6 @@ library.dialog('/askImage', [ // asks user for text and image URL
 	},
 });
 
-
 library.dialog('/sendingImage', [ // sends image and text message
 	(session, args) => {
 		[messageText] = [args.messageText];
@@ -160,13 +159,12 @@ library.dialog('/sendingImage', [ // sends image and text message
 				receiveMessage: { // search for people that accepted receiving messages
 					$eq: true,
 				},
-				fb_id: { // excludes whoever is sending the direct message
-					$and: [{ $ne: session.userData.userid }, { $ne: '000000000000001' }],
+				fb_id: {
+					$ne: session.userData.userid, // excludes whoever is sending the direct message
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				console.log(`\nUsuário: ${Object.entries(element.dataValues)}`);
 				User.findOne({
 					attributes: ['address', 'session', 'fb_id'],
 					where: {
@@ -266,13 +264,12 @@ library.dialog('/sendingMessage', [ // sends text message
 				receiveMessage: { // search for people that accepted receiving messages
 					$eq: true,
 				},
-				fb_id: { // excludes whoever is sending the direct message
-					$and: [{ $ne: session.userData.userid }, { $ne: '000000000000001' }],
+				fb_id: {
+					$ne: session.userData.userid, // excludes whoever is sending the direct message
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				console.log(`\nUsuário: ${Object.entries(element.dataValues)}`);
 				User.findOne({
 					attributes: ['address', 'session', 'fb_id'],
 					where: {

@@ -7,23 +7,30 @@ const startProactiveImage = async (user, customMessage, customImage, group) => {
 	try {
 		const textGroup = new builder.Message().address(user.address);
 		textGroup.text(group);
-		await bot.send(textGroup);
 
 		const image = new builder.Message().address(user.address);
 		image.addAttachment({
 			contentType: 'image/jpeg',
 			contentUrl: customImage,
 		});
-		await bot.send(image);
 
 		const textMessage = new builder.Message().address(user.address);
 		textMessage.text(customMessage);
 		textMessage.textLocale('pt-BR');
-		await bot.send(textMessage);
+
+		bot.send(textGroup, () => {
+			bot.send(image, () => {
+				bot.send(textMessage, () => {
+					bot.beginDialog(user.address, '*:/confirm', {
+						userDialogo: user.session.dialogName,
+						usefulData: user.session.usefulData,
+					});
+				});
+			});
+		});
 	} catch (err) {
 		console.log(`Couldn't send Message => ${err}`);
-	} finally {
-		await bot.beginDialog(user.address, '*:/confirm', {
+		bot.beginDialog(user.address, '*:/confirm', {
 			userDialogo: user.session.dialogName,
 			usefulData: user.session.usefulData,
 		});
@@ -38,20 +45,29 @@ const startProactiveDialog = async (user, customMessage, group) => {
 		const textGroup = new builder.Message().address(user.address);
 		textGroup.text(group);
 		textGroup.textLocale('pt-BR');
-		await bot.send(textGroup);
 
 		const textMessage = new builder.Message().address(user.address);
 		textMessage.text(customMessage);
 		textMessage.textLocale('pt-BR');
-		await bot.send(textMessage);
+
+		// console.log(`${user.name} vai para ${user.session.dialogName}\n\n`);
+		bot.send(textGroup, () => {
+			bot.send(textMessage, () => {
+				bot.beginDialog(user.address, '*:/confirm', {
+					userDialogo: user.session.dialogName,
+					usefulData: user.session.usefulData,
+				});
+			});
+		});
+
+		// bot.send(textMessage);
 	} catch (err) {
 		console.log(`Couldn't send Message => ${err}`);
+		bot.beginDialog(user.address, '*:/confirm', {
+			userDialogo: user.session.dialogName,
+			usefulData: user.session.usefulData,
+		});
 	}
-	// console.log(`${user.name} vai para ${user.session.dialogName}\n\n`);
-	await bot.beginDialog(user.address, '*:/confirm', {
-		userDialogo: user.session.dialogName,
-		usefulData: user.session.usefulData,
-	});
 };
 
 module.exports.startProactiveDialog = startProactiveDialog;
