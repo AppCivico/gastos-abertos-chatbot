@@ -1,4 +1,8 @@
 /* global  bot:true builder:true */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
+
+const emoji = require('node-emoji');
 
 const library = new builder.Library('firstMissionAssign');
 
@@ -6,25 +10,22 @@ bot.library(require('./conclusion'));
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
-const custom = require('../../misc/custom_intents');
-const emoji = require('node-emoji');
+const saveSession = require('../../misc/save_session');
+const errorLog = require('../../misc/send_log');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 const Notification = require('../../server/schema/models').notification;
 
-
 const Yes = 'Sim';
 const No = 'Não';
-
 let user;
-
 let userCity;
 let userState;
 
 library.dialog('/', [
 	(session, args) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		[user] = [args.user];
 		UserMission.create({
 			user_id: user.id,
@@ -38,27 +39,26 @@ library.dialog('/', [
 				'\n\nSe precisar de ajuda, entre em contato conosco. :)',
 			}).then(() => {
 				console.log('Added a new notification to be sent!');
-			}).catch((errNotification) => {
-				console.log(`Couldn't save notification :( -> ${errNotification})`);
+			}).catch((err) => {
+				errorLog.storeErrorLog(session, `Couldn't save notification => ${err}`);
 			});
-			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sign_of_the_horns').repeat(2)}`);
+			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sunglasses').repeat(2)}`);
 			session.send(texts.first_mission.details);
-			session.beginDialog('/askState');
+			session.replaceDialog('/bosta');
 		}).catch((err) => {
-			console.log(`Error creating user mission: ${err}`);
-			session.send('Oooops, tive um problema ao iniciar suas missões, tente novamente mais tarde ou entre em contato conosco.' +
-				` ${emoji.get('dizzy_face').repeat(3)}`);
-			session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-			throw err;
+			errorLog.storeErrorLog(session, `Error finding user => ${err}`);
+			session.send(`Tive um problema ao iniciar suas missões. ${emoji.get('dizzy_face').repeat(2)}. ` +
+			'Estarei tentando resolver o problema. Tente novamente mais tarde.');
+			session.replaceDialog('*:/getStarted');
 		});
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
-library.dialog('/askState', [
+library.dialog('/bosta', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		session.beginDialog('validators:state', {
 			prompt: `Qual é o estado(sigla) que você mora? ${emoji.get('flag-br')}`,
@@ -66,7 +66,6 @@ library.dialog('/askState', [
 			maxRetries: 10,
 		});
 	},
-
 	(session, args) => {
 		userState = args.response;
 		session.replaceDialog('/askCity');
@@ -75,7 +74,7 @@ library.dialog('/askState', [
 
 library.dialog('/askCity', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, userState);
+		saveSession.updateSession(session.userData.userid, session, userState);
 		if (!userState) {
 			console.log('no user state');
 			userState = args.usefulData;
@@ -84,8 +83,8 @@ library.dialog('/askCity', [
 		builder.Prompts.text(session, `Qual é o município que você representará? ${emoji.get('cityscape')}`);
 	},
 
-	(session, args) => {
-		userCity = args.response;
+	(session) => {
+		userCity = session.userData.userDoubt; // comes from customAction
 		User.update({
 			state: userState.toUpperCase(),
 			city: userCity,
@@ -94,20 +93,28 @@ library.dialog('/askCity', [
 				fb_id: session.userData.userid,
 			},
 			returning: true,
-		})
-			.then(() => {
-				console.log('User address updated sucessfuly');
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+		}).then(() => {
+			console.log('User address updated sucessfuly');
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Couldn't save user address => ${err}`);
+		});
 		session.replaceDialog('/moreDetails');
 	},
-]);
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
+});
 
 library.dialog('/moreDetails', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		builder.Prompts.choice(
 			session,
 			'Quer o link para alguns portais de transparência para usar como referência?',

@@ -1,5 +1,5 @@
 /* global builder:true */
-// Check how many users are in a state
+// Generate a CSV with user information
 
 const library = new builder.Library('csvUser');
 
@@ -13,17 +13,20 @@ const file = 'guaxi_usuario_temp.csv';
 const generatedRequest = new Base64File();
 let csvStream;
 let writableStream;
+let numberResults;
 
 const apiUri = process.env.MAILCHIMP_API_URI;
 const apiUser = process.env.MAILCHIMP_API_USER;
 const apiKey = process.env.MAILCHIMP_API_KEY;
 
 const User = require('../server/schema/models').user;
+const LAIRequest = require('../server/schema/models').user_information_access_request;
+const UserMission = require('../server/schema/models').user_mission;
 
 library.dialog('/', [
 	(session, args, next) => {
 		User.findAndCountAll({
-			attributes: ['id', 'fb_name', 'name', 'state', 'city', 'receiveMessage', 'group', 'createdAt', 'updatedAt', 'admin'],
+			attributes: ['id', 'fb_name', 'name', 'state', 'city', 'receiveMessage', 'group', 'createdAt', 'updatedAt', 'admin', 'fb_id'],
 			order: [['id', 'ASC']],
 		}).then((listUser) => {
 			if (listUser.count === 0) {
@@ -50,29 +53,29 @@ library.dialog('/', [
 						'Criado em': element.dataValues.createdAt,
 						'Última Interação': element.dataValues.updatedAt,
 						'É administrador': element.dataValues.admin,
+						'ID do Facebook': element.dataValues.fb_id,
 					});
+
+					// this block will be executed last
+					if (count === listUser.rows.length) {
+						writableStream.on('finish', () => {
+							console.log('Done writing file.');
+							next();
+						});
+						csvStream.end();
+					}
 				});
-				console.log(count);
-				// this block will be executed last
-				if (count === listUser.rows.length) {
-					writableStream.on('finish', () => {
-						console.log('DONE!');
-						next();
-					});
-					csvStream.end();
-				}
 			}
 		}).catch((err) => {
 			session.send(`Ocorreu um erro ao pesquisar usuários => ${err}`);
 			session.endDialog();
 		});
 	},
-	(session) => {
+	(session, args, next) => {
 		let data = generatedRequest.loadSync('', file);
 		data = JSON.stringify(data);
-		// const dataString = `{"name":"${Date.now()}_guaxi_users.csv" , "file_data":${data}}`;
 		const dataString = `{"name":"${timestamp('YYYYMMDDmmss')}_guaxi_users.csv" , "file_data":${data}}`;
-		console.log(dataString);
+		// console.log(dataString);
 		const options = {
 			url: apiUri,
 			method: 'POST',
@@ -87,7 +90,7 @@ library.dialog('/', [
 		function callback(error, response, body) {
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
-				console.log(`\nURL: ${obj.full_size_url}`);
+				// console.log(`\nURL: ${obj.full_size_url}`);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
 					facebook: {
@@ -110,15 +113,148 @@ library.dialog('/', [
 					},
 				});
 				session.send(msg);
-				session.endDialog();
+				next();
 			} else {
-				session.send(`Ocorreu um erro => ${error}`);
-				session.endDialog();
+				session.send(`Ocorreu um erro ao gerar o CSV => ${error}`);
+				next();
 			}
 		}
 		request(options, callback);
 		fs.unlink(`./${file}`);
 	},
+	(session, args, next) => {
+		numberResults = 'Dados relevantes:\n\n';
+		UserMission.count({
+			where: {
+				mission_id: {	$eq: 1 },
+				completed: { $eq: true },
+			},
+		}).then((MissionData) => {
+			numberResults += `Avaliações de portal: ${MissionData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			next();
+		});
+	},
+	(session, args, next) => {
+		UserMission.count({
+			where: {
+				mission_id: {	$eq: 1 },
+				completed: { $eq: false	},
+			},
+		}).then((MissionData) => {
+			numberResults += `Avaliações começadas mas não concluídas: ${MissionData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			next();
+		});
+	},
+	(session, args, next) => {
+		UserMission.count({
+			where: {
+				mission_id: { $eq: 2 },
+				completed: { $eq: true },
+			},
+		}).then((MissionData) => {
+			numberResults += `Pedidos protocolados: ${MissionData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			next();
+		});
+	},
+	(session, args, next) => {
+		LAIRequest.count({
+		}).then((LAIData) => {
+			numberResults += `Pedidos gerados: ${LAIData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			next();
+		});
+	},
+	(session, args, next) => {
+		// A Leader is whoever finished the first mission or started the second mission
+		UserMission.count({
+			distinct: true,
+			col: 'user_id',
+			where: {
+				$or: [
+					{ mission_id: { $eq: 2 } },
+					{ mission_id: { $eq: 1 }, completed: { $eq: true } },
+				],
+			},
+		}).then((MissionData) => {
+			numberResults += `Líderes: ${MissionData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			next();
+		});
+	},
+	(session, args, next) => {
+		UserMission.count({
+			where: {
+				mission_id: { $eq: 2 },
+				completed: { $eq: false },
+			},
+		}).then((MissionData) => {
+			numberResults += `Pedidos começados mas não concluídos: ${MissionData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			next();
+		});
+	},
+	(session, args, next) => {
+		User.count({
+			where: {
+				receiveMessage: { $eq: true },
+			},
+		}).then((MissionData) => {
+			numberResults += `Quantos recebem mensagem de embaixador: ${MissionData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			next();
+		});
+	},
+	(session, args, next) => {
+		User.count({
+			where: {
+				$or: [
+					// null means we couldn't ask the user yet but we'll send the message anyway
+					{ receiveMessage: null },
+					// true means the user accepted receiving messages
+					{ receiveMessage: true },
+				],
+			},
+		}).then((MissionData) => {
+			numberResults += `Quantos recebem mensagem de administrador: ${MissionData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			next();
+		});
+	},
+	(session) => {
+		User.count({
+			where: {
+				sendMessage: { $eq: true },
+			},
+		}).then((MissionData) => {
+			numberResults += `Quantos embaixadores: ${MissionData}\n\n`;
+		}).catch((err) => {
+			session.send(`Ocorreu um erro => ${err}`);
+		}).finally(() => {
+			session.send(numberResults);
+			session.endDialog();
+		});
+	},
 ]);
+
+// líder é quem acaba a primeria missão ou começa a segunda
 
 module.exports = library;
