@@ -1,4 +1,6 @@
 /* global builder:true */
+/* eslint no-param-reassign: ["error", { "props": true,
+"ignorePropertyModificationsFor": ["session"] }] */
 // A menu for admins to add users to groups
 
 const library = new builder.Library('removeGroup');
@@ -23,7 +25,7 @@ library.dialog('/', [
 		builder.Prompts.text(session, 'Digite o nome do usuario a ser removido para iniciarmos a pesquisa.');
 	},
 	(session, args, next) => {
-		userName = args.response;
+		userName = session.userData.userInput; // comes from customAction
 
 		User.findAndCountAll({ // list all users with desired like = fb_name
 			attributes: ['fb_name', 'group'],
@@ -106,7 +108,7 @@ library.dialog('/', [
 						},
 					},
 				}).then(() => {
-					session.send(`${userName} foi removido do grupo ${userGroup}!`);
+					session.send(`Sucesso! ${userName} não pode mais enviar mensagens!`);
 				}).catch((err) => {
 					session.send(`Não foi possível remover ${result.response.entity} de ${userGroup} => ${err}`);
 				}).finally(() => {
@@ -119,6 +121,16 @@ library.dialog('/', [
 			}
 		}
 	},
-]);
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userInput = session.message.text;
+			session.endDialog();
+		}
+	},
+});
 
 module.exports = library;

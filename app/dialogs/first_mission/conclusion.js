@@ -2,13 +2,16 @@
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
+const emoji = require('node-emoji');
+
 const library = new builder.Library('firstMissionConclusion');
+
 bot.library(require('../second_mission/assign'));
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
 const texts = require('../../misc/speeches_utils/big-texts');
-const emoji = require('node-emoji');
-const custom = require('../../misc/custom_intents');
+const saveSession = require('../../misc/save_session');
+const errorLog = require('../../misc/send_log');
 
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
@@ -33,23 +36,12 @@ const WelcomeBack = 'Beleza!';
 
 let user;
 
-function reloadArgs() { // called after session updates to saves us some lines
-	if (!answers || !user) { // empty when dialog gets interrupted
-		// [answers] = args.usefulData.answers; // stores saved values from bd
-		// [user] = args.usefulData.User; // necessary => user.state
-	}
-}
-
 library.dialog('/', [
 	(session, args) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
+		session.sendTyping();
 		[user] = [args.user];
 
-		args.usefulData = { answers: null, User: null };
-		// args.usefulData.answers = '';
-		// args.usefulData.User = '';
-
-		session.sendTyping();
 		builder.Prompts.choice(
 			session,
 			'Pelo o que vi aqui você está na primeira missão, vamos concluí-la?',
@@ -84,7 +76,7 @@ library.dialog('/', [
 
 library.dialog('/conclusionPromptAfterMoreDetails', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -117,7 +109,17 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 
 library.dialog('/transparencyPortalExists', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		User.findOne({
+			attributes: ['state', 'id'],
+			where: { fb_id: session.userData.userid },
+		}).then((userData) => {
+			session.userData.state = userData.state;
+			session.userData.id = userData.id;
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error finding user (getting state) => ${err}`);
+		});
+
+		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
 		session.send(`Agora vamos avaliar o portal de transparêcia no seu município! ${emoji.get('slightly_smiling_face')}`);
 		session.send("Caso você queira deixar para outra hora, basta digitar 'começar' e eu te levarei para o início.");
@@ -155,25 +157,30 @@ library.dialog('/transparencyPortalExists', [
 
 library.dialog('/transparencyPortalURL', [
 	(session) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		answers.transparencyPortalURL = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.text(session, 'Qual é a URL(link) do portal?\n\nExemplo de uma URL: https://gastosabertos.org/');
 	},
-
-	(session, args) => {
-		answers.transparencyPortalURL = args.response;
+	(session) => {
+		answers.transparencyPortalURL = session.message.text; // comes from customAction
 		session.replaceDialog('/transparencyPortalHasFinancialData');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
 });
 
 library.dialog('/transparencyPortalHasFinancialData', [
-	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+	(session) => {
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -203,9 +210,8 @@ library.dialog('/transparencyPortalHasFinancialData', [
 });
 
 library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
-	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+	(session) => {
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		answers.transparencyPortalFinancialDataFormats = ''; // reseting value, in case the user cancels the dialog and retries
 		session.sendTyping();
 		builder.Prompts.choice(
@@ -236,24 +242,31 @@ library.dialog('/transparencyPortalAllowsFinancialDataDownload', [
 });
 
 library.dialog('/transparencyPortalFinancialDataFormats', [
-	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+	(session) => {
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		session.sendTyping();
 		builder.Prompts.text(session, 'Você saberia dizer, qual o formato que estes arquivos estão ? Ex.: CSV, XLS, XML.');
 	},
-	(session, args) => {
-		answers.transparencyPortalFinancialDataFormats = args.response;
+	(session) => {
+		// session.message.text = comes from customAction
+		answers.transparencyPortalFinancialDataFormats = session.message.text;
 		session.replaceDialog('/transparencyPortalHasContractsData');
 	},
-]).cancelAction('cancelAction', '', {
-	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
+]).customAction({
+	matches: /^[\w]+/, // override main customAction at app.js
+	onSelectAction: (session) => {
+		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
+			session.replaceDialog(session.userData.session); // cancel option
+		} else {
+			session.userData.userDoubt = session.message.text;
+			session.endDialog();
+		}
+	},
 });
 
 library.dialog('/transparencyPortalHasContractsData', [
-	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+	(session) => {
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -282,9 +295,8 @@ library.dialog('/transparencyPortalHasContractsData', [
 });
 
 library.dialog('/transparencyPortalHasBiddingsData', [
-	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+	(session) => {
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -313,9 +325,8 @@ library.dialog('/transparencyPortalHasBiddingsData', [
 });
 
 library.dialog('/transparencyPortalHasBiddingProcessData', [
-	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
-		reloadArgs(args);
+	(session) => {
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -344,9 +355,8 @@ library.dialog('/transparencyPortalHasBiddingProcessData', [
 });
 
 library.dialog('/userUpdate', [
-	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, User });
-		reloadArgs(args);
+	(session) => {
+		saveSession.updateSession(session.userData.userid, session, { answers, User });
 		const msg = new builder.Message(session);
 		msg.sourceEvent({
 			facebook: {
@@ -369,51 +379,49 @@ library.dialog('/userUpdate', [
 		});
 
 		session.send('Uhuuu! Concluímos nossa primeira missão! ' +
-			`\n\nEu disse que formariamos uma boa equipe! ${emoji.get('sunglasses')} ${emoji.get('clap').repeat(3)}`);
+			`\n\nEu disse que formariamos uma boa equipe! ${emoji.get('sunglasses')} ${emoji.get('clap').repeat(2)}`);
 
 		User.count({
 			where: {
-				state: user.state,
+				state: session.userData.state,
 			},
-		})
-			.then((count) => {
-				if (count < 10 && count !== 1) {
-					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
+		}).then((count) => {
+			if (count < 10 && count !== 1) {
+				session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
 					`\n\nAtualmente há ${count} líderes no seu estado. Vamos aumentar este número para 10 líderes?`);
-					session.send('Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!');
-					if (session.message.address.channelId === 'facebook') {
-						session.send(msg);
-					}
-				} else if (count < 10 && count === 1) {
-					session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
-					'\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?');
-					session.send('Compartilhe isto com os seus amigos! Assim nós teremos mais força para incentivar a transparência em seu estado!');
-					if (session.message.address.channelId === 'facebook') {
-						session.send(msg);
-					}
+				session.send('Para alcançar esse número pedimos que você convide seus amigos para participar desse nosso segundo ciclo do Gastos Abertos!');
+				if (session.message.address.channelId === 'facebook') {
+					session.send(msg);
 				}
-			}).catch((e) => {
-				console.log(`Error${e}`);
-				session.send('Oooops, tive um problema ao finalizar suas missões, tente novamente mais tarde.');
-				session.endDialogWithResult({ resumed: builder.ResumeReason.notCompleted });
-				throw e;
-			});
+			} else if (count < 10 && count === 1) {
+				session.send(`E eu vou te dar uma tarefa extra ${emoji.get('grinning')} ${emoji.get('sunglasses')}` +
+					'\n\nAtualmente há apenas você de líder no seu estado. Vamos aumentar este número para 10 líderes?');
+				session.send('Compartilhe isto com os seus amigos! Assim nós teremos mais força para incentivar a transparência em seu estado!');
+				if (session.message.address.channelId === 'facebook') {
+					session.send(msg);
+				}
+			}
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error finding user => ${err}`);
+			session.send(`Você já pode começar sua segunda missão. Basta gerar um pedido de acesso a informação! ${emoji.get('grinning').repeat(2)}`);
+			session.replaceDialog('*:/promptButtons');
+		});
+
 		UserMission.update({
 			completed: true,
 			metadata: answers,
 		}, {
 			where: {
-				user_id: user.id,
+				user_id: session.userData.id,
 				mission_id: 1,
 				completed: false,
 			},
 			returning: true,
 			raw: true,
 		}).then((missionData) => {
+			console.log(missionData[1][0].id);
 			console.log(`Mission ${missionData[1][0].id} Updated!`);
 			Notification.update({
-				// sentAlready == true and timeSent == null or numberSent = 0
-				// means that no message was sent, because there was no need to
 			}, {
 				where: {
 					userID: missionData[1][0].user_id,
@@ -422,9 +430,7 @@ library.dialog('/userUpdate', [
 			}).then(() => {
 				console.log('Notification Updated! This message will not be sent!');
 			}).catch((err) => {
-				console.log(`Couldn\t update Notification => ${err}! This message will be sent!`);
-				session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
-				session.replaceDialog('*:/promptButtons');
+				errorLog.storeErrorLog(session, `Couldn't update Notification 1 => ${err}`);
 			});
 
 			builder.Prompts.choice(
@@ -437,22 +443,16 @@ library.dialog('/userUpdate', [
 				} // eslint-disable-line comma-dangle
 			);
 		}).catch((err) => {
-			console.log(`Error updating mission${err}`);
-			session.send('Oooops...Tive um problema ao atualizar sua missão. Tente novamente mais tarde.');
+			errorLog.storeErrorLog(session, `Error updating userMission => ${err}`);
+			session.send(`Você já pode começar sua segunda missão. Basta gerar um pedido de acesso a informação! ${emoji.get('grinning').repeat(2)}`);
 			session.replaceDialog('*:/promptButtons');
-			throw err;
 		});
 	},
 
 	(session, args) => {
 		switch (args.response.entity) {
 		case nextMission:
-			session.replaceDialog(
-				'secondMissionAssign:/assign',
-				{
-					user,
-				} // eslint-disable-line comma-dangle
-			);
+			session.replaceDialog('secondMissionAssign:/assign');
 			break;
 		default: // WelcomeBack
 			session.replaceDialog('*:/getStarted');

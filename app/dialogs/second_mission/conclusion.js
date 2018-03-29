@@ -1,19 +1,14 @@
 /* global  builder:true */
 
-const library = new builder.Library('secondMissionConclusion');
 const emoji = require('node-emoji');
 
-const answers = {
-	userProtocoledRequest: '',
-	govAnswered: '',
-	answerWasSatisfactory: '',
-};
+const library = new builder.Library('secondMissionConclusion');
 
 const retryPrompts = require('../../misc/speeches_utils/retry-prompts');
-const custom = require('../../misc/custom_intents');
+const saveSession = require('../../misc/save_session');
+const errorLog = require('../../misc/send_log');
+
 const Notification = require('../../server/schema/models').notification;
-
-
 const User = require('../../server/schema/models').user;
 const UserMission = require('../../server/schema/models').user_mission;
 
@@ -22,12 +17,17 @@ const Yes = 'Sim';
 const notYet = 'Ainda Não';
 const No = 'Não';
 const WelcomeBack = 'Voltar para o início';
-
 let user;
+
+const answers = {
+	userProtocoledRequest: '',
+	govAnswered: '',
+	answerWasSatisfactory: '',
+};
 
 library.dialog('/', [
 	(session, args) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		if (!args.user && args.user_mission) {
 			session.send('Ooops, houve algum problema, vamos voltar para o início.');
 			session.replaceDialog('*:/getStarted');
@@ -56,7 +56,7 @@ library.dialog('/', [
 
 library.dialog('/secondMissionQuestions', [
 	(session, args) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
 		[user] = [args.user];
 		session.sendTyping();
 		// reloadArgs(args);
@@ -117,7 +117,9 @@ library.dialog('/secondMissionQuestions', [
 				session.send('Se houve alguma irregularidade no processo ou você ficou com dúvidas, ' +
 				'encaminhe uma mensagem para a Controladoria Geral da União:\n\n' +
 				'https://sistema.ouvidorias.gov.br/publico/Manifestacao/RegistrarManifestacao.aspx');
+				// session.replaceDialog('*:/promptButtons');
 				session.replaceDialog('/conclusion');
+
 				break;
 			}
 		}
@@ -133,35 +135,33 @@ library.dialog('/secondMissionQuestions', [
 				answers.answerWasSatisfactory = 0;
 				break;
 			}
+			session.replaceDialog('/conclusion');
 		}
-
-		session.replaceDialog('/conclusion');
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
-
 });
 
 library.dialog('/conclusion', [
 	(session, args, next) => {
-		custom.updateSessionData(session.userData.userid, session, { answers, user });
-
+		saveSession.updateSession(session.userData.userid, session, { answers, user });
+		console.log('\n\n\n\n');
 		User.findOne({
 			attributes: ['id'],
 			where: { fb_id: session.userData.userid },
 		}).then((userData) => {
-			console.dir(userData);
 			user = userData.dataValues;
-		}).catch((errUser) => {
-			console.log(`Error finding user => ${errUser}`);
-		}).then(() => {
 			next();
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error finding user => ${err}`);
+			session.send(`Tive um problema ao salvar suas respostas. ${emoji.get('dizzy_face').repeat(2)}. ` +
+			'Estarei tentando resolver o problema. Tente novamente mais tarde.');
+			session.replaceDialog('*:/getStarted');
 		});
 	},
-
 	(session) => {
 		UserMission.update({
-			completed: false,
+			completed: true, // False is for testing
 			metadata: answers,
 		}, {
 			where: {
@@ -170,7 +170,7 @@ library.dialog('/conclusion', [
 				completed: false,
 			},
 			returning: true,
-		}).then((result) => {
+		}).then(() => {
 			Notification.update({
 				// sentAlready == true and timeSent == null
 				// means that no message was sent, because there was no need to
@@ -182,14 +182,15 @@ library.dialog('/conclusion', [
 				},
 			}).then(() => {
 				console.log('Notification Updated! This message will not be sent!');
-			}).catch((err) => { console.log(`Couldn\t update Notification => ${err}! This message will be sent!`); });
-			console.log(`Mission updated sucessfuly: ${result}`);
+			}).catch((err) => {
+				errorLog.storeErrorLog(session, `Error updating notification => ${err}`);
+			});
 			session.replaceDialog('/congratulations');
-		}).catch((e) => {
-			console.log(`Error updating mission: ${e}`);
-			session.send('Oooops...Tive um problema ao criar seu cadastro. Tente novamente mais tarde.');
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error updating userMission => ${err}`);
+			session.send(`Tive um problema ao gravar suas respostas. ${emoji.get('dizzy_face').repeat(2)}. ` +
+			'Estarei tentando resolver o problema. Tente novamente mais tarde.');
 			session.replaceDialog('*:/getStarted');
-			throw e;
 		});
 	} // eslint-disable-line comma-dangle
 ]).cancelAction('cancelAction', '', {
@@ -198,7 +199,7 @@ library.dialog('/conclusion', [
 
 library.dialog('/congratulations', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		session.send('Parabéns! Você concluiu o processo de missões do Gastos Abertos! Muito obrigado por participar comigo dessa tarefa! ' +
 		`\n\nAposto que você e eu aprendemos muitas coisas novas nesse processo! ${emoji.get('slightly_smiling_face').repeat(2)}` +
 		'\n\nDarei a você uma tarefa extra, ela é difícil, mas toda a equipe do Gastos Abertos está com você nessa!');

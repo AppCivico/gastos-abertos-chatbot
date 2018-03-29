@@ -8,7 +8,8 @@ bot.library(require('./second_mission/conclusion'));
 
 const emoji = require('node-emoji');
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
-const custom = require('../misc/custom_intents');
+const saveSession = require('../misc/save_session');
+const errorLog = require('../misc/send_log');
 
 const User = require('../server/schema/models').user;
 const UserMission = require('../server/schema/models').user_mission;
@@ -40,10 +41,14 @@ library.dialog('/', [
 							user,
 						} // eslint-disable-line comma-dangle
 					);
-					return user;
+					return user; // necessary
 				}
 				session.replaceDialog('/currentMission');
-				return undefined;
+				return undefined; // not so much
+			}).catch((err) => {
+				errorLog.storeErrorLog(session, `Error finding user or counting Mission => ${err}`, user.id);
+				session.send('Ocorreu um erro! Nossos administradores estão sendo avisados e logo eles irão te ajudar.');
+				session.replaceDialog('*:/getStarted');
 			});
 		});
 	},
@@ -53,7 +58,7 @@ library.dialog('/', [
 
 library.dialog('/currentMission', [
 	(session) => {
-		custom.updateSession(session.userData.userid, session);
+		saveSession.updateSession(session.userData.userid, session);
 		UserMission.findAll({
 			where: {
 				user_id: user.id,
@@ -62,7 +67,6 @@ library.dialog('/currentMission', [
 			missionUser = UserMissionData[UserMissionData.length - 1].dataValues;
 
 			switch (missionUser.mission_id) {
-			// TODO Ele manda gerar um pedido mesmo se o pedido já estiver gerado.
 			case 1:
 				if (missionUser.completed) {
 					session.replaceDialog(
@@ -84,7 +88,7 @@ library.dialog('/currentMission', [
 			default: // 2
 				if (missionUser.completed) {
 					session.send(`Parabéns! Você concluiu o processo de missões do Gastos Abertos! ${emoji.get('tada').repeat(3)}`);
-					session.send('Junte-se a nós no Grupo de Lideranças do Gastos Abertos no WhatsApp do Gastos Abertos.' +
+					session.send('Junte-se a nós no Grupo de Lideranças do Gastos Abertos no WhatsApp do Gastos Abertos. ' +
 					`Participe dos debates e compartilhe suas experiências conosco. ${emoji.get('slightly_smiling_face').repeat(2)}`);
 					session.send('Para entrar, basta acessar o link abaixo do seu celular:' +
 					'\n\n https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
@@ -109,6 +113,10 @@ library.dialog('/currentMission', [
 					);
 				}
 			}
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error finding user or counting Mission => ${err}`, user.id);
+			session.send('Ocorreu um erro! Nossos administradores estão sendo avisados e logo eles irão te ajudar.');
+			session.replaceDialog('*:/getStarted');
 		});
 	},
 
