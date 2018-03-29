@@ -1,4 +1,4 @@
-/* global  builder:true */
+/* global builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
@@ -54,7 +54,7 @@ library.dialog('/', [
 			'e serão mandados para o início do fluxo do bot, perdendo seu fluxo. ' +
 			'\n\nEssa forma de mandar mensagem é mais demorada que a outra.' +
 			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o botão no menu ao lado.',
-			[writeMsg, imageMsg, goBack],
+			[writeMsg, imageMsg, testMessage, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 				retryPrompt: 'Por favor, utilize os botões',
@@ -156,7 +156,8 @@ library.dialog('/sendingImage', [ // sends image and text message
 		[imageUrl] = [args.imageUrl];
 		session.sendTyping();
 		User.findAll({
-			attributes: ['name', 'address', 'session', 'fb_id'],
+			attributes: ['fb_id'],
+			group: ['fb_id'], // stops db from loading same user in case of redundancy on table
 			where: {
 				$or: [
 					// null means we couldn't ask the user yet but we'll send the message anyway
@@ -202,7 +203,7 @@ library.dialog('/sendingImage', [ // sends image and text message
 library.dialog('/askText', [ // asks user for text message
 	(session) => {
 		builder.Prompts.text(session, 'Digite a sua mensagem. Ela será enviada a todos os usuários que ' +
-		'concordaram em receber mensagens pelo Guaxi.');
+		'concordaram em receber mensagens pelo Guaxi ou ainda não passaram pelo diálogo de permissão para receber as mensagens.');
 	},
 	(session) => {
 		messageText = session.userData.userInput; // comes from customAction
@@ -246,14 +247,15 @@ library.dialog('/askText', [ // asks user for text message
 
 library.dialog('/sendingMessage', [ // sends text message
 	(session, args) => {
-		if (!args) { // Test Message options happens here
+		if (!args) { // Test Message option happens here
 			messageText = '<<Mensagem administrativa de teste>>';
 		} else {
 			[messageText] = [args.messageText];
 		}
 		session.sendTyping();
-		User.findAll({
-			attributes: ['name', 'address', 'session', 'fb_id'],
+		User.findAndCountAll({
+			attributes: ['fb_id'],
+			group: ['fb_id'], // stops db from loading same user in case of redundancy on table
 			where: {
 				$or: [
 					// null means we couldn't ask the user yet but we'll send the message anyway
@@ -261,12 +263,13 @@ library.dialog('/sendingMessage', [ // sends text message
 					// true means the user accepted receiving messages
 					{ receiveMessage: true },
 				],
-				fb_id: { // excludes whoever is sending the direct message
+				fb_id: {
 					$ne: session.userData.userid,
 				},
 			},
 		}).then((user) => {
-			user.forEach((element) => {
+			user.rows.forEach((element) => {
+				console.log(`\n\n\n${element.address}`);
 				Send.sendMessageByFbId(
 					element.dataValues, messageText, session.userData.pageToken,
 					messageFrom + session.userData.group // eslint-disable-line comma-dangle
@@ -274,8 +277,8 @@ library.dialog('/sendingMessage', [ // sends text message
 				msgCount += 1;
 			});
 		}).catch((err) => {
-			session.send('Ocorreu um erro ao enviar mensagem');
-			console.log(`Erro ao enviar mensagem: ${err}`);
+			session.send(`Ocorreu um erro ao enviar mensagem ${err}`);
+			msgCount = 0;
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
 			groupMessage.create({
