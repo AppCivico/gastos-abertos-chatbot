@@ -14,6 +14,9 @@ const allIntents = (message, intents, callback) => {
 		case 'pedido':
 			dialog = 'informationAccessRequest:/';
 			break;
+		case 'reset':
+			dialog = '*:/';
+			break;
 		default: // Default Fallback Intent
 			dialog = 'error';
 			break;

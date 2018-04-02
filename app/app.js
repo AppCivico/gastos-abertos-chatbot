@@ -71,6 +71,7 @@ bot.beginDialogAction('reset', '/reset');
 bot.dialog('/reset', [
 	(session) => {
 		session.endDialog();
+		console.log('Resetando');
 		session.beginDialog('/');
 	},
 ]);
