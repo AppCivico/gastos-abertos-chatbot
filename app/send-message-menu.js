@@ -99,8 +99,8 @@ library.dialog('/askImage', [ // asks user for text and image URL
 		'\n\nExemplo: https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png');
 	},
 
-	(session, args) => {
-		imageUrl = args.response;
+	(session) => {
+		imageUrl = session.userData.userInput;
 		session.send('Sua mensagem aparecerá da seguinte forma para os usuários:');
 		session.send(messageFrom + session.userData.group);
 		session.send({
@@ -136,7 +136,7 @@ library.dialog('/askImage', [ // asks user for text and image URL
 		}
 	},
 ]).customAction({
-	matches: /^[\w]+/, // override main customAction at app.js
+	matches: /^[\s\S]*/, // override main customAction at app.js
 	onSelectAction: (session) => {
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
 			session.replaceDialog(session.userData.session); // cancel option
@@ -238,7 +238,7 @@ library.dialog('/askText', [ // asks user for text message
 		}
 	},
 ]).customAction({
-	matches: /^[\w]+/, // override main customAction at app.js
+	matches: /^[\s\S]*/, // override main customAction at app.js
 	onSelectAction: (session) => {
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
 			session.replaceDialog(session.userData.session); // cancel option

@@ -268,7 +268,7 @@ bot.dialog('/promptButtons', [
 	},
 // ]);
 ]).customAction({
-	matches: /^[\w]+/,
+	matches: /^[\s\S]*/,
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {

@@ -167,7 +167,7 @@ library.dialog('/transparencyPortalURL', [
 		session.replaceDialog('/transparencyPortalHasFinancialData');
 	},
 ]).customAction({
-	matches: /^[\w]+/, // override main customAction at app.js
+	matches: /^[\s\S]*/, // override main customAction at app.js
 	onSelectAction: (session) => {
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
 			session.replaceDialog(session.userData.session); // cancel option
@@ -253,7 +253,7 @@ library.dialog('/transparencyPortalFinancialDataFormats', [
 		session.replaceDialog('/transparencyPortalHasContractsData');
 	},
 ]).customAction({
-	matches: /^[\w]+/, // override main customAction at app.js
+	matches: /^[\s\S]*/, // override main customAction at app.js
 	onSelectAction: (session) => {
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
 			session.replaceDialog(session.userData.session); // cancel option
