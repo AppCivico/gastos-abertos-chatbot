@@ -8,6 +8,8 @@ require('./connectorSetup.js')();
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const Timer = require('./timer'); // eslint-disable-line no-unused-vars
+// const csv = require('fast-csv');
+// const fs = require('fs');
 
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
@@ -326,3 +328,39 @@ bot.dialog('/askPermission', [
 		}
 	},
 ]);
+
+// bot.dialog('/csv', [
+// 	(session) => {
+// 		const stream = fs.createReadStream(`${__dirname}/guaxi.csv`);
+// 		csv
+// 			.fromStream(stream, { headers: true })
+// 			.on('data', (data) => {
+// 				console.log(`\n${JSON.stringify(data)}`);
+// 				console.log(data['Nome no Facebook']);
+//
+// 				User.create({
+// 					name: data['Nome Cadastrado'],
+// 					occupation: 'undefined',
+// 					email: 'undefined',
+// 					birth_date: 'undefined',
+// 					state: data.Estado,
+// 					city: data['Município'],
+// 					cellphone_number: 'undefined',
+// 					active: true,
+// 					approved: true,
+// 					fb_id: data['ID do Facebook'],
+// 					fb_name: data['Nome no Facebook'],
+// 					admin: data['É administrador'],
+// 					session: {
+// 						dialogName: session.dialogStack()[session.dialogStack().length - 1].id,
+// 					},
+// 					group: data.Grupo,
+// 				});
+// 			})
+// 			.on('end', () => {
+// 				console.log('done');
+// 			});
+//
+// 		session.endDialog();
+// 	},
+// ]);
