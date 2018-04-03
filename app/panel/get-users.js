@@ -27,7 +27,7 @@ library.dialog('/', [
 	(session, args, next) => {
 		User.findAndCountAll({
 			attributes: ['id', 'fb_name', 'name', 'state', 'city', 'receiveMessage', 'group', 'createdAt', 'updatedAt', 'admin', 'fb_id'],
-			order: [['id', 'ASC']],
+			order: [['createdAt', 'ASC']],
 		}).then((listUser) => {
 			if (listUser.count === 0) {
 				session.send('Não encontrei ninguém. Não temos ninguém salvo? Melhor entrar em contato com o suporte!');
@@ -241,6 +241,8 @@ library.dialog('/', [
 	},
 	(session) => {
 		User.count({
+			distinct: true,
+			col: 'fb_id',
 			where: {
 				sendMessage: { $eq: true },
 			},
@@ -250,11 +252,10 @@ library.dialog('/', [
 			session.send(`Ocorreu um erro => ${err}`);
 		}).finally(() => {
 			session.send(numberResults);
+			session.send('Obs: Um líder é quem terminou a primeira missão ou começou a segunda.');
 			session.endDialog();
 		});
 	},
 ]);
-
-// líder é quem acaba a primeria missão ou começa a segunda
 
 module.exports = library;
