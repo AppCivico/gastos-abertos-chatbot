@@ -14,6 +14,7 @@ const generatedRequest = new Base64File();
 let csvStream;
 let writableStream;
 let numberResults;
+let count;
 
 const apiUri = process.env.MAILCHIMP_API_URI;
 const apiUser = process.env.MAILCHIMP_API_USER;
@@ -25,45 +26,59 @@ const UserMission = require('../server/schema/models').user_mission;
 
 library.dialog('/', [
 	(session, args, next) => {
+		count = 0;
 		User.findAndCountAll({
-			attributes: ['id', 'fb_name', 'name', 'state', 'city', 'receiveMessage', 'group', 'createdAt', 'updatedAt', 'admin', 'fb_id'],
-			order: [['createdAt', 'ASC']],
+			attributes: ['fb_id'],
+			group: ['fb_id'],
 		}).then((listUser) => {
 			if (listUser.count === 0) {
 				session.send('Não encontrei ninguém. Não temos ninguém salvo? Melhor entrar em contato com o suporte!');
 				session.endDialog();
 			} else {
+				session.sendTyping();
+
 				csvStream = csv.createWriteStream({ headers: true });
 				writableStream = fs.createWriteStream(file);
 				csvStream.pipe(writableStream);
 
-				let count = 0;
-				session.send(`Encontrei ${listUser.count} usuário(s). Estou montando o arquivo`);
-				session.sendTyping();
-				listUser.rows.forEach((element) => {
-					csvStream.write({
-						Número: ++count, // eslint-disable-line no-plusplus
-						ID: element.dataValues.id,
-						'Nome no Facebook': element.dataValues.fb_name,
-						'Nome Cadastrado': element.dataValues.name,
-						Estado: element.dataValues.state,
-						Município: element.dataValues.city,
-						'Recebe Mensagens': element.dataValues.receiveMessage,
-						Grupo: element.dataValues.group,
-						'Criado em': element.dataValues.createdAt,
-						'Última Interação': element.dataValues.updatedAt,
-						'É administrador': element.dataValues.admin,
-						'ID do Facebook': element.dataValues.fb_id,
-					});
+				session.send(' Estou montando o arquivo');
 
-					// this block will be executed last
-					if (count === listUser.rows.length) {
-						writableStream.on('finish', () => {
-							console.log('Done writing file.');
-							next();
+				listUser.rows.forEach((user) => {
+					User.findOne({
+						attributes: ['id', 'fb_name', 'name', 'state', 'city', 'receiveMessage', 'group', 'createdAt', 'updatedAt', 'admin', 'fb_id'],
+						where: {
+							fb_id: {
+								$eq: user.fb_id,
+							},
+						},
+					}).then((element) => {
+						csvStream.write({
+							Número: ++count, // eslint-disable-line no-plusplus
+							ID: element.dataValues.id,
+							'Nome no Facebook': element.dataValues.fb_name,
+							'Nome Cadastrado': element.dataValues.name,
+							Estado: element.dataValues.state,
+							Município: element.dataValues.city,
+							'Recebe Mensagens': element.dataValues.receiveMessage,
+							Grupo: element.dataValues.group,
+							'Criado em': element.dataValues.createdAt,
+							'Última Interação': element.dataValues.updatedAt,
+							'É administrador': element.dataValues.admin,
+							'ID do Facebook': element.dataValues.fb_id,
 						});
-						csvStream.end();
-					}
+
+						// this block will be executed last
+						if (count === listUser.rows.length) {
+							writableStream.on('finish', () => {
+								console.log('Done writing file.');
+								next();
+							});
+							csvStream.end();
+						}
+					}).catch((err) => {
+						session.send(`Ocorreu um erro ao montar arquivo => ${err}`);
+						session.endDialog();
+					});
 				});
 			}
 		}).catch((err) => {
@@ -124,6 +139,7 @@ library.dialog('/', [
 	},
 	(session, args, next) => {
 		numberResults = 'Dados relevantes:\n\n';
+		numberResults = `Número de usuários: ${count}\n\n`;
 		UserMission.count({
 			where: {
 				mission_id: {	$eq: 1 },
