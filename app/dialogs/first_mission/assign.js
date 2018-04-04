@@ -75,8 +75,7 @@ library.dialog('/bosta', [
 library.dialog('/askCity', [
 	(session, args) => {
 		saveSession.updateSession(session.userData.userid, session, userState);
-		if (!userState) {
-			console.log('no user state');
+		if (!userState) { // no user state
 			userState = args.usefulData;
 		}
 		session.sendTyping();

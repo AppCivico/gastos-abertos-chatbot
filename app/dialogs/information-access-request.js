@@ -721,7 +721,7 @@ library.dialog('/generateRequest', [
 		function callback(error, response, body) {
 			if (!error || response.statusCode === 200) {
 				const obj = JSON.parse(body);
-				console.log(obj.full_size_url);
+				// console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
 				msg.sourceEvent({
 					facebook: {
@@ -768,7 +768,7 @@ library.dialog('/generateRequest', [
 					}).catch((err) => {
 						errorLog.storeErrorLog(session, `Couldn't save LAI request => ${err})`, user.id);
 					});
-					console.log(`Mission ${missionData[1][0].id} updated successfully`);
+					// console.log(`Mission ${missionData[1][0].id} updated successfully`);
 					session.send(`Aeee!! Conseguimos! Demorou, mas chegamos ao final. ${emoji.get('sweat_smile')}`);
 					session.send('Muito bem! Agora basta protocolar o pedido de acesso à informação no portal de transparência de sua prefeitura, ' +
 						'ou levar esse pedido em formato físico e protocola-lo.' +

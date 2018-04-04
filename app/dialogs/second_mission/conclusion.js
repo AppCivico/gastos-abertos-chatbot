@@ -145,7 +145,6 @@ library.dialog('/secondMissionQuestions', [
 library.dialog('/conclusion', [
 	(session, args, next) => {
 		saveSession.updateSession(session.userData.userid, session, { answers, user });
-		console.log('\n\n\n\n');
 		User.findOne({
 			attributes: ['id'],
 			where: { fb_id: session.userData.userid },

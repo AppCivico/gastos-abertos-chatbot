@@ -171,7 +171,6 @@ bot.dialog('/sendAnswer', [
 
 library.dialog('/writeMessage', [
 	(session) => {
-		console.log(adminData.fb_name);
 		if (/^undef$|^undefined$|^null$|^undefined undefined$/i.test(adminData.fb_name)) { // stop 'undefined' to pass as admin name
 			adminData.fb_name = 'a Administração.';
 		}

@@ -21,7 +21,6 @@ library.dialog('/messageHelp', [
 		}).then((user) => {
 			session.userData.address = user.address;
 			session.userData.session = user.session.dialogName;
-			console.log(session.userData.session);
 		});
 		builder.Prompts.choice(
 			session, 'Não entendi essa opção. Se estiver com alguma dúvida, mande-nos uma mensagem escolhendo a opção \'contato\' abaixo.' +

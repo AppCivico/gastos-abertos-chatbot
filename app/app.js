@@ -116,9 +116,10 @@ bot.dialog('/', [
 				group: session.userData.userGroup,
 			},
 		}).spread((user, created) => {
-			console.log(`state: ${Object.values(session.dialogStack()[session.dialogStack().length - 1].state)}`);
-			console.log(user.get({ plain: true })); // prints user data
-			console.log(`Was created? => ${created}`);
+			// console.log(`state: ${Object.values(session.dialogStack()
+			// [session.dialogStack().length - 1].state)}`);
+			// console.log(user.get({ plain: true })); // prints user data
+			// console.log(`Was created? => ${created}`);
 
 			// Don't reset admin group to normal default nor admin deault
 			if (user.get('group') !== 'Cidadão' && user.get('group') !== process.env.adminGroup) {

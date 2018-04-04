@@ -60,7 +60,7 @@ library.dialog('/', [
 					// this block will be executed last
 					if (count === listUser.rows.length) {
 						writableStream.on('finish', () => {
-							console.log('Done writing file.');
+							// console.log('Done writing file.');
 							next();
 						});
 						csvStream.end();
@@ -76,7 +76,6 @@ library.dialog('/', [
 		let data = generatedRequest.loadSync('', file);
 		data = JSON.stringify(data);
 		const dataString = `{"name":"${timestamp('YYYYMMDDmmss')}_guaxi_users.csv" , "file_data":${data}}`;
-		// console.log(dataString);
 		const options = {
 			url: apiUri,
 			method: 'POST',

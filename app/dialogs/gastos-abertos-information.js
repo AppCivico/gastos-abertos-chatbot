@@ -137,7 +137,6 @@ library.dialog('/updateAddress', [
 					returning: true,
 				}).then(() => {
 					session.send(`Suas preferências foram atualizadas! ${emoji.get('slightly_smiling_face').repeat(2)}`);
-					console.log('User address updated sucessfuly');
 				}).catch((err) => {
 					errorLog.storeErrorLog(session, `Error finding user => ${err}`);
 					session.send(`Ocorreu um erro! ${emoji.get('dizzy_face').repeat(2)}. Tente novamente mais tarde.`);

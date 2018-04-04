@@ -47,7 +47,6 @@ library.dialog('/', [
 				session.send(`Encontrei ${listUser.count} usuário(s).`);
 				listUser.rows.forEach((element) => {
 					arrayName.push(element.dataValues.fb_name);
-					console.log(`\nAchei ${element.dataValues.group}`);
 					arrayGroup.push(element.dataValues.group);
 				});
 				next();

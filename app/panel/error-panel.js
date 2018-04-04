@@ -107,7 +107,7 @@ library.dialog('/', [
 					arrayData[result.response.index].session = userData.session;
 					arrayData[result.response.index].fb_name = userData.fb_name;
 					session.replaceDialog('/viewMessage', { errorData: arrayData[result.response.index], choiceOptions: [writeAnswer, markAnswered, Cancel] });
-				}).catch((err) => { console.log(err); });
+				}).catch((err) => { session.send(`Ocorreu um erro => ${err}`); });
 			} else {
 				session.replaceDialog('/viewMessage', { errorData: arrayData[result.response.index], choiceOptions: [markAnswered, Cancel] });
 			}
@@ -181,7 +181,6 @@ bot.dialog('/sendAnswerToError', [
 
 library.dialog('/writeMessage', [
 	(session) => {
-		console.log(adminData.fb_name);
 		if (/^undef$|^undefined$|^null$|^undefined undefined$/i.test(adminData.fb_name)) { // stop 'undefined' to pass as admin name
 			adminData.fb_name = 'a Administração.';
 		}
