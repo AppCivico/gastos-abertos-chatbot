@@ -40,6 +40,7 @@ library.dialog('/receives', [
 		});
 	},
 	(session) => {
+		// Creating user message
 		userMessage.create({
 			user_id: user.id,
 			user_name: user.fb_name,
@@ -49,28 +50,40 @@ library.dialog('/receives', [
 			answered: false,
 		}).then(() => {
 			session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
+			// group by so it doesn't repeat the message in case of duplicates on the database
 			User.findAll({
-				attributes: ['fb_name', 'address', 'session'],
+				attributes: ['fb_id'],
+				group: 'fb_id',
 				where: {
-					admin: {
+					admin: { // search for admins
 						$eq: true,
 					},
-					id: { // excludes current user if it is an admin
-						$ne: user.id,
+					fb_id: {
+						$ne: session.userData.userid, // excludes current user if it is an admin
 					},
 				},
-			}).then((adminData) => {
-				adminData.forEach((element) => {
-					bot.beginDialog(element.address, '*:/sendNotification', {
-						userDialog: element.session.dialogName,
-						usefulData: element.session.usefulData,
+			}).then((userList) => {
+				// sends each message individually
+				userList.forEach((element) => {
+					User.findOne({
+						attributes: ['address', 'session', 'fb_name'],
+						where: {
+							fb_id: {
+								$eq: element.fb_id,
+							},
+						},
+					}).then((userData) => {
+						bot.beginDialog(userData.address, '*:/sendNotification', {
+							userDialog: userData.session.dialogName,
+							usefulData: userData.session.usefulData,
+						});
+					}).catch((err) => {
+						console.log(`Erro => ${err}`);
 					});
 				});
+			}).catch((err) => {
+				console.log(`Erro => ${err}`);
 			});
-		}).catch((err) => {
-			errorLog.storeErrorLog(session, `Error creating user message => ${err}`, user.id);
-		}).finally(() => {
-			session.replaceDialog(user.session.dialogName);
 		});
 	},
 ]);
