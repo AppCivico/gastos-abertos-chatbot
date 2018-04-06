@@ -66,11 +66,10 @@ library.dialog('/receives', [
 						usefulData: element.session.usefulData,
 					});
 				});
+				session.replaceDialog(user.session.dialogName);
 			});
 		}).catch((err) => {
 			errorLog.storeErrorLog(session, `Error creating user message => ${err}`, user.id);
-		}).finally(() => {
-			session.replaceDialog(user.session.dialogName);
 		});
 	},
 ]);
