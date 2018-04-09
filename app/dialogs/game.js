@@ -162,7 +162,7 @@ library.dialog('/sendToInformationAccessRequest', [
 			break;
 		default: // No
 			session.send(`Okay! Eu estarei aqui esperando para começarmos! ${emoji.get('wave').repeat(2)}`);
-			session.endDialog();
+			session.replaceDialog('*:/promptButtons');
 			break;
 		}
 	},
