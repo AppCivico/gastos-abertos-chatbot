@@ -57,7 +57,7 @@ library.dialog('/promptButtons', [
 				session.replaceDialog('contact_doubt:/');
 				break;
 			default: // goBack
-				session.endDialog();
+				session.replaceDialog('*:/getStarted');
 				break;
 			}
 		}
@@ -68,7 +68,7 @@ library.dialog('/promptButtons', [
 ]).customAction({
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 	onSelectAction: (session) => {
-		session.endDialog();
+		session.replaceDialog('*:/getStarted');
 	},
 });
 

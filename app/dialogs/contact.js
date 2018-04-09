@@ -13,6 +13,9 @@ const userMessage = require('../server/schema/models').user_message;
 
 const inbox = 'Ir pra caixa de entrada';
 const goBack = 'Voltar';
+// the limit to check if a user text if part of the same message(also used in the timer)
+const limit = (60000 * 3); // 3 minutes
+let timer; // setTimeout = warn admin after the limit has passed
 let message;
 let user;
 
@@ -39,18 +42,60 @@ library.dialog('/receives', [
 			next();
 		});
 	},
-	(session) => {
-		// Creating user message
-		userMessage.create({
-			user_id: user.id,
-			user_name: user.fb_name,
-			user_address: user.address,
-			content: message,
-			response: false,
-			answered: false,
-		}).then(() => {
-			session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
-			// group by so it doesn't repeat the message in case of duplicates on the database
+	(session, args, next) => {
+		// Checks if a certain period of time has passed since last user message(if it exists).
+		// if so, then that message is a new message!
+		// If not, then we can add the new message as part of the last message.
+		userMessage.findAll({
+			attributes: ['updatedAt', 'id', 'content'],
+			where: {
+				user_id: {
+					$eq: user.id,
+				},
+				answered: { // not answered already
+					$ne: true,
+				},
+			},
+		}).then((userMessageList) => {
+			if (userMessageList.length === 0) { // no messages from this user
+				next();
+			} else {
+				// can be a little buggy if another user sends a message in the 'limit' time window
+				// clearing timer so we don't warn the admins more than once
+				clearTimeout(timer);
+				// gets the highest value for updatedAt
+				const lastUpdated = Math.max(...userMessageList.map(o => o.updatedAt));
+				// gets the object with the highest value for updatedAt ^
+				const lastMessage = userMessageList.find(x =>
+					(x.updatedAt >= lastUpdated) &&	(x.updatedAt <= lastUpdated));
+				// === is not accepted in JS when comparing dates so we're verifying both <= and >=
+				if ((Date.now() - lastMessage.updatedAt) <= limit) { // Checks if enough time has passed
+					userMessage.update({ // adds new message text to old message
+						content: `${lastMessage.content} ${message}`, // old text + white_space + new text
+					}, {
+						where: {
+							id: lastMessage.id,
+						},
+					}).then(() => {
+						next();
+					});
+				} else { // creates new user message
+					userMessage.create({
+						user_id: user.id,
+						user_name: user.fb_name,
+						user_address: user.address,
+						content: message,
+						answered: false,
+					}).then(() => {
+						next();
+					});
+				}
+			}
+		});
+	},
+	(session) => { // warns admins and gives feedback to the user
+		timer = setTimeout(() => {
+		// group by so it doesn't repeat the message in case of duplicates on the database
 			User.findAll({
 				attributes: ['fb_id'],
 				group: 'fb_id',
@@ -63,7 +108,7 @@ library.dialog('/receives', [
 					},
 				},
 			}).then((userList) => {
-				// sends each message individually
+			// sends each message individually
 				userList.forEach((element) => {
 					User.findOne({
 						attributes: ['address', 'session', 'fb_name'],
@@ -76,6 +121,7 @@ library.dialog('/receives', [
 						bot.beginDialog(userData.address, '*:/sendNotification', {
 							userDialog: userData.session.dialogName,
 							usefulData: userData.session.usefulData,
+							userName: user.fb_name,
 						});
 					}).catch((err) => {
 						console.log(`Erro => ${err}`);
@@ -84,7 +130,9 @@ library.dialog('/receives', [
 			}).catch((err) => {
 				console.log(`Erro => ${err}`);
 			});
-		});
+		}, limit);
+		session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
+		session.replaceDialog(user.session.dialogName);
 	},
 ]);
 
@@ -93,7 +141,7 @@ bot.dialog('/sendNotification', [
 		session.userData.dialogName = args.userDialog;
 		session.userData.usefulData = args.usefulData;
 		builder.Prompts.choice(
-			session, 'Recebemos uma nova dúvida! Entre na caixa de entrada para responder!', [inbox, goBack],
+			session, `Recebemos uma nova dúvida de ${args.userName}! Entre na caixa de entrada para responder!`, [inbox, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle
