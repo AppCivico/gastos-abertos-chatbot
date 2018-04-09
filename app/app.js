@@ -77,7 +77,7 @@ bot.dialog('/reset', [
 
 bot.dialog('/', [
 	(session) => {
-		session.userData = {}; // TODO alinhar qual comportamento nós realmente queremos
+		session.userData = {};
 		if (session.message.address.channelId === 'facebook') {
 			session.userData.userid = session.message.sourceEvent.sender.id;
 			session.userData.pageid = session.message.sourceEvent.recipient.id;
@@ -88,12 +88,6 @@ bot.dialog('/', [
 		session.userData.pageToken = pageToken;
 		session.userData.isItAdmin = false;
 		session.userData.userGroup = 'Cidadão'; // default group
-
-		// // checks if user should be an admin using fb_id
-		// if (adminArray.includes(session.userData.userid)) {
-		// 	session.userData.isItAdmin = true;
-		// 	session.userData.userGroup = process.env.adminGroup; // default admin group
-		// }
 
 		// default value: 'undefined'. Yes, it's only a string.
 		User.findOrCreate({
@@ -127,21 +121,23 @@ bot.dialog('/', [
 			}
 
 			// it's better to always update fb_name to follow any changes the user may do
-			saveSession.userFacebook(
-				session.userData.userid, session.userData.pageToken,
-				(result => User.update({
-					fb_name: `${result.first_name} ${result.last_name}`,
-					fb_id: result.id,
-				}, {
-					where: {
-						fb_id: {
-							$eq: session.userData.userid,
+			if (session.message.address.channelId === 'facebook') {
+				saveSession.userFacebook(
+					session.userData.userid, session.userData.pageToken,
+					(result => User.update({
+						fb_name: `${result.first_name} ${result.last_name}`,
+						fb_id: result.id,
+					}, {
+						where: {
+							fb_id: {
+								$eq: session.userData.userid,
+							},
 						},
-					},
-				}).catch((err) => {
-					errorLog.storeErrorLog(session, `Couldn't update facebook name => ${err}`, user.get('id'));
-				})) // eslint-disable-line comma-dangle
-			);
+					}).catch((err) => {
+						errorLog.storeErrorLog(session, `Couldn't update facebook name => ${err}`, user.get('id'));
+					})) // eslint-disable-line comma-dangle
+				);
+			}
 			// if user was created, there's no point in updating
 			// session.userData.isItAdmin === true => avoid turning admins into non-admins
 			if (!created && session.userData.isItAdmin === true) {
