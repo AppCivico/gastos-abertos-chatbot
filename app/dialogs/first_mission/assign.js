@@ -44,7 +44,7 @@ library.dialog('/', [
 			});
 			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sunglasses').repeat(2)}`);
 			session.send(texts.first_mission.details);
-			session.replaceDialog('/bosta');
+			session.replaceDialog('/askState');
 		}).catch((err) => {
 			errorLog.storeErrorLog(session, `Error finding user => ${err}`);
 			session.send(`Tive um problema ao iniciar suas missões. ${emoji.get('dizzy_face').repeat(2)}. ` +
@@ -56,7 +56,7 @@ library.dialog('/', [
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
 });
 
-library.dialog('/bosta', [
+library.dialog('/askState', [
 	(session) => {
 		saveSession.updateSession(session.userData.userid, session);
 		session.sendTyping();
@@ -105,7 +105,7 @@ library.dialog('/askCity', [
 		if (/^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^come[cç]ar/i.test(session.message.text)) {
 			session.replaceDialog(session.userData.session); // cancel option
 		} else {
-			session.userData.userDoubt = session.message.text;
+			session.userData.userInput = session.message.text;
 			session.endDialog();
 		}
 	},

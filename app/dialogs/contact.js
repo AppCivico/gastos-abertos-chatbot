@@ -58,7 +58,16 @@ library.dialog('/receives', [
 			},
 		}).then((userMessageList) => {
 			if (userMessageList.length === 0) { // no messages from this user
-				next();
+				userMessage.create({
+					user_id: user.id,
+					user_name: user.fb_name,
+					user_address: user.address,
+					content: message,
+					answered: false,
+				}).then(() => {
+					session.send('Recebemos sua dúvida! Entraremos em contato o mais cedo possível.');
+					next();
+				});
 			} else {
 				// can be a little buggy if another user sends a message in the 'limit' time window
 				// clearing timer so we don't warn the admins more than once
@@ -77,7 +86,11 @@ library.dialog('/receives', [
 							id: lastMessage.id,
 						},
 					}).then(() => {
+						session.send('Entendido! Te respondendemos em breve.' +
+						'\n\nEnquanto isso, por que não explorar nosso bot? Utilize nossos botões para interagir!');
 						next();
+					}).catch((err) => {
+						errorLog.storeErrorLog(session, `Error findind User => ${err}`, user.id);
 					});
 				} else { // creates new user message
 					userMessage.create({
@@ -87,10 +100,13 @@ library.dialog('/receives', [
 						content: message,
 						answered: false,
 					}).then(() => {
+						session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
 						next();
 					});
 				}
 			}
+		}).catch((err) => {
+			errorLog.storeErrorLog(session, `Error findind User => ${err}`, user.id);
 		});
 	},
 	(session) => { // warns admins and gives feedback to the user
@@ -124,14 +140,13 @@ library.dialog('/receives', [
 							userName: user.fb_name,
 						});
 					}).catch((err) => {
-						console.log(`Erro => ${err}`);
+						errorLog.storeErrorLog(session, `Error findind User => ${err}`, user.id);
 					});
 				});
 			}).catch((err) => {
-				console.log(`Erro => ${err}`);
+				errorLog.storeErrorLog(session, `Error findind User => ${err}`, user.id);
 			});
 		}, limit);
-		session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
 		session.replaceDialog(user.session.dialogName);
 	},
 ]);

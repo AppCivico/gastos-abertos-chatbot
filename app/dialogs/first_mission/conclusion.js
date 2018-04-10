@@ -61,7 +61,7 @@ library.dialog('/', [
 				break;
 			case No:
 				session.send(`Okay! Estarei te esperando para mandarmos ver nessa tarefa! ${emoji.get('sunglasses')}`);
-				session.endDialog();
+				session.replaceDialog('*:/promptButtons');
 				break;
 			default: // MoreInformations
 				session.send(texts.first_mission.details);
@@ -98,7 +98,7 @@ library.dialog('/conclusionPromptAfterMoreDetails', [
 				break;
 			default: // No
 				session.send(`Okay! Estarei te esperando para mandarmos ver nessa tarefa! ${emoji.get('sunglasses')}`);
-				session.endDialog();
+				session.replaceDialog('*:/promptButtons');
 				break;
 			}
 		}
