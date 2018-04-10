@@ -277,7 +277,6 @@ bot.dialog('/promptButtons', [
 	matches: /^[\s\S]*/,
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
-			console.log('\n\n\n\n', response);
 			if (response === 'error') {
 				session.beginDialog('contact_doubt:/receives', { userMessage: session.message.text });
 			} else {
