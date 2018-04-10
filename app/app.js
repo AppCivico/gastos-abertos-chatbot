@@ -235,6 +235,13 @@ bot.dialog('/promptButtons', [
 			session, menuMessage, menuOptions,
 			{
 				listStyle: builder.ListStyle.button,
+				// disableRecognizer: false,
+				// recognizeChoices: false,
+				// // if true, the prompt will attempt to recognize numbers in the users utterance as the index of the choice to return. The default value is "true".</param>
+				// recognizeNumbers: false,
+				// // if true, the prompt will attempt to recognize ordinals like "the first one" or "the second one" as the index of the choice to return. The default value is "true".</param>
+				// recognizeOrdinals: false,
+				// // if true, the prompt will attempt to recognize the selected value using the choices themselves. The default value is "true".</param>
 			} // eslint-disable-line comma-dangle
 		);
 	},

@@ -77,6 +77,7 @@ library.dialog('/receives', [
 							id: lastMessage.id,
 						},
 					}).then(() => {
+						session.send('Entendido! Estaremos te respondendo o mais cedo possível.');
 						next();
 					});
 				} else { // creates new user message
@@ -87,6 +88,7 @@ library.dialog('/receives', [
 						content: message,
 						answered: false,
 					}).then(() => {
+						session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
 						next();
 					});
 				}
@@ -131,7 +133,6 @@ library.dialog('/receives', [
 				console.log(`Erro => ${err}`);
 			});
 		}, limit);
-		session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
 		session.replaceDialog(user.session.dialogName);
 	},
 ]);
