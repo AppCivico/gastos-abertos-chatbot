@@ -65,7 +65,7 @@ library.dialog('/receives', [
 					content: message,
 					answered: false,
 				}).then(() => {
-					session.send('Recebemos sua dúvida! Em breve, entraremos em contato.');
+					session.send('Recebemos sua dúvida! Entraremos em contato o mais cedo possível.');
 					next();
 				});
 			} else {
@@ -86,7 +86,8 @@ library.dialog('/receives', [
 							id: lastMessage.id,
 						},
 					}).then(() => {
-						session.send('Entendido! Estaremos te respondendo o mais cedo possível.');
+						session.send('Entendido! Te respondendemos em breve.' +
+						'\n\nEnquanto isso, por que não explorar nosso bot? Utilize nossos botões para interagir!');
 						next();
 					}).catch((err) => {
 						errorLog.storeErrorLog(session, `Error findind User => ${err}`, user.id);
