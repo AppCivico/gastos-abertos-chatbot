@@ -6,3 +6,4 @@ node_modules/
 /.gitignore
 /example.env
 /package.json
+*.csv

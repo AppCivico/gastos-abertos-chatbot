@@ -17,6 +17,16 @@ let lastIndex = 0;
 const arrayName = []; // data from users found using userName
 const arrayGroup = []; // store groups from the users above
 
+function removeDuplicatesBy(keyFn, array) {
+	const mySet = new Set();
+	return array.filter((x) => {
+		const key = keyFn(x);
+		const isNew = !mySet.has(key);
+		if (isNew) mySet.add(key);
+		return isNew;
+	});
+}
+
 library.dialog('/', [
 	(session) => {
 		arrayName.length = 0; // empty array
@@ -40,12 +50,14 @@ library.dialog('/', [
 				},
 			},
 		}).then((listUser) => {
-			if (listUser.count === 0) {
+			const listNoDupes = removeDuplicatesBy(x => x.fb_id, listUser.rows);
+
+			if (listNoDupes.length === 0) {
 				session.send('Não foi encontrado nenhum usuário com esse nome!');
 				session.endDialog();
 			} else {
-				session.send(`Encontrei ${listUser.count} usuário(s).`);
-				listUser.rows.forEach((element) => {
+				session.send(`Encontrei ${listNoDupes.length} usuário(s).`);
+				listNoDupes.forEach((element) => {
 					arrayName.push(element.dataValues.fb_name);
 					arrayGroup.push(element.dataValues.group);
 				});

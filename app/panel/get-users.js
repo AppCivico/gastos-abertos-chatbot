@@ -223,7 +223,9 @@ library.dialog('/', [
 		});
 	},
 	(session, args, next) => {
-		User.count({
+		User.findAndCountAll({
+			attributes: ['fb_id'],
+			group: ['fb_id'], // stops db from loading same user in case of redundancy on table
 			where: {
 				$or: [
 					// null means we couldn't ask the user yet but we'll send the message anyway
@@ -231,9 +233,12 @@ library.dialog('/', [
 					// true means the user accepted receiving messages
 					{ receiveMessage: true },
 				],
+				fb_id: {
+					$ne: session.userData.userid,
+				},
 			},
-		}).then((MissionData) => {
-			numberResults += `Quantos recebem mensagem de administrador: ${MissionData}\n\n`;
+		}).then((userList) => {
+			numberResults += `Quantos recebem mensagem de administrador: ${userList.count.length}\n\n`;
 		}).catch((err) => {
 			session.send(`Ocorreu um erro => ${err}`);
 		}).finally(() => {
