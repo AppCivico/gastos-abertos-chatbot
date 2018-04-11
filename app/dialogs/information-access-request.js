@@ -4,7 +4,6 @@
 /* eslint no-plusplus: 0 */
 /* eslint max-len: 0 */
 
-
 const request = require('request');
 const pdf = require('html-pdf');
 const fs = require('fs');

@@ -1,12 +1,11 @@
-/* global builder:true */
+/* global  builder:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
 // the menu to send direct messages to user
-// NOTICE: This is a copy of the way admins send message
+// NOTICE: This is how this functionality used to be
 // For now, the way Ambassadors send messages is the same as the admins
-// The old functionality is on send-message-menu2
-const Send = require('./panel/admin-message');
+const Send = require('./send-message');
 
 const library = new builder.Library('sendMessageMenu');
 
@@ -16,7 +15,7 @@ const groupMessage = require('./server/schema/models').group_message;
 const writeMsg = 'Escrever Mensagem';
 const imageMsg = 'Mensagem com Imagem';
 const testMessage = 'Mensagem Teste(Temporário)';
-const goBack = 'Voltar';
+const goBack = 'Voltar para o painel';
 const Confirm = 'Enviar';
 const Negate = 'Não enviar/Voltar';
 const messageFrom = 'Essa é uma mensagem de ';
@@ -24,6 +23,7 @@ const messageFrom = 'Essa é uma mensagem de ';
 let messageText; // custom message text
 let imageUrl; // desired image url
 let msgCount; // counts number of messages sent
+// let userDialog; // user's last active dialog
 
 library.dialog('/', [
 	(session, args, next) => {
@@ -33,16 +33,17 @@ library.dialog('/', [
 			where: { fb_id: session.userData.userid },
 		}).then((userData) => {
 			if (userData.group === '' || userData.group === 'Cidadão') {
-				session.send(`Você parece ser do grupo ${session.userData.group}. Desse jeito não poderá enviar mensagem.` +
+				session.send(`Você parece ser do grupo ${session.userData.group}. Desse jeito, não poderá enviar mensagem.` +
 				'\n\nPor favor, entre em contato com nossa equipe imediatamente.');
 				session.endDialog();
 			} else {
-				session.userData.id = userData.id;
 				session.userData.group = userData.group;
+				session.userData.id = userData.id;
 				next();
 			}
 		}).catch((err) => {
-			session.send(`Não consegui encontrar seu grupo => ${err}. Não poderemos mandar mensagens.` +
+			console.log(`Couldn't find user => ${err}`);
+			session.send('Não consegui encontrar seu grupo. Não poderemos mandar mensagens.' +
 			'\n\nPor favor, entre em contato com nossa equipe imediatamente.');
 			session.endDialog();
 		});
@@ -50,11 +51,11 @@ library.dialog('/', [
 
 	(session) => {
 		builder.Prompts.choice(
-			session, 'Este é o menu para mandarmos mensagens aos usuários! Aqui, você, o embaixador poderá mandar mensagens ' +
-			'para os usuários da nossa base.' +
-			`\n\nToda mensagem será assinada por seu grupo, no caso ${session.userData.group}.` +
-			'\n\nMuito cuidado por aqui!' +
-			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o botão no menu ao lado.',
+			session, 'Este é o menu para os embaixadores mandarem mensagens aos usuários! Apenas quem aceitarou receber mensagens irão recebê-las.' +
+			'\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), visualize como fica e confirme. ' +
+			`A mensagem será mandada em nome do grupo ${session.userData.group}. Você não receberá a mensagem. ` +
+			'Com essas mensagens, o fluxo do usuário não será interrompido, continuando de onde parou.' +
+			'\n\nSe você for interrompido durante esse fluxo, volte para o menu inicial com o menu ao lado. Tome cuidado!',
 			[writeMsg, imageMsg, goBack],
 			{
 				listStyle: builder.ListStyle.button,
@@ -98,11 +99,10 @@ library.dialog('/askImage', [ // asks user for text and image URL
 		builder.Prompts.text(session, 'Digite a URL da imagem desejada.' +
 		'\n\nLembre-se: ela deve estar online e acessível a todos. Cuidado com o tamanho. Pode ser GIF.' +
 		'\n\nExemplo: https://gallery.mailchimp.com/cdabeff22c56cd4bd6072bf29/images/8e84d7d3-bba7-43be-acac-733dd6712f78.png');
-		session.userData.userInput = '';
 	},
 
 	(session) => {
-		imageUrl = session.userData.userInput; // comes from customAction
+		imageUrl = session.userData.userInput;
 		session.send('Sua mensagem aparecerá da seguinte forma para os usuários:');
 		session.send(messageFrom + session.userData.group);
 		session.send({
@@ -156,25 +156,32 @@ library.dialog('/sendingImage', [ // sends image and text message
 		session.sendTyping();
 		User.findAll({
 			attributes: ['fb_id'],
-			group: ['fb_id'], // stops db from loading same user in case of redundancy on table
+			group: 'fb_id',
 			where: {
-				$or: [
-					// null means we couldn't ask the user yet but we'll send the message anyway
-					{ receiveMessage: null },
-					// true means the user accepted receiving messages
-					{ receiveMessage: true },
-				],
-				fb_id: { // excludes whoever is sending the direct message
-					$ne: session.userData.userid,
+				receiveMessage: { // search for people that accepted receiving messages
+					$eq: true,
+				},
+				fb_id: {
+					$ne: session.userData.userid, // excludes whoever is sending the direct message
 				},
 			},
 		}).then((user) => {
 			user.forEach((element) => {
-				Send.sendImageByFbId(
-					element.dataValues, messageText, imageUrl,
-					session.userData.pageToken,
-					messageFrom + session.userData.group // eslint-disable-line comma-dangle
-				);
+				User.findOne({
+					attributes: ['address', 'session', 'fb_id'],
+					where: {
+						fb_id: {
+							$eq: element.fb_id,
+						},
+					},
+				}).then((userData) => {
+					Send.startProactiveImage(
+						userData.dataValues, messageText, imageUrl,
+						messageFrom + session.userData.group // eslint-disable-line comma-dangle
+					);
+				}).catch((err) => {
+					console.log(`Erro => ${err}`);
+				});
 				msgCount += 1;
 			});
 		}).catch((err) => {
@@ -202,7 +209,7 @@ library.dialog('/sendingImage', [ // sends image and text message
 library.dialog('/askText', [ // asks user for text message
 	(session) => {
 		builder.Prompts.text(session, 'Digite a sua mensagem. Ela será enviada a todos os usuários que ' +
-		'concordaram em receber mensagens pelo Guaxi ou ainda não passaram pelo diálogo de permissão para receber as mensagens.');
+		'concordaram em receber mensagens pelo Guaxi.');
 	},
 	(session) => {
 		messageText = session.userData.userInput; // comes from customAction
@@ -246,36 +253,44 @@ library.dialog('/askText', [ // asks user for text message
 
 library.dialog('/sendingMessage', [ // sends text message
 	(session, args) => {
-		if (!args) { // Test Message option happens here
-			messageText = '<<Mensagem administrativa de teste>>';
+		if (!args) {
+			messageText = '<<Mensagem proativa de teste>>';
 		} else {
 			[messageText] = [args.messageText];
 		}
 		session.sendTyping();
-		User.findAndCountAll({
+		User.findAll({
 			attributes: ['fb_id'],
-			group: ['fb_id'], // stops db from loading same user in case of redundancy on table
+			group: 'fb_id',
 			where: {
-				$or: [
-					// null means we couldn't ask the user yet but we'll send the message anyway
-					{ receiveMessage: null },
-					// true means the user accepted receiving messages
-					{ receiveMessage: true },
-				],
+				receiveMessage: { // search for people that accepted receiving messages
+					$eq: true,
+				},
 				fb_id: {
-					$ne: session.userData.userid,
+					$ne: session.userData.userid, // excludes whoever is sending the direct message
 				},
 			},
 		}).then((user) => {
-			user.rows.forEach((element) => {
-				Send.sendMessageByFbId(
-					element.dataValues, messageText, session.userData.pageToken,
-					messageFrom + session.userData.group // eslint-disable-line comma-dangle
-				);
+			user.forEach((element) => {
+				User.findOne({
+					attributes: ['address', 'session', 'fb_id'],
+					where: {
+						fb_id: {
+							$eq: element.fb_id,
+						},
+					},
+				}).then((userData) => {
+					Send.startProactiveDialog(
+						userData.dataValues, messageText,
+						messageFrom + session.userData.group // eslint-disable-line comma-dangle
+					);
+				}).catch((err) => {
+					console.log(`Erro => ${err}`);
+				});
 				msgCount += 1;
 			});
 		}).catch((err) => {
-			session.send(`Ocorreu um erro ao enviar mensagem ${err}`);
+			session.send(`Ocorreu um erro ao enviar mensagem => ${err}`);
 			msgCount = 0;
 		}).finally(() => {
 			session.send(`${msgCount} mensagen(s) enviada(s) com sucesso!`);
@@ -283,7 +298,6 @@ library.dialog('/sendingMessage', [ // sends text message
 				user_id: session.userData.id,
 				user_group: session.userData.group,
 				content: messageText,
-				image_url: imageUrl,
 				number_sent: msgCount,
 			}).then(() => {
 				console.log('Message saved successfully!');
