@@ -11,6 +11,16 @@ const Cancel = 'Cancelar/Voltar';
 const arrayData = []; // data from users found using userName
 let lastIndex = 0;
 
+function removeDuplicatesBy(keyFn, array) {
+	const mySet = new Set();
+	return array.filter((x) => {
+		const key = keyFn(x);
+		const isNew = !mySet.has(key);
+		if (isNew) mySet.add(key);
+		return isNew;
+	});
+}
+
 library.dialog('/', [
 	(session, args, next) => {
 		arrayData.length = 0; // empty array
@@ -30,12 +40,14 @@ library.dialog('/', [
 				},
 			},
 		}).then((listAdmin) => {
-			if (listAdmin.count === 0) {
+			const listNoDupes = removeDuplicatesBy(x => x.fb_id, listAdmin.rows);
+
+			if (listNoDupes.length === 0) {
 				session.send('Não foi encontrado nenhum outro administrador, além de você!');
 				session.endDialog();
 			} else {
-				session.send(`Encontrei ${listAdmin.count} administrador(es).`);
-				listAdmin.rows.forEach((element) => {
+				session.send(`Encontrei ${listNoDupes.length} administrador(es).`);
+				listNoDupes.forEach((element) => {
 					arrayData.push(element.dataValues.fb_name);
 				});
 				next();

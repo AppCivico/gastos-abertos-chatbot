@@ -14,6 +14,16 @@ let userName = ''; // fb_name to search for
 const arrayData = []; // data from users found using userName
 let lastIndex = 0;
 
+function removeDuplicatesBy(keyFn, array) {
+	const mySet = new Set();
+	return array.filter((x) => {
+		const key = keyFn(x);
+		const isNew = !mySet.has(key);
+		if (isNew) mySet.add(key);
+		return isNew;
+	});
+}
+
 library.dialog('/', [
 	(session) => {
 		arrayData.length = 0; // empty array
@@ -27,7 +37,7 @@ library.dialog('/', [
 		userName = session.userData.userInput; // comes from customAction
 
 		User.findAndCountAll({ // list all users with desired like = fb_name
-			attributes: ['fb_name'],
+			attributes: ['fb_name', 'fb_id'],
 			order: [['updatedAt', 'DESC']], // order by last recorded interation with bot
 			limit: 7,
 			where: {
@@ -42,12 +52,13 @@ library.dialog('/', [
 				},
 			},
 		}).then((listUser) => {
-			if (listUser.count === 0) {
+			const listNoDupes = removeDuplicatesBy(x => x.fb_id, listUser.rows);
+			if (listNoDupes.length === 0) {
 				session.send('Não foi encontrado nenhum usuário com esse nome! Será que ele já é administrador?');
 				session.endDialog();
 			} else {
-				session.send(`Encontrei ${listUser.count} usuário(s).`);
-				listUser.rows.forEach((element) => {
+				session.send(`Encontrei ${listNoDupes.length} usuário(s).`);
+				listNoDupes.forEach((element) => {
 					arrayData.push(element.dataValues.fb_name);
 				});
 				next();
