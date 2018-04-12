@@ -6,22 +6,13 @@ require('dotenv').config();
 require('./connectorSetup.js')();
 
 const { pageToken } = process.env;
-const { ChatbaseApiKey } = process.env;
 // const adminArray = process.env.adminArray.split(',');
 
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const Timer = require('./timer');
-const chatbase = require('@google/chatbase')
-	.setApiKey(ChatbaseApiKey) // Your api key
-	// .setUserId(user.get('id')) // The id of the user you are interacting with
-	.setPlatform('Messenger')// The platform the bot is interacting on/over
-	.setVersion('1.0'); // The version of the bot deployed
-	// .setIntent('newUniqueUser'); // the intent of the user message
-
-	// const csv = require('fast-csv');
-	// const fs = require('fs');
-
+// const csv = require('fast-csv');
+// const fs = require('fs');
 
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
@@ -36,6 +27,7 @@ bot.library(require('./misc/error_message'));
 
 const saveSession = require('./misc/save_session');
 const errorLog = require('./misc/send_log');
+const chatBase = require('./misc/chatbase');
 
 const User = require('./server/schema/models').user;
 
@@ -73,7 +65,6 @@ intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
-
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
@@ -127,23 +118,9 @@ bot.dialog('/', [
 			// console.log(`Was created? => ${created}`);
 
 			if (created === true) {
-				chatbase.newMessage()
-					.setUserId(session.userData.tableId) // The id of the user you are interacting with
-					.setIntent('User Interation') // the intent of the user message
-					.setMessage('Im a new user interacting for the first time') // the message itself
-					.setTimestamp(Date.now().toString())
-				// .setAsNotHandled()
-					.send() // sends Message
-					.then(() => console.log('Sucess!'))
-					.catch(e => console.error(e));
+				chatBase.MessageHandled(session.userData.sdasdf, 'User Interation', 'Im a new user interacting for the first time');
 			} else {
-				chatbase.newMessage()
-					.setUserId(session.userData.tableId)
-					.setIntent('User Interation')
-					.setMessage('Im an old user interacting again')
-					.setTimestamp(Date.now().toString())
-					.send()
-					.catch(e => console.error(e));
+				chatBase.MessageHandled(session.userData.sdasdf, 'User Interation', 'Im an old user interacting again');
 			}
 
 			// Don't reset admin group to normal default nor admin deault
@@ -195,6 +172,7 @@ bot.dialog('/', [
 			}
 		}).catch((err) => {
 			errorLog.storeErrorLog(session, `Error creating user at app.js! => ${err}`);
+			console.log('\n\n', err);
 			session.replaceDialog('/promptButtons');
 		}); // eslint-disable-line comma-dangle
 	},
@@ -309,26 +287,10 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
-				chatbase.newMessage()
-					.setUserId(session.userData.tableId ? session.userData.tableId : '000') // The id of the user you are interacting with
-					.setIntent('Free Text') // the intent of the user message
-					.setMessage(session.message.text) // the message itself
-					.setTimestamp(Date.now().toString())
-					.setAsNotHandled()
-					.send() // sends Message
-					.then(() => console.log('\n\nSucess!'))
-					.catch(e => console.error(e));
+				chatBase.msgUnhandled(session.userData.tableId, 'Free Text', session.message.text);
 				session.beginDialog('contact_doubt:/receives', { userMessage: session.message.text });
 			} else {
-				chatbase.newMessage()
-					.setUserId(session.userData.tableId ? session.userData.tableId : '000') // The id of the user you are interacting with
-					.setIntent('Free Text') // the intent of the user message
-					.setMessage(session.message.text) // the message itself
-					.setTimestamp(Date.now().toString())
-				// .setAsNotHandled()
-					.send() // sends Message
-					.then(() => console.log('\n\nSucess!'))
-					.catch(e => console.error(e));
+				chatBase.MessageHandled(session.userData.tableId, 'Free Text', session.message.text);
 				session.replaceDialog(response);
 			}
 		}));
