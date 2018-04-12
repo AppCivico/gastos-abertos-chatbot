@@ -12,7 +12,6 @@ const User = require('./server/schema/models').user;
 
 bot.library(require('./dialogs/second_mission/conclusion'));
 
-
 function missionWarning(user, text, missionID) {
 	Notification.update({
 		sentAlready: true, // TODO false for testing

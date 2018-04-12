@@ -5,11 +5,23 @@
 require('dotenv').config();
 require('./connectorSetup.js')();
 
+const { pageToken } = process.env;
+const { ChatbaseApiKey } = process.env;
+// const adminArray = process.env.adminArray.split(',');
+
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-const Timer = require('./timer'); // eslint-disable-line no-unused-vars
-// const csv = require('fast-csv');
-// const fs = require('fs');
+const Timer = require('./timer');
+const chatbase = require('@google/chatbase')
+	.setApiKey(ChatbaseApiKey) // Your api key
+	// .setUserId(user.get('id')) // The id of the user you are interacting with
+	.setPlatform('Messenger')// The platform the bot is interacting on/over
+	.setVersion('1.0'); // The version of the bot deployed
+	// .setIntent('newUniqueUser'); // the intent of the user message
+
+	// const csv = require('fast-csv');
+	// const fs = require('fs');
+
 
 console.log(`Crontab MissionTimer is running? => ${Timer.MissionTimer.running}`);
 console.log(`Crontab RequestTimer is running? => ${Timer.RequestTimer.running}`);
@@ -62,8 +74,6 @@ intents.matches('Default Fallback Intent', '/');
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
 
-const { pageToken } = process.env;
-// const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
@@ -110,10 +120,31 @@ bot.dialog('/', [
 				group: session.userData.userGroup,
 			},
 		}).spread((user, created) => {
+			session.userData.tableId = user.get('id').toString(); // for chatbase usedId
 			// console.log(`state: ${Object.values(session.dialogStack()
 			// [session.dialogStack().length - 1].state)}`);
 			// console.log(user.get({ plain: true })); // prints user data
 			// console.log(`Was created? => ${created}`);
+
+			if (created === true) {
+				chatbase.newMessage()
+					.setUserId(session.userData.tableId) // The id of the user you are interacting with
+					.setIntent('User Interation') // the intent of the user message
+					.setMessage('Im a new user interacting for the first time') // the message itself
+					.setTimestamp(Date.now().toString())
+				// .setAsNotHandled()
+					.send() // sends Message
+					.then(() => console.log('Sucess!'))
+					.catch(e => console.error(e));
+			} else {
+				chatbase.newMessage()
+					.setUserId(session.userData.tableId)
+					.setIntent('User Interation')
+					.setMessage('Im an old user interacting again')
+					.setTimestamp(Date.now().toString())
+					.send()
+					.catch(e => console.error(e));
+			}
 
 			// Don't reset admin group to normal default nor admin deault
 			if (user.get('group') !== 'Cidadão' && user.get('group') !== process.env.adminGroup) {
@@ -278,8 +309,26 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
+				chatbase.newMessage()
+					.setUserId(session.userData.tableId ? session.userData.tableId : '000') // The id of the user you are interacting with
+					.setIntent('Free Text') // the intent of the user message
+					.setMessage(session.message.text) // the message itself
+					.setTimestamp(Date.now().toString())
+					.setAsNotHandled()
+					.send() // sends Message
+					.then(() => console.log('\n\nSucess!'))
+					.catch(e => console.error(e));
 				session.beginDialog('contact_doubt:/receives', { userMessage: session.message.text });
 			} else {
+				chatbase.newMessage()
+					.setUserId(session.userData.tableId ? session.userData.tableId : '000') // The id of the user you are interacting with
+					.setIntent('Free Text') // the intent of the user message
+					.setMessage(session.message.text) // the message itself
+					.setTimestamp(Date.now().toString())
+				// .setAsNotHandled()
+					.send() // sends Message
+					.then(() => console.log('\n\nSucess!'))
+					.catch(e => console.error(e));
 				session.replaceDialog(response);
 			}
 		}));
