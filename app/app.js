@@ -79,7 +79,6 @@ bot.dialog('/reset', [
 bot.dialog('/', [
 	(session) => {
 		session.userData = {};
-		chatBase.setPlatform(session.message.address.channelId);
 		if (session.message.address.channelId === 'facebook') {
 			session.userData.userid = session.message.sourceEvent.sender.id;
 			session.userData.pageid = session.message.sourceEvent.recipient.id;
@@ -112,16 +111,18 @@ bot.dialog('/', [
 				group: session.userData.userGroup,
 			},
 		}).spread((user, created) => {
-			session.userData.tableId = user.get('id'); // for chatbase usedId
 			// console.log(`state: ${Object.values(session.dialogStack()
 			// [session.dialogStack().length - 1].state)}`);
 			// console.log(user.get({ plain: true })); // prints user data
 			// console.log(`Was created? => ${created}`);
 
+
+			// setting the chatBase template with userId and channel
+			chatBase.setPlatform(user.get('id').toString(), session.message.address.channelId);
 			if (created === true) {
-				chatBase.MessageHandled(session.userData.tableId, 'User Interation', 'Im a new user interacting for the first time');
+				chatBase.MessageHandled('New User', 'Im a new user interacting for the first time');
 			} else {
-				chatBase.MessageHandled(session.userData.tableId, 'User Interation', 'Im an old user interacting again');
+				chatBase.MessageHandled('Old User', 'Im an old user interacting again');
 			}
 
 			// Don't reset admin group to normal default nor admin deault
@@ -291,10 +292,10 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
-				chatBase.msgUnhandled(session.userData.tableId, 'Free Text', session.message.text);
+				chatBase.msgUnhandled('Free Text', session.message.text);
 				session.beginDialog('contact_doubt:/receives', { userMessage: session.message.text });
 			} else {
-				chatBase.MessageHandled(session.userData.tableId, 'Free Text', session.message.text);
+				chatBase.MessageHandled('Free Text', session.message.text);
 				session.replaceDialog(response);
 			}
 		}));
