@@ -112,16 +112,16 @@ bot.dialog('/', [
 				group: session.userData.userGroup,
 			},
 		}).spread((user, created) => {
-			session.userData.tableId = user.get('id').toString(); // for chatbase usedId
+			session.userData.tableId = user.get('id'); // for chatbase usedId
 			// console.log(`state: ${Object.values(session.dialogStack()
 			// [session.dialogStack().length - 1].state)}`);
 			// console.log(user.get({ plain: true })); // prints user data
 			// console.log(`Was created? => ${created}`);
 
 			if (created === true) {
-				chatBase.MessageHandled(session.userData.sdasdf, 'User Interation', 'Im a new user interacting for the first time');
+				chatBase.MessageHandled(session.userData.tableId, 'User Interation', 'Im a new user interacting for the first time');
 			} else {
-				chatBase.MessageHandled(session.userData.sdasdf, 'User Interation', 'Im an old user interacting again');
+				chatBase.MessageHandled(session.userData.tableId, 'User Interation', 'Im an old user interacting again');
 			}
 
 			// Don't reset admin group to normal default nor admin deault
