@@ -4,6 +4,10 @@
 
 require('dotenv').config();
 
+const request = require('request');
+
+const tinyUrl = 'http://tinyurl.com/api-create.php?url=';
+
 const { ChatbaseApiKey } = process.env;
 const chatbase = require('@google/chatbase')
 	.setApiKey(ChatbaseApiKey); // Your api key
@@ -43,11 +47,28 @@ function msgUnhandled(interation, message) {
 
 module.exports.msgUnhandled = msgUnhandled;
 
-// function trackLink(url, platform) {
-// 	// usage: session.send(chatBase.trackLink('http://www.google.com', session.message.address.channelId));
-// 	// For now, the chatbase library doesn't suport link tapping. So, we need the link.
-// 	// DONT use this without passing it through something like TinyUrl(security reasons)
-// 	return `https://chatbase.com/r?api_key=${ChatbaseApiKey}&url=${url}&platform=${platform}`;
-// }
-//
-// module.exports.trackLink = trackLink;
+function getTinyUrl(url, callback) {
+	// Usage: await chatBase.getTinyUrl(
+	// chatBase.trackLink('www.google.com', session.message.address.channelId),
+	// (response) => { session.send('Click our link:' + response); next(); });
+	// obs: we're using trackLink to get the actual link we want to cover up(see below)
+	// obs2: 'await' so dont forget the async!
+	request(`${tinyUrl}${url}`, (error, response, body) => {
+		console.log('error:', error);
+		console.log('statusCode:', response && response.statusCode);
+		console.log('body:', body, '\n');
+		callback(body);
+	});
+}
+
+module.exports.getTinyUrl = getTinyUrl;
+
+function trackLink(url, platform) {
+	// usage: session.send(chatBase.trackLink('http://www.google.com', session.message.address.channelId));
+	// For now, the chatbase library doesn't suport link tapping. So, we need the link.
+	// DONT use this without passing it through something like TinyUrl(security reasons)
+	// Use it with getTinyUrl(above)
+	return `https://chatbase.com/r?api_key=${ChatbaseApiKey}&url=${url}&platform=${platform}`;
+}
+
+module.exports.trackLink = trackLink;

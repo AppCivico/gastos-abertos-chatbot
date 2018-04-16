@@ -86,6 +86,13 @@ bot.dialog('/', [
 			// hardcoded ids for testing purposes
 			session.userData.userid = '000000000000002';
 		}
+
+		// setting the chatBase object with userId and channel
+		chatBase.setPlatform(
+			session.userData.userid,
+			session.message.address.channelId // eslint-disable-line comma-dangle
+		);
+
 		session.userData.pageToken = pageToken;
 		session.userData.isItAdmin = false;
 		session.userData.userGroup = 'Cidadão'; // default group
@@ -116,12 +123,10 @@ bot.dialog('/', [
 			// console.log(user.get({ plain: true })); // prints user data
 			// console.log(`Was created? => ${created}`);
 
-			// setting the chatBase template with userId and channel
-			chatBase.setPlatform(user.get('id').toString(), session.message.address.channelId);
 			if (created === true) {
-				chatBase.MessageHandled('New User', 'Im a new user interacting for the first time');
+				chatBase.MessageHandled('New-User', 'Im a new user interacting for the first time');
 			} else {
-				chatBase.MessageHandled('Old User', 'Im an old user interacting again');
+				chatBase.MessageHandled('Old-User', 'Im an old user interacting again');
 			}
 
 			// Don't reset admin group to normal default nor admin deault
@@ -291,10 +296,10 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
-				chatBase.msgUnhandled(`Free Text+${response}`, session.message.text);
+				chatBase.msgUnhandled(`Free-Text+${response}`, session.message.text);
 				session.beginDialog('contact_doubt:/receives', { userMessage: session.message.text });
 			} else {
-				chatBase.MessageHandled(`Free Text+${response}`, session.message.text);
+				chatBase.MessageHandled(`Free-Text+${response}`, session.message.text);
 				session.replaceDialog(response);
 			}
 		}));
@@ -320,7 +325,7 @@ bot.dialog('/askPermission', [
 			case Yes:
 				session.send('Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre ' +
 				'dados abertos e transparência orçamentária na sua cidade ou em seu círculo de amizades!');
-				chatBase.MessageHandled('New User-Accepts Messages', 'Im a new user and I want to receive messages');
+				chatBase.MessageHandled('New-User-Accepts Messages', 'Im a new user and I want to receive messages');
 				User.update({
 					address: session.message.address,
 					receiveMessage: true,
@@ -333,7 +338,7 @@ bot.dialog('/askPermission', [
 				break;
 			default: // No
 				session.send(`Tranquilo! Se quiser, você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
-				chatBase.MessageHandled('New User-Doesnt accept msgs', 'Im a new user and I dont want to receive messages');
+				chatBase.MessageHandled('New-User-Doesnt accept msgs', 'Im a new user and I dont want to receive messages');
 				User.update({
 					address: session.message.address,
 					receiveMessage: false,
