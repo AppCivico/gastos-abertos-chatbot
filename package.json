@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/lucasansei/gastos-abertos-chatbot#readme",
   "dependencies": {
+    "@google/chatbase": "^1.1.1",
     "amqplib": "^0.5.1",
     "apiai": "^4.0.3",
     "async": "^2.6.0",

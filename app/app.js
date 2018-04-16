@@ -5,9 +5,12 @@
 require('dotenv').config();
 require('./connectorSetup.js')();
 
+const { pageToken } = process.env;
+// const adminArray = process.env.adminArray.split(',');
+
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
-const Timer = require('./timer'); // eslint-disable-line no-unused-vars
+const Timer = require('./timer');
 // const csv = require('fast-csv');
 // const fs = require('fs');
 
@@ -24,6 +27,7 @@ bot.library(require('./misc/error_message'));
 
 const saveSession = require('./misc/save_session');
 const errorLog = require('./misc/send_log');
+const chatBase = require('./misc/chatbase');
 
 const User = require('./server/schema/models').user;
 
@@ -61,9 +65,6 @@ intents.matches('Default Fallback Intent', '/');
 
 // bot.dialog('/', intents);
 // console.log(`intents: ${Object.entries(intents.actions)}`);
-
-const { pageToken } = process.env;
-// const adminArray = process.env.adminArray.split(',');
 
 bot.beginDialogAction('getStarted', '/getStarted');
 bot.beginDialogAction('reset', '/reset');
@@ -115,6 +116,15 @@ bot.dialog('/', [
 			// console.log(user.get({ plain: true })); // prints user data
 			// console.log(`Was created? => ${created}`);
 
+
+			// setting the chatBase template with userId and channel
+			chatBase.setPlatform(user.get('id').toString(), session.message.address.channelId);
+			if (created === true) {
+				chatBase.MessageHandled('New User', 'Im a new user interacting for the first time');
+			} else {
+				chatBase.MessageHandled('Old User', 'Im an old user interacting again');
+			}
+
 			// Don't reset admin group to normal default nor admin deault
 			if (user.get('group') !== 'Cidadão' && user.get('group') !== process.env.adminGroup) {
 				session.userData.userGroup = user.get('group');
@@ -164,6 +174,7 @@ bot.dialog('/', [
 			}
 		}).catch((err) => {
 			errorLog.storeErrorLog(session, `Error creating user at app.js! => ${err}`);
+			console.log('\n\n', err);
 			session.replaceDialog('/promptButtons');
 		}); // eslint-disable-line comma-dangle
 	},
@@ -237,11 +248,14 @@ bot.dialog('/promptButtons', [
 				listStyle: builder.ListStyle.button,
 				// disableRecognizer: false,
 				// recognizeChoices: false,
-				// // if true, the prompt will attempt to recognize numbers in the users utterance as the index of the choice to return. The default value is "true".</param>
+				// // if true, the prompt will attempt to recognize numbers in the users utterance as the
+				// index of the choice to return. The default value is "true".</param>
 				// recognizeNumbers: false,
-				// // if true, the prompt will attempt to recognize ordinals like "the first one" or "the second one" as the index of the choice to return. The default value is "true".</param>
+				// // if true, the prompt will attempt to recognize ordinals like "the first one" or "the
+				// second one" as the index of the choice to return. The default value is "true".</param>
 				// recognizeOrdinals: false,
-				// // if true, the prompt will attempt to recognize the selected value using the choices themselves. The default value is "true".</param>
+				// // if true, the prompt will attempt to recognize the selected value using the choices
+				// themselves. The default value is "true".</param>
 			} // eslint-disable-line comma-dangle
 		);
 	},
@@ -278,8 +292,10 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
+				chatBase.msgUnhandled('Free Text', session.message.text);
 				session.beginDialog('contact_doubt:/receives', { userMessage: session.message.text });
 			} else {
+				chatBase.MessageHandled('Free Text', session.message.text);
 				session.replaceDialog(response);
 			}
 		}));
