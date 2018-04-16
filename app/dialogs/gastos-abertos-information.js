@@ -1,4 +1,4 @@
-/* global bot:true builder:true */
+/* global bot:true builder:true chatBase:true */
 
 const retryPrompts = require('../misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
@@ -17,7 +17,6 @@ const Contato = 'Contato';
 let receiveDialog;
 let receiveYes;
 let receiveNo;
-let newAddress;
 let booleanMessage;
 
 library.dialog('/', [
@@ -93,13 +92,11 @@ library.dialog('/receiveMessage', [
 				receiveDialog = 'No momento, você não está recebendo nenhum de nossas mensagens diretas.\n\nDeseja começar a recebê-las?';
 				receiveYes = 'Sim, quero receber!';
 				receiveNo = 'Não quero receber';
-				newAddress = session.message.address;
 				booleanMessage = true;
 			} else {
-				receiveDialog = 'Você já recebe nossas mensagens diretas. Deseja parar de recebê-las?';
+				receiveDialog = 'Você já recebe nossas mensagens diretas. \n\nDeseja parar de recebê-las?';
 				receiveYes = 'Parar de receber';
 				receiveNo = 'Continuar recebendo';
-				newAddress = null;
 				booleanMessage = false;
 			}
 			session.replaceDialog('/updateAddress');
@@ -127,8 +124,13 @@ library.dialog('/updateAddress', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case receiveYes:
+				if (booleanMessage === true) {
+					chatBase.MessageHandled('User-Wants-to-receive-Messages', 'User went to menu and chose to start(or keep) receiving messages');
+				} else {
+					chatBase.MessageHandled('User-Doenst-Want-to-receive-Messages', 'User went to menu and chose to stop receiving messages');
+				}
 				User.update({
-					address: newAddress,
+					address: session.message.address,
 					receiveMessage: booleanMessage,
 				}, {
 					where: {

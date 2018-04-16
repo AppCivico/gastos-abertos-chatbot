@@ -1,4 +1,4 @@
-/* global  bot:true builder:true */
+/* global  bot:true builder:true chatBase:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
@@ -43,6 +43,7 @@ library.dialog('/', [
 				errorLog.storeErrorLog(session, `Couldn't save notification => ${err}`);
 			});
 			session.send(`Vamos lá! Que comece o processo de missões! ${emoji.get('sunglasses').repeat(2)}`);
+			chatBase.MessageHandled('User-Stars-Portal-Avaliation', 'User started first mission');
 			session.send(texts.first_mission.details);
 			session.replaceDialog('/askState');
 		}).catch((err) => {

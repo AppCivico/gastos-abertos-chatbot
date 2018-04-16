@@ -1,4 +1,4 @@
-/* global bot:true builder:true */
+/* global bot:true builder:true chatBase:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
@@ -380,6 +380,7 @@ library.dialog('/userUpdate', [
 
 		session.send('Uhuuu! Concluímos nossa primeira missão! ' +
 			`\n\nEu disse que formariamos uma boa equipe! ${emoji.get('sunglasses')} ${emoji.get('clap').repeat(2)}`);
+		chatBase.MessageHandled('User-Ends-Portal-Avaliation', 'User finished first mission');
 
 		User.count({
 			where: {
@@ -419,7 +420,6 @@ library.dialog('/userUpdate', [
 			returning: true,
 			raw: true,
 		}).then((missionData) => {
-			console.log(missionData[1][0].id);
 			console.log(`Mission ${missionData[1][0].id} Updated!`);
 			Notification.update({
 			}, {

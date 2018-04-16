@@ -1,4 +1,4 @@
-/* global bot:true builder:true */
+/* global bot:true builder:true chatBase:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
@@ -20,12 +20,14 @@ let message;
 let user;
 
 library.dialog('/', [
-	(session) => {
+	async (session) => {
 		session.sendTyping();
-		session.send('Se estiver com alguma dúvida, digite e envie uma mensagem utilizando o campo abaixo. ' +
-		`Logo entraremos em contato. ${emoji.get('smile')}` +
-	'\n\nVocê também pode visitar o nosso grupo de lideranças: https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS');
-		session.endDialog();
+		await chatBase.getTinyUrl(chatBase.trackLink('https://chat.whatsapp.com/Flm0oYPVLP0KfOKYlUidXS', session.message.address.channelId), (response) => {
+			session.send('Se estiver com alguma dúvida, digite e envie uma mensagem utilizando o campo abaixo. ' +
+			`Logo entraremos em contato. ${emoji.get('smile')}` +
+		`\n\nVocê também pode visitar o nosso grupo de lideranças: ${response}`);
+			session.endDialog();
+		});
 	},
 ]);
 

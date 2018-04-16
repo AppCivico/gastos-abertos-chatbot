@@ -1,4 +1,4 @@
-/* global  bot:true builder:true */
+/* global bot:true builder:true chatBase:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 /* eslint no-plusplus: 0 */
@@ -140,7 +140,7 @@ library.dialog('/askLAI', [
 	(session, args) => {
 		switch (args.response.entity) {
 		case Generate:
-
+			chatBase.MessageHandled('Lai Start', 'User started Lai Generation');
 			Notification.findOrCreate({
 				where: { // checks if exists
 					missionID: 2,
@@ -218,8 +218,8 @@ library.dialog('/questionOne', [
 			'de 27 de maio de 2009, e demais regras aplicáveis;</p>');
 			break;
 		}
-		// session.replaceDialog('/questionTwo');
-		session.beginDialog('/questionThirteen'); // for time-saving testing purposes
+		session.replaceDialog('/questionTwo');
+		// session.beginDialog('/questionThirteen'); // for time-saving testing purposes
 	},
 ]).cancelAction('cancelAction', '', {
 	matches: /^cancel$|^cancelar$|^voltar$|^in[íi]cio$|^começar/i,
@@ -719,6 +719,7 @@ library.dialog('/generateRequest', [
 
 		function callback(error, response, body) {
 			if (!error || response.statusCode === 200) {
+				chatBase.MessageHandled('Lai Generated', 'User Generated Lai successfully');
 				const obj = JSON.parse(body);
 				// console.log(obj.full_size_url);
 				const msg = new builder.Message(session);
@@ -786,6 +787,9 @@ library.dialog('/generateRequest', [
 					errorLog.storeErrorLog(session, `Couldn't update user mission => ${err})`, user.id);
 					next();
 				});
+			} else {
+				chatBase.MessageHandled('Lai Error', 'There was an error during Lai Generation');
+				errorLog.storeErrorLog(session, `error during Lai Generation => ${error})`, user.id);
 			}
 		}
 
