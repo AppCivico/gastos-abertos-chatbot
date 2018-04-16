@@ -5,7 +5,6 @@
 require('dotenv').config();
 
 const { ChatbaseApiKey } = process.env;
-
 const chatbase = require('@google/chatbase')
 	.setApiKey(ChatbaseApiKey); // Your api key
 
@@ -19,26 +18,26 @@ function setPlatform(userId = '000', platform = 'no_platform', version = '1.0') 
 
 module.exports.setPlatform = setPlatform;
 
-function MessageHandled(userId, interation, message) {
+function MessageHandled(interation, message) {
 	chatbase.newMessage()
 		.setIntent(interation) // the intent of the user message
 		.setMessage(message) // the message itself
 		.setTimestamp(Date.now().toString())
 		.send()
-		.then(() => console.log('Sucess!'))
+		.then(() => console.log('Success!'))
 		.catch(e => console.error(e));
 }
 
 module.exports.MessageHandled = MessageHandled;
 
-function msgUnhandled(userId, interation, message) {
+function msgUnhandled(interation, message) {
 	chatbase.newMessage()
 		.setIntent(interation)
 		.setMessage(message)
 		.setTimestamp(Date.now().toString())
 		.setAsNotHandled()
 		.send()
-		.then(() => console.log('Sucess!'))
+		.then(() => console.log('Success!'))
 		.catch(e => console.error(e));
 }
 

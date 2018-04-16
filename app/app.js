@@ -1,4 +1,4 @@
-/* global  bot:true builder:true */
+/* global bot:true builder:true chatBase:true */
 /* eslint no-param-reassign: ["error", { "props": true,
 "ignorePropertyModificationsFor": ["session"] }] */
 
@@ -8,6 +8,7 @@ require('./connectorSetup.js')();
 const { pageToken } = process.env;
 // const adminArray = process.env.adminArray.split(',');
 
+global.chatBase = require('./misc/chatbase'); // setup happens down below
 const retryPrompts = require('./misc/speeches_utils/retry-prompts');
 const emoji = require('node-emoji');
 const Timer = require('./timer');
@@ -27,7 +28,6 @@ bot.library(require('./misc/error_message'));
 
 const saveSession = require('./misc/save_session');
 const errorLog = require('./misc/send_log');
-const chatBase = require('./misc/chatbase');
 
 const User = require('./server/schema/models').user;
 
@@ -115,7 +115,6 @@ bot.dialog('/', [
 			// [session.dialogStack().length - 1].state)}`);
 			// console.log(user.get({ plain: true })); // prints user data
 			// console.log(`Was created? => ${created}`);
-
 
 			// setting the chatBase template with userId and channel
 			chatBase.setPlatform(user.get('id').toString(), session.message.address.channelId);
@@ -321,6 +320,7 @@ bot.dialog('/askPermission', [
 			case Yes:
 				session.send('Ótimo! Espero que você nos ajude na divulgação de conteúdo e informações sobre ' +
 				'dados abertos e transparência orçamentária na sua cidade ou em seu círculo de amizades!');
+				chatBase.MessageHandled('New User-Accepts Messages', 'Im a new user and I want to receive messages');
 				User.update({
 					address: session.message.address,
 					receiveMessage: true,
@@ -333,6 +333,7 @@ bot.dialog('/askPermission', [
 				break;
 			default: // No
 				session.send(`Tranquilo! Se quiser, você poderá se inscrever no menu de informações. ${emoji.get('smile')}`);
+				chatBase.MessageHandled('New User-Doesnt accept msgs', 'Im a new user and I dont want to receive messages');
 				User.update({
 					address: session.message.address,
 					receiveMessage: false,
