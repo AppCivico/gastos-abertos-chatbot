@@ -121,7 +121,6 @@ library.dialog('/secondMissionQuestions', [
 				'https://sistema.ouvidorias.gov.br/publico/Manifestacao/RegistrarManifestacao.aspx');
 				// session.replaceDialog('*:/promptButtons');
 				session.replaceDialog('/conclusion');
-
 				break;
 			}
 		}

@@ -291,10 +291,10 @@ bot.dialog('/promptButtons', [
 	onSelectAction: (session) => {
 		custom.allIntents(session, intents, ((response) => {
 			if (response === 'error') {
-				chatBase.msgUnhandled('Free Text', session.message.text);
+				chatBase.msgUnhandled(`Free Text+${response}`, session.message.text);
 				session.beginDialog('contact_doubt:/receives', { userMessage: session.message.text });
 			} else {
-				chatBase.MessageHandled('Free Text', session.message.text);
+				chatBase.MessageHandled(`Free Text+${response}`, session.message.text);
 				session.replaceDialog(response);
 			}
 		}));
