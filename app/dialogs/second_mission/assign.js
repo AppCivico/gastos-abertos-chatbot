@@ -1,4 +1,4 @@
-/* global  bot:true builder:true */
+/* global bot:true builder:true */
 
 const emoji = require('node-emoji');
 

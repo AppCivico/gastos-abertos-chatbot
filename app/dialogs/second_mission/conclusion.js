@@ -1,4 +1,4 @@
-/* global  builder:true */
+/* global builder:true chatBase:true */
 
 const emoji = require('node-emoji');
 
@@ -32,9 +32,7 @@ library.dialog('/', [
 			session.send('Ooops, houve algum problema, vamos voltar para o início.');
 			session.replaceDialog('*:/getStarted');
 		}
-
 		[user] = [args.user];
-
 		session.sendTyping();
 		builder.Prompts.choice(
 			session,
@@ -60,6 +58,7 @@ library.dialog('/secondMissionQuestions', [
 		[user] = [args.user];
 		session.sendTyping();
 		// reloadArgs(args);
+
 		builder.Prompts.choice(
 			session,
 			'Você protocolou o pedido de acesso à informação?',
@@ -75,6 +74,7 @@ library.dialog('/secondMissionQuestions', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case Yes:
+				chatBase.MessageHandled('Lai-Answer-Protocol-Yes', 'User Protocolated Lai');
 				answers.userProtocoledRequest = 1;
 				builder.Prompts.choice(
 					session,
@@ -100,6 +100,7 @@ library.dialog('/secondMissionQuestions', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case Yes:
+				chatBase.MessageHandled('Lai-Answer-Protocol-Prefecture-Yes', 'Prefecture Answered Protocol');
 				answers.govAnswered = 1;
 				builder.Prompts.choice(
 					session,
@@ -112,6 +113,7 @@ library.dialog('/secondMissionQuestions', [
 				);
 				break;
 			default: // No
+				chatBase.MessageHandled('Lai-Answer-Protocol-Prefecture-No', 'Prefecture Didnt Answer Protocol');
 				answers.govAnswered = 0;
 				session.send(`Que pena! ${emoji.get('cold_sweat').repeat(2)} No entanto, não vamos desistir!`);
 				session.send('Se houve alguma irregularidade no processo ou você ficou com dúvidas, ' +
@@ -129,9 +131,11 @@ library.dialog('/secondMissionQuestions', [
 		if (result.response) {
 			switch (result.response.entity) {
 			case Yes:
+				chatBase.MessageHandled('Lai-Answer-Protocol-Prefecture-Satisfactory-Yes', 'Answer from Prefecture was Satisfactory');
 				answers.answerWasSatisfactory = 1;
 				break;
 			default: // No
+				chatBase.MessageHandled('Lai-Answer-Protocol-Prefecture-Satisfactory-No', 'Answer from Prefecture wasnt Satisfactory');
 				answers.answerWasSatisfactory = 0;
 				break;
 			}
