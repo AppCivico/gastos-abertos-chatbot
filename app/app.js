@@ -23,7 +23,7 @@ bot.library(require('./dialogs/game'));
 bot.library(require('./dialogs/contact'));
 bot.library(require('./validators'));
 bot.library(require('./panel/admin-panel'));
-bot.library(require('./send-message-menu'));
+bot.library(require('./send-message-menu2'));
 bot.library(require('./misc/error_message'));
 
 const saveSession = require('./misc/save_session');
