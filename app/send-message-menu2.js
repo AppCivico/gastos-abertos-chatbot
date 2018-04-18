@@ -51,7 +51,7 @@ library.dialog('/', [
 
 	(session) => {
 		builder.Prompts.choice(
-			session, 'Este é o menu para os embaixadores mandarem mensagens aos usuários! Apenas quem aceitarou receber mensagens irão recebê-las.' +
+			session, 'Este é o menu para os embaixadores mandarem mensagens aos usuários! Apenas quem aceitou receber mensagens irão recebê-las.' +
 			'\n\nEscolha uma opção, digite o texto desejado, inclua uma imagem(se for o caso), visualize como fica e confirme. ' +
 			`A mensagem será mandada em nome do grupo ${session.userData.group}. Você não receberá a mensagem. ` +
 			'Com essas mensagens, o fluxo do usuário não será interrompido, continuando de onde parou.' +
