@@ -15,7 +15,7 @@ const userMessage = require('../server/schema/models').user_message;
 const inbox = 'Ir pra caixa de entrada';
 const goBack = 'Voltar';
 // the limit to check if a user text if part of the same message(also used in the timer)
-const limit = 5000;// (60000 * 3); // 3 minutes
+const limit = (60000 * 3); // 3 minutes
 let timer; // setTimeout = warn admin after the limit has passed
 let message;
 let user;
