@@ -5,6 +5,7 @@
 const library = new builder.Library('contact_doubt');
 const emoji = require('node-emoji');
 const errorLog = require('../misc/send_log');
+const saveSession = require('../misc/save_session');
 
 bot.library(require('../panel/answer-messages'));
 
@@ -14,10 +15,12 @@ const userMessage = require('../server/schema/models').user_message;
 const inbox = 'Ir pra caixa de entrada';
 const goBack = 'Voltar';
 // the limit to check if a user text if part of the same message(also used in the timer)
-const limit = (60000 * 3); // 3 minutes
+const limit = 5000;// (60000 * 3); // 3 minutes
 let timer; // setTimeout = warn admin after the limit has passed
 let message;
 let user;
+let names = '';
+
 
 library.dialog('/', [
 	async (session) => {
@@ -139,7 +142,6 @@ library.dialog('/receives', [
 						bot.beginDialog(userData.address, '*:/sendNotification', {
 							userDialog: userData.session.dialogName,
 							usefulData: userData.session.usefulData,
-							userName: user.fb_name,
 						});
 					}).catch((err) => {
 						errorLog.storeErrorLog(session, `Error findind User => ${err}`, user.id);
@@ -154,11 +156,24 @@ library.dialog('/receives', [
 ]);
 
 bot.dialog('/sendNotification', [
-	(session, args) => {
+	(session, args, next) => {
 		session.userData.dialogName = args.userDialog;
 		session.userData.usefulData = args.usefulData;
+
+		saveSession.userFacebook(
+			session.userData.userid, session.userData.pageToken,
+			((result, error) => {
+				names = `${result.first_name} ${result.last_name}`;
+				if (error) {
+					names = 'um cidadão';
+				}
+				next();
+			}) // eslint-disable-line comma-dangle
+		);
+	},
+	(session) => {
 		builder.Prompts.choice(
-			session, `Recebemos uma nova dúvida de ${args.userName}! Entre na caixa de entrada para responder!`, [inbox, goBack],
+			session, `Recebemos uma nova dúvida de ${names}.\n\n Entre na caixa de entrada para responder!`, [inbox, goBack],
 			{
 				listStyle: builder.ListStyle.button,
 			} // eslint-disable-line comma-dangle

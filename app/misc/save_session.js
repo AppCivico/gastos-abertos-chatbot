@@ -12,7 +12,7 @@ const userFacebook = (userID, pageToken, callback) => {
 		console.log('error:', error);
 		console.log('statusCode:', response && response.statusCode);
 		console.log('body:', body, '\n');
-		callback(JSON.parse(body));
+		callback(JSON.parse(body), error);
 	});
 };
 
